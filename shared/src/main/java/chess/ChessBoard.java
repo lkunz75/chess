@@ -8,6 +8,7 @@ package chess;
  */
 public class ChessBoard {
 
+    ChessPiece[][] squares = new ChessPiece[8][8]; //remember that its zero indexed! These are just dimensions!
     public ChessBoard() {
         
     }
@@ -19,7 +20,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+        squares[position.getRow()-1][position.getRow()-1] = piece;
     }
 
     /**
@@ -30,8 +31,9 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        throw new RuntimeException("Not implemented");
+        return squares[position.getRow()-1][position.getRow()-1]; // just return the piece, remember that its zero indexed!
     }
+
 
     /**
      * Sets the board to the default starting board
