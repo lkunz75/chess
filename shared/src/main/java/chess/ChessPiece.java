@@ -128,6 +128,59 @@ public class ChessPiece {
         return valid_move;
     }
 
+    //KING
+    public List<List<Integer>> KingMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+        // A King can move one block in any direction
+        List<List<Integer>> king_move = new ArrayList<>();
+        int initial_row = myPosition.getRow() - 1;
+        int initial_col = myPosition.getColumn() - 1;
+        int row_downright = initial_row + 1;
+        int col_downright = initial_col + 1;
+        // go diag-right (+,+)
+        if (((row_downright < 8) && (col_downright < 8)) && ((board.squares[row_downright][col_downright] == null) || (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_downright,col_downright)); // convert to the right thing for later
+        }
+        //diag down left (+,-)
+        int row_downleft = initial_row + 1;
+        int col_downleft = initial_col - 1;
+        if (((row_downleft < 8) && (col_downleft >= 0)) && ((board.squares[row_downleft][col_downleft] == null) || (board.squares[row_downleft][col_downleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_downleft,col_downleft)); // convert to the right thing for later
+        }
+        //diag up-left (-, -)
+        int row_upleft = initial_row - 1;
+        int col_upleft = initial_col - 1;
+        if (((row_upleft >= 0) && (col_upleft >= 0)) && ((board.squares[row_upleft][col_upleft] == null) || (board.squares[row_upleft][col_upleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_upleft,col_upleft)); // convert to the right thing for later
+        }
+        //diag up-right (-,+)
+        int row_upright = initial_row - 1;
+        int col_upright = initial_col + 1;
+        if (((row_upright >= 0) && (col_upright < 8)) && ((board.squares[row_upright][col_upright] == null) || (board.squares[row_upright][col_upright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_upright,col_upright)); // convert to the right thing for later
+        }
+        // just up
+        int col_up= initial_col + 1;
+        if (((initial_row < 8 && col_up < 8)) && ((board.squares[initial_row][col_up] == null) || (board.squares[initial_row][col_up].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(initial_row,col_up)); // convert to the right thing for later
+        }
+        // just down
+        int col_down= initial_col - 1;
+        if (((initial_row < 8 && col_down >= 0)) && ((board.squares[initial_row][col_down] == null) || (board.squares[initial_row][col_down].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(initial_row,col_down)); // convert to the right thing for later
+        }
+        // just left
+        int row_left = initial_row + 1;
+        if (((row_left < 8 && initial_col < 8)) && ((board.squares[row_left][initial_col] == null) || (board.squares[row_left][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_left,initial_col)); // convert to the right thing for later
+        }
+        // just right
+        int row_right = initial_row - 1;
+        if (((row_right >= 0 && initial_col < 8)) && ((board.squares[row_right][initial_col] == null) || (board.squares[row_right][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_right,initial_col)); // convert to the right thing for later
+        }
+        return king_move;
+    }
+
 
     Collection<ChessMove> convert_moves(ChessBoard board, ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
         List<ChessMove> converted_move = new ArrayList<>();
@@ -139,6 +192,18 @@ public class ChessPiece {
             converted_move.add(new_piece);
         }
         return converted_move;
+    }
+
+    public List<List<Integer>> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+        List<List<Integer>> knight_move = new ArrayList<>();
+        int initial_row = myPosition.getRow() - 1;
+        int initial_col = myPosition.getColumn() - 1;
+        int row_downright = initial_row + 1;
+        int col_downright = initial_col + 1;
+        // go diag-right (+,+)
+        if (((row_downright < 8) && (col_downright < 8)) && ((board.squares[row_downright][col_downright] == null) || (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            king_move.add(Arrays.asList(row_downright,col_downright)); // convert to the right thing for later
+        }
     }
 
     /**
@@ -153,6 +218,9 @@ public class ChessPiece {
         List<List<Integer>> valid_moves = new ArrayList<>();
         if (piece.getPieceType() == PieceType.BISHOP){
              valid_moves = BishopMovesCalculator(board, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.KING){
+            valid_moves = KingMovesCalculator(board, myPosition);
         }
         return convert_moves(board, myPosition, valid_moves, piece);
     }
