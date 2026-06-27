@@ -195,15 +195,43 @@ public class ChessPiece {
     }
 
     public List<List<Integer>> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+        // moves in an L shape
         List<List<Integer>> knight_move = new ArrayList<>();
         int initial_row = myPosition.getRow() - 1;
         int initial_col = myPosition.getColumn() - 1;
-        int row_downright = initial_row + 1;
-        int col_downright = initial_col + 1;
-        // go diag-right (+,+)
-        if (((row_downright < 8) && (col_downright < 8)) && ((board.squares[row_downright][col_downright] == null) || (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
-            king_move.add(Arrays.asList(row_downright,col_downright)); // convert to the right thing for later
+        // (-1, +3)
+        if (((initial_row - 1 >= 0) && (initial_col + 2 < 8)) && ((board.squares[initial_row - 1][initial_col + 2] == null) || (board.squares[initial_row - 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row - 1,initial_col + 2)); // convert to the right thing for later
         }
+        // (+1, +3)
+        if (((initial_row + 1 < 8) && (initial_col + 2 < 8)) && ((board.squares[initial_row + 1][initial_col + 2] == null) || (board.squares[initial_row + 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row + 1,initial_col + 2)); // convert to the right thing for later
+        }
+        // (-1, -3)
+        if (((initial_row - 1 >= 0) && (initial_col - 2 >= 0)) && ((board.squares[initial_row - 1][initial_col - 2] == null) || (board.squares[initial_row - 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row - 1,initial_col - 2)); // convert to the right thing for later
+        }
+        // (+1, -3)
+        if (((initial_row + 1 < 8) && (initial_col - 2 >= 0)) && ((board.squares[initial_row + 1][initial_col - 2] == null) || (board.squares[initial_row + 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row + 1,initial_col - 2)); // convert to the right thing for later
+        }
+        // (+3, -1)
+        if (((initial_row + 2 < 8) && (initial_col - 1 >= 0)) && ((board.squares[initial_row + 2][initial_col - 1] == null) || (board.squares[initial_row + 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row + 2,initial_col - 1)); // convert to the right thing for later
+        }
+        // (+3, +1)
+        if (((initial_row + 2 < 8) && (initial_col + 1 < 8)) && ((board.squares[initial_row + 2][initial_col + 1] == null) || (board.squares[initial_row + 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row + 2,initial_col + 1)); // convert to the right thing for later
+        }
+        // (-3, +1)
+        if (((initial_row - 2 >= 0) && (initial_col + 1 < 8)) && ((board.squares[initial_row - 2][initial_col + 1] == null) || (board.squares[initial_row - 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row - 2,initial_col + 1)); // convert to the right thing for later
+        }
+        // (-3, -1)
+        if (((initial_row - 2 >= 0) && (initial_col - 1 >= 0)) && ((board.squares[initial_row - 2][initial_col - 1] == null) || (board.squares[initial_row - 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+            knight_move.add(Arrays.asList(initial_row - 2,initial_col - 1)); // convert to the right thing for later
+        }
+        return knight_move;
     }
 
     /**
@@ -221,6 +249,9 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.KING){
             valid_moves = KingMovesCalculator(board, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.KNIGHT){
+            valid_moves = KnightMovesCalculator(board, myPosition);
         }
         return convert_moves(board, myPosition, valid_moves, piece);
     }
