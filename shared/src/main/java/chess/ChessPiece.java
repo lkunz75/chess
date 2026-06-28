@@ -258,6 +258,151 @@ public class ChessPiece {
         return pawn_move;
     }
 
+    public List<List<Integer>> QueenMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+        // can move diagonal, forward, backward, side to side
+        List<List<Integer>> valid_move = new ArrayList<>();
+        //Bishops can move diagonally any number of squares
+        int initial_row = myPosition.getRow()-1; // be in array mode
+        int initial_col = myPosition.getColumn()-1;
+        int row_downright = initial_row + 1;
+        int col_downright = initial_col + 1;
+        //Same diagonals as the Bishop
+        while ((row_downright < 8) && (col_downright < 8)){
+            if (board.squares[row_downright][col_downright] == null) {
+                valid_move.add(Arrays.asList(row_downright,col_downright)); // convert to the right thing for later
+                row_downright++;
+                col_downright++;
+            }
+            else if (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_downright,col_downright));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        // go down-left (+, -)
+        int row_downleft = initial_row + 1;
+        int col_downleft = initial_col - 1;
+        while ((row_downleft < 8) && (col_downleft >= 0)){
+            if (board.squares[row_downleft][col_downleft] == null) {
+                valid_move.add(Arrays.asList(row_downleft,col_downleft));
+                row_downleft++;
+                col_downleft--;
+            }
+            else if (board.squares[row_downleft][col_downleft].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_downleft,col_downleft));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        //go up-left (-, -)
+        int row_upleft = initial_row - 1;
+        int col_upleft = initial_col - 1;
+        while ((row_upleft >= 0) && (col_upleft >= 0)){
+            if (board.squares[row_upleft][col_upleft] == null) {
+                valid_move.add(Arrays.asList(row_upleft,col_upleft));
+                row_upleft--;
+                col_upleft--;
+            }
+            else if (board.squares[row_upleft][col_upleft].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_upleft,col_upleft));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        //go up-right (-, +)
+        int row_upright = initial_row - 1;
+        int col_upright = initial_col + 1;
+        while ((row_upright >= 0) && (col_upright < 8)){
+            if (board.squares[row_upright][col_upright] == null) {
+                valid_move.add(Arrays.asList(row_upright,col_upright));
+                row_upright--;
+                col_upright++;
+            }
+            else if (board.squares[row_upright][col_upright].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_upright,col_upright));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        // go up
+        int row_up = initial_row - 1;
+        while ((row_up >= 0) && (initial_col < 8)){
+            if (board.squares[row_up][initial_col] == null) {
+                valid_move.add(Arrays.asList(row_up,initial_col));
+                row_up--;
+            }
+            else if (board.squares[row_up][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_up,initial_col));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        // go down
+        int row_down = initial_row + 1;
+        while ((row_down < 8) && (initial_col < 8)){
+            if (board.squares[row_down][initial_col] == null) {
+                valid_move.add(Arrays.asList(row_down,initial_col));
+                row_down++;
+            }
+            else if (board.squares[row_down][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(row_down,initial_col));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        // go right
+        int col_right = initial_col + 1;
+        while ((initial_row < 8) && (col_right < 8)){
+            if (board.squares[initial_row][col_right] == null) {
+                valid_move.add(Arrays.asList(initial_row,col_right));
+                col_right++;
+            }
+            else if (board.squares[initial_row][col_right].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(initial_row,col_right));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        // go left
+        int col_left = initial_col - 1;
+        while ((initial_row < 8) && (col_left >= 0)){
+            if (board.squares[initial_row][col_left] == null) {
+                valid_move.add(Arrays.asList(initial_row,col_left));
+                col_left--;
+            }
+            else if (board.squares[initial_row][col_left].pieceColor != board.squares[initial_row][initial_col].pieceColor){
+                valid_move.add(Arrays.asList(initial_row,col_left));
+                break; // get out of the while loop since we hit a piece
+            }
+            else {
+                // hit a friendly colored piece
+                break;
+            }
+        }
+        return valid_move;
+    }
+
     // just moved it for added clarity
     Collection<ChessMove> convert_moves(ChessBoard board, ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
         List<ChessMove> converted_move = new ArrayList<>();
@@ -318,6 +463,9 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.PAWN){
             valid_moves = PawnMovesCalculator(board, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.QUEEN){
+            valid_moves = QueenMovesCalculator(board, myPosition);
         }
         return convert_moves(board, myPosition, valid_moves, piece);
     }
