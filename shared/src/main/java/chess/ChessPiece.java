@@ -181,19 +181,6 @@ public class ChessPiece {
         return king_move;
     }
 
-
-    Collection<ChessMove> convert_moves(ChessBoard board, ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
-        List<ChessMove> converted_move = new ArrayList<>();
-        for (List<Integer> move:valid_moves) {
-            int row = move.get(0);
-            int col = move.get(1);
-            ChessPosition validMove = new ChessPosition(row+1, col+1);
-            ChessMove new_piece = new ChessMove(myPosition, validMove, null); //this should be null
-            converted_move.add(new_piece);
-        }
-        return converted_move;
-    }
-
     public List<List<Integer>> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         // moves in an L shape
         List<List<Integer>> knight_move = new ArrayList<>();
@@ -234,6 +221,82 @@ public class ChessPiece {
         return knight_move;
     }
 
+    public List<List<Integer>> PawnMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+        List<List<Integer>> pawn_move = new ArrayList<>();
+        int initial_row = myPosition.getRow() - 1;
+        int initial_col = myPosition.getColumn() - 1;
+        // white add
+        if (board.squares[initial_row][initial_col].pieceColor == ChessGame.TeamColor.WHITE){
+            if (initial_row == 1 && board.squares[initial_row+1][initial_col] == null && board.squares[initial_row+2][initial_col] == null){
+                pawn_move.add(Arrays.asList(initial_row+2, initial_col));
+            }
+            if ((initial_row + 1 < 8) && (board.squares[initial_row + 1][initial_col] == null)){
+                pawn_move.add(Arrays.asList(initial_row + 1,initial_col)); // convert to the right thing for later
+            }
+            if ((initial_row + 1 < 8 && initial_col + 1 < 8) && board.squares[initial_row+1][initial_col+1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col+1].pieceColor){
+                pawn_move.add(Arrays.asList(initial_row + 1,initial_col+1));
+            }
+            if ((initial_row + 1 < 8 && initial_col - 1 >= 0) && board.squares[initial_row+1][initial_col-1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col-1].pieceColor){
+                pawn_move.add(Arrays.asList(initial_row + 1,initial_col-1));
+            }
+        }
+        // black subtract
+        else {
+            if (initial_row == 6 && board.squares[initial_row-1][initial_col] == null && board.squares[initial_row-2][initial_col] == null){
+                pawn_move.add(Arrays.asList(initial_row-2, initial_col));
+            }
+            if ((initial_row - 1 >= 0) && (board.squares[initial_row - 1][initial_col] == null)){
+                pawn_move.add(Arrays.asList(initial_row - 1,initial_col)); // convert to the right thing for later
+            }
+            if ((initial_row - 1 >= 0 && initial_col + 1 < 8) && board.squares[initial_row-1][initial_col+1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col+1].pieceColor){
+                pawn_move.add(Arrays.asList(initial_row - 1,initial_col+1));
+            }
+            if ((initial_row -1 >= 0 && initial_col - 1 >= 0) && board.squares[initial_row-1][initial_col-1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col-1].pieceColor){
+                pawn_move.add(Arrays.asList(initial_row - 1,initial_col-1));
+            }
+        }
+        return pawn_move;
+    }
+
+    // just moved it for added clarity
+    Collection<ChessMove> convert_moves(ChessBoard board, ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
+        List<ChessMove> converted_move = new ArrayList<>();
+        for (List<Integer> move:valid_moves) {
+            int row = move.get(0);
+            int col = move.get(1);
+            if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.WHITE && row == 7){
+                //promote the pawn when it reaches the end it can become any of these four things!
+                ChessPosition ValidMove = new ChessPosition(row+1, col+1);
+                ChessMove new_queen = new ChessMove(myPosition, ValidMove, PieceType.QUEEN); //this should be null
+                converted_move.add(new_queen);
+                ChessMove new_rook = new ChessMove(myPosition, ValidMove, PieceType.ROOK); //this should be null
+                converted_move.add(new_rook);
+                ChessMove new_bishop = new ChessMove(myPosition, ValidMove, PieceType.BISHOP); //this should be null
+                converted_move.add(new_bishop);
+                ChessMove new_knight = new ChessMove(myPosition, ValidMove, PieceType.KNIGHT); //this should be null
+                converted_move.add(new_knight);
+            }
+            else if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.BLACK && row == 0){
+                //promote
+                ChessPosition ValidMove = new ChessPosition(row+1, col+1);
+                ChessMove new_queen = new ChessMove(myPosition, ValidMove, PieceType.QUEEN); //this should be null
+                converted_move.add(new_queen);
+                ChessMove new_rook = new ChessMove(myPosition, ValidMove, PieceType.ROOK); //this should be null
+                converted_move.add(new_rook);
+                ChessMove new_bishop = new ChessMove(myPosition, ValidMove, PieceType.BISHOP); //this should be null
+                converted_move.add(new_bishop);
+                ChessMove new_knight = new ChessMove(myPosition, ValidMove, PieceType.KNIGHT); //this should be null
+                converted_move.add(new_knight);
+            }
+            else {
+                ChessPosition validMove = new ChessPosition(row+1, col+1);
+                ChessMove new_piece = new ChessMove(myPosition, validMove, null); //this should be null
+                converted_move.add(new_piece);
+            }
+        }
+        return converted_move;
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -252,6 +315,9 @@ public class ChessPiece {
         }
         if (piece.getPieceType() == PieceType.KNIGHT){
             valid_moves = KnightMovesCalculator(board, myPosition);
+        }
+        if (piece.getPieceType() == PieceType.PAWN){
+            valid_moves = PawnMovesCalculator(board, myPosition);
         }
         return convert_moves(board, myPosition, valid_moves, piece);
     }
