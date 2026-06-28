@@ -477,7 +477,7 @@ public class ChessPiece {
 
 
     // just moved it for added clarity
-    Collection<ChessMove> convert_moves(ChessBoard board, ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
+    Collection<ChessMove> convert_moves(ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
         List<ChessMove> converted_move = new ArrayList<>();
         for (List<Integer> move:valid_moves) {
             int row = move.get(0);
@@ -543,7 +543,7 @@ public class ChessPiece {
         if (piece.getPieceType() == PieceType.ROOK){
             valid_moves = RookMovesCalculator(board, myPosition);
         }
-        return convert_moves(board, myPosition, valid_moves, piece);
+        return convert_moves(myPosition, valid_moves, piece);
     }
 
     @Override
