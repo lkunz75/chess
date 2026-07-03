@@ -13,7 +13,6 @@ public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8]; //remember that its zero indexed! These are just dimensions!
     public ChessBoard() {
-        
     }
 
     /**
@@ -159,7 +158,7 @@ public class ChessBoard {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ChessBoard that = (ChessBoard) o;
+        chessBoard that = (chessBoard) o;
         return Objects.deepEquals(squares, that.squares);
     }
 

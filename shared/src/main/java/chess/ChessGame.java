@@ -56,7 +56,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        int start_row = start.getRow();
+        int start_col = start.getColumn();
+        ChessBoard board = getBoard();
+        if (board.squares[start_row][start_col].getTeamColor() == TeamColor.WHITE)
+        // check color so we know whose turn is next
     }
 
     /**
@@ -96,7 +101,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        board.resetBoard();
     }
 
     /**
@@ -105,6 +110,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        //still trying to figure out how
     }
 }
