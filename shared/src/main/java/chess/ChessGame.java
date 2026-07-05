@@ -10,6 +10,7 @@ import java.util.Collection;
  */
 public class ChessGame {
 
+    ChessBoard game = new ChessBoard();
     public ChessGame() {
 
     }
@@ -60,8 +61,16 @@ public class ChessGame {
         int start_row = start.getRow();
         int start_col = start.getColumn();
         ChessBoard board = getBoard();
-        if (board.squares[start_row][start_col].getTeamColor() == TeamColor.WHITE)
-        // check color so we know whose turn is next
+        ChessPosition endposition = move.getEndPosition();
+        if (board.squares[start_row][start_col].getTeamColor() == TeamColor.WHITE) {
+            // check color so we know whose turn is next
+            if (isInCheck(TeamColor.WHITE)){
+                // changes what moves can be made
+            }
+            if (isInCheck(TeamColor.WHITE)){
+                // changes what moves can be made
+            }
+        }
     }
 
     /**
@@ -71,7 +80,27 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        int row = 0;
+        int col = 0;
+        // pieceMoves(ChessBoard board, ChessPosition myPosition)
+        if (teamColor == TeamColor.WHITE){
+            // go through colors
+            while (row < 8){
+                while (col < 8) {
+                    ChessPosition board_spot = new ChessPosition(row, col);
+                    col++;
+                    Collection<ChessMove> list_of_moves = pieceMoves(game, board_spot);
+                }
+                col = 0;
+                row++;
+            }
+            if (endPosition.equals(kingPosition)){
+                return true;
+            }
+        }
+        if (teamColor == TeamColor.BLACK){
+            // goes through other team colors
+        }
     }
 
     /**
@@ -101,7 +130,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        board.resetBoard();
+        game = board; // set the game chessboard to the given board
     }
 
     /**
@@ -110,6 +139,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        //still trying to figure out how
+        return game; // returns a chessboard object
     }
 }
