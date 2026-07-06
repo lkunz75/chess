@@ -1,7 +1,6 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -12,6 +11,8 @@ import java.util.Objects;
 public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8]; //remember that its zero indexed! These are just dimensions!
+    List<List<Integer>> white_king = new ArrayList<>();
+    List<List<Integer>> black_king = new ArrayList<>();
     public ChessBoard() {
     }
 
@@ -23,6 +24,23 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.WHITE){
+            white_king = new ArrayList<>(); // clear the old spot
+            white_king.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
+        }
+
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.BLACK){
+            black_king = new ArrayList<>();
+            black_king.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
+        }
+    }
+
+    public List<List<Integer>> return_white_king(){
+        return white_king;
+    }
+
+    public List<List<Integer>> return_black_king(){
+        return black_king;
     }
 
     /**
@@ -158,7 +176,7 @@ public class ChessBoard {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        chessBoard that = (chessBoard) o;
+        ChessBoard that = (ChessBoard) o;
         return Objects.deepEquals(squares, that.squares);
     }
 
