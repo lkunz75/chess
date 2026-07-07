@@ -155,6 +155,7 @@ public class ChessGame {
                     updated_bk.add(Arrays.asList(start.getRow()-1, start.getColumn()-1));
                     game.black_king = updated_bk;
                 }
+
             }
 
         }
