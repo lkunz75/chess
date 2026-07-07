@@ -9,7 +9,7 @@ import java.util.*;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece {
+public class ChessPiece { // so confused by cloneable
 
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
@@ -562,6 +562,12 @@ public class ChessPiece {
         ChessPiece that = (ChessPiece) o;
         return pieceColor == that.pieceColor && type == that.type;
     }
+
+    @Override
+    public ChessPiece clone() throws CloneNotSupportedException {
+        return (ChessPiece) super.clone();
+    }
+
 
     @Override
     public int hashCode() {
