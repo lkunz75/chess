@@ -155,9 +155,7 @@ public class ChessGame {
                     updated_bk.add(Arrays.asList(start.getRow()-1, start.getColumn()-1));
                     game.black_king = updated_bk;
                 }
-
             }
-
         }
         game.squares = original.data; // change it back
         return valid_moves;
@@ -269,8 +267,8 @@ public class ChessGame {
      */
     public boolean isInCheckmate(TeamColor teamColor) {
         List<List<Integer>> king = new ArrayList<>();
-        int row = 0;
-        int col = 0;
+        int k_row = 0;
+        int k_col = 0;
         if (teamColor == TeamColor.BLACK) {
             king = game.return_black_king();
         }
@@ -278,19 +276,36 @@ public class ChessGame {
             king = game.return_white_king();
         }
         for (List<Integer> k : king) {
-            row = k.get(0);
-            col = k.get(1);
+            k_row = k.get(0);
+            k_col = k.get(1);
         }
-        ChessPosition king_position = new ChessPosition(row + 1, col + 1);
+        ChessPosition king_position = new ChessPosition(k_row + 1, k_col + 1);
         Collection<ChessMove> moves = validMoves(king_position);
-        if (moves.size() == 1) {
+        int row = 0;
+        int col = 0;
+        if (moves.isEmpty()) { // checks if the other pieces can protect it
+            while (row < 8) {
+                while (col < 8) {
+                    ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
+                    ChessPiece piece = game.squares[row][col]; // remember how your indexed!!
+                    if (piece != null && piece.getTeamColor() == teamColor) { // this should be checked because we want to check and see if opposing team puts us in check
+                        Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
+                        for (ChessMove move : list_of_moves) {
+                            ChessPosition startPosition = move.getStartPosition();
+                            Collection<ChessMove> valid_moves = validMoves(startPosition);
+                            if (!valid_moves.isEmpty()){
+                                return false;
+                            }
+                        }
+                    }
+                    col++;
+                }
+                col = 0;
+                row++;
+            }
             return true;
         }
-        if (moves.isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
+        else {return false;}
     }
 
     /**
@@ -314,7 +329,7 @@ public class ChessGame {
                     for (ChessMove move : list_of_moves) {
                         ChessPosition startPosition = move.getStartPosition();
                         Collection<ChessMove> valid_moves = validMoves(startPosition);
-                        if (valid_moves.size() > 1){
+                        if (!valid_moves.isEmpty()){
                             return false;
                         }
                     }
