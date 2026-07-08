@@ -26,12 +26,14 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
-        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.WHITE){
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING
+                && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.WHITE){
             whiteKing = new ArrayList<>(); // clear the old spot
             whiteKing.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
         }
 
-        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.BLACK){
+        if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING
+                && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.BLACK){
             blackKing = new ArrayList<>();
             blackKing.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
         }
@@ -62,8 +64,6 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-    //Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook
-        // 8 Pawns
         ChessPiece[][] new_squares = new ChessPiece[8][8];
         squares = new_squares;
         ChessPosition rook_left_posw = new ChessPosition(1, 1); // this is myPosition
@@ -114,8 +114,6 @@ public class ChessBoard {
         ChessPosition pawn_posw8 = new ChessPosition(2, 8);
         ChessPiece pawn_w8 = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         addPiece(pawn_posw8, pawn_w8);
-
-        // keep the same order for black
         ChessPosition rook_left_posb = new ChessPosition(8, 8); // this is myPosition
         ChessPiece rook_leftb = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
         addPiece(rook_left_posb, rook_leftb);

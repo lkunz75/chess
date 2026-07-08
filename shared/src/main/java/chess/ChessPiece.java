@@ -138,45 +138,53 @@ public class ChessPiece { // so confused by cloneable
         int row_downright = initial_row + 1;
         int col_downright = initial_col + 1;
         // go diag-right (+,+)
-        if (((row_downright < 8) && (col_downright < 8)) && ((board.squares[row_downright][col_downright] == null) || (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_downright < 8) && (col_downright < 8)) && ((board.squares[row_downright][col_downright] == null)
+                || (board.squares[row_downright][col_downright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_downright,col_downright));
         }
         //diag down left (+,-)
         int row_downleft = initial_row + 1;
         int col_downleft = initial_col - 1;
-        if (((row_downleft < 8) && (col_downleft >= 0)) && ((board.squares[row_downleft][col_downleft] == null) || (board.squares[row_downleft][col_downleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_downleft < 8) && (col_downleft >= 0)) && ((board.squares[row_downleft][col_downleft] == null)
+                || (board.squares[row_downleft][col_downleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_downleft,col_downleft));
         }
         //diag up-left (-, -)
         int row_upleft = initial_row - 1;
         int col_upleft = initial_col - 1;
-        if (((row_upleft >= 0) && (col_upleft >= 0)) && ((board.squares[row_upleft][col_upleft] == null) || (board.squares[row_upleft][col_upleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_upleft >= 0) && (col_upleft >= 0)) && ((board.squares[row_upleft][col_upleft] == null)
+                || (board.squares[row_upleft][col_upleft].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_upleft,col_upleft));
         }
         //diag up-right (-,+)
         int row_upright = initial_row - 1;
         int col_upright = initial_col + 1;
-        if (((row_upright >= 0) && (col_upright < 8)) && ((board.squares[row_upright][col_upright] == null) || (board.squares[row_upright][col_upright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_upright >= 0) && (col_upright < 8)) && ((board.squares[row_upright][col_upright] == null)
+                || (board.squares[row_upright][col_upright].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_upright,col_upright));
         }
         // just up
         int col_up= initial_col + 1;
-        if (((initial_row < 8 && col_up < 8)) && ((board.squares[initial_row][col_up] == null) || (board.squares[initial_row][col_up].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row < 8 && col_up < 8)) && ((board.squares[initial_row][col_up] == null)
+                || (board.squares[initial_row][col_up].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(initial_row,col_up));
         }
         // just down
         int col_down= initial_col - 1;
-        if (((initial_row < 8 && col_down >= 0)) && ((board.squares[initial_row][col_down] == null) || (board.squares[initial_row][col_down].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row < 8 && col_down >= 0)) && ((board.squares[initial_row][col_down] == null)
+                || (board.squares[initial_row][col_down].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(initial_row,col_down));
         }
         // just left
         int row_left = initial_row + 1;
-        if (((row_left < 8 && initial_col < 8)) && ((board.squares[row_left][initial_col] == null) || (board.squares[row_left][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_left < 8 && initial_col < 8)) && ((board.squares[row_left][initial_col] == null)
+                || (board.squares[row_left][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_left,initial_col));
         }
         // just right
         int row_right = initial_row - 1;
-        if (((row_right >= 0 && initial_col < 8)) && ((board.squares[row_right][initial_col] == null) || (board.squares[row_right][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((row_right >= 0 && initial_col < 8)) && ((board.squares[row_right][initial_col] == null)
+                || (board.squares[row_right][initial_col].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             king_move.add(Arrays.asList(row_right,initial_col));
         }
         return king_move;
@@ -188,35 +196,43 @@ public class ChessPiece { // so confused by cloneable
         int initial_row = myPosition.getRow() - 1;
         int initial_col = myPosition.getColumn() - 1;
         // (-1, +3)
-        if (((initial_row - 1 >= 0) && (initial_col + 2 < 8)) && ((board.squares[initial_row - 1][initial_col + 2] == null) || (board.squares[initial_row - 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row - 1 >= 0) && (initial_col + 2 < 8)) && ((board.squares[initial_row - 1][initial_col + 2] == null)
+                || (board.squares[initial_row - 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row - 1,initial_col + 2));
         }
         // (+1, +3)
-        if (((initial_row + 1 < 8) && (initial_col + 2 < 8)) && ((board.squares[initial_row + 1][initial_col + 2] == null) || (board.squares[initial_row + 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row + 1 < 8) && (initial_col + 2 < 8)) && ((board.squares[initial_row + 1][initial_col + 2] == null)
+                || (board.squares[initial_row + 1][initial_col + 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row + 1,initial_col + 2));
         }
         // (-1, -3)
-        if (((initial_row - 1 >= 0) && (initial_col - 2 >= 0)) && ((board.squares[initial_row - 1][initial_col - 2] == null) || (board.squares[initial_row - 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row - 1 >= 0) && (initial_col - 2 >= 0)) && ((board.squares[initial_row - 1][initial_col - 2] == null)
+                || (board.squares[initial_row - 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row - 1,initial_col - 2));
         }
         // (+1, -3)
-        if (((initial_row + 1 < 8) && (initial_col - 2 >= 0)) && ((board.squares[initial_row + 1][initial_col - 2] == null) || (board.squares[initial_row + 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row + 1 < 8) && (initial_col - 2 >= 0)) && ((board.squares[initial_row + 1][initial_col - 2] == null)
+                || (board.squares[initial_row + 1][initial_col - 2].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row + 1,initial_col - 2));
         }
         // (+3, -1)
-        if (((initial_row + 2 < 8) && (initial_col - 1 >= 0)) && ((board.squares[initial_row + 2][initial_col - 1] == null) || (board.squares[initial_row + 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row + 2 < 8) && (initial_col - 1 >= 0)) && ((board.squares[initial_row + 2][initial_col - 1] == null)
+                || (board.squares[initial_row + 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row + 2,initial_col - 1));
         }
         // (+3, +1)
-        if (((initial_row + 2 < 8) && (initial_col + 1 < 8)) && ((board.squares[initial_row + 2][initial_col + 1] == null) || (board.squares[initial_row + 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row + 2 < 8) && (initial_col + 1 < 8)) && ((board.squares[initial_row + 2][initial_col + 1] == null)
+                || (board.squares[initial_row + 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row + 2,initial_col + 1));
         }
         // (-3, +1)
-        if (((initial_row - 2 >= 0) && (initial_col + 1 < 8)) && ((board.squares[initial_row - 2][initial_col + 1] == null) || (board.squares[initial_row - 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row - 2 >= 0) && (initial_col + 1 < 8)) && ((board.squares[initial_row - 2][initial_col + 1] == null)
+                || (board.squares[initial_row - 2][initial_col + 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row - 2,initial_col + 1));
         }
         // (-3, -1)
-        if (((initial_row - 2 >= 0) && (initial_col - 1 >= 0)) && ((board.squares[initial_row - 2][initial_col - 1] == null) || (board.squares[initial_row - 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
+        if (((initial_row - 2 >= 0) && (initial_col - 1 >= 0)) && ((board.squares[initial_row - 2][initial_col - 1] == null)
+                || (board.squares[initial_row - 2][initial_col - 1].pieceColor != board.squares[initial_row][initial_col].pieceColor))){
             knight_move.add(Arrays.asList(initial_row - 2,initial_col - 1));
         }
         return knight_move;
@@ -234,10 +250,12 @@ public class ChessPiece { // so confused by cloneable
             if ((initial_row + 1 < 8) && (board.squares[initial_row + 1][initial_col] == null)){
                 pawn_move.add(Arrays.asList(initial_row + 1,initial_col));
             }
-            if ((initial_row + 1 < 8 && initial_col + 1 < 8) && board.squares[initial_row+1][initial_col+1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col+1].pieceColor){
+            if ((initial_row + 1 < 8 && initial_col + 1 < 8) && board.squares[initial_row+1][initial_col+1]!= null
+                    && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col+1].pieceColor){
                 pawn_move.add(Arrays.asList(initial_row + 1,initial_col+1));
             }
-            if ((initial_row + 1 < 8 && initial_col - 1 >= 0) && board.squares[initial_row+1][initial_col-1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col-1].pieceColor){
+            if ((initial_row + 1 < 8 && initial_col - 1 >= 0) && board.squares[initial_row+1][initial_col-1]!= null
+                    && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row+1][initial_col-1].pieceColor){
                 pawn_move.add(Arrays.asList(initial_row + 1,initial_col-1));
             }
         }
@@ -249,10 +267,12 @@ public class ChessPiece { // so confused by cloneable
             if ((initial_row - 1 >= 0) && (board.squares[initial_row - 1][initial_col] == null)){
                 pawn_move.add(Arrays.asList(initial_row - 1,initial_col)); // convert to the right thing for later
             }
-            if ((initial_row - 1 >= 0 && initial_col + 1 < 8) && board.squares[initial_row-1][initial_col+1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col+1].pieceColor){
+            if ((initial_row - 1 >= 0 && initial_col + 1 < 8) && board.squares[initial_row-1][initial_col+1]!= null
+                    && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col+1].pieceColor){
                 pawn_move.add(Arrays.asList(initial_row - 1,initial_col+1));
             }
-            if ((initial_row -1 >= 0 && initial_col - 1 >= 0) && board.squares[initial_row-1][initial_col-1]!= null && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col-1].pieceColor){
+            if ((initial_row -1 >= 0 && initial_col - 1 >= 0) && board.squares[initial_row-1][initial_col-1]!= null
+                    && board.squares[initial_row][initial_col].pieceColor != board.squares[initial_row-1][initial_col-1].pieceColor){
                 pawn_move.add(Arrays.asList(initial_row - 1,initial_col-1));
             }
         }
