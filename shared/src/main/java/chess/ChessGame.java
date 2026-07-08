@@ -173,18 +173,34 @@ public class ChessGame {
         int start_col = start.getColumn() - 1;
         ChessBoard board = getBoard();
         ChessPosition endposition = move.getEndPosition();
+        ChessPiece piece = null;
         if (board.squares[start_row][start_col] != null) {
             // check color so we know whose turn is next
+            TeamColor color = board.squares[start_row][start_col].getTeamColor();
+            if (color != current_turn){throw new InvalidMoveException();} // only moving during their turn!
             Collection<ChessMove> valid_moves = validMoves(start);
             for (ChessMove moves : valid_moves) {
                 ChessPosition move_end = moves.getEndPosition();
-                if (endposition == move_end) {
-                    ChessPiece piece = board.squares[start_row][start_col];
+                if (endposition.equals(move_end)) { // then its valid
+                    piece = board.squares[start_row][start_col];
+                    if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                        ChessPiece.PieceType promote = move.getPromotionPiece();
+                        if (promote != null) {
+                            piece = new ChessPiece(color, promote);
+                        }
+                    }
                     board.squares[endposition.getRow() - 1][endposition.getColumn() - 1] = piece;
                     board.squares[start_row][start_col] = null;
+                    if (color == TeamColor.WHITE) {
+                        current_turn = TeamColor.BLACK;
+                    }
+                    else {
+                        current_turn = TeamColor.WHITE;
+                    }
                     return;
                 }
             }
+            throw new InvalidMoveException();
         } else {
             throw new InvalidMoveException();
         }
