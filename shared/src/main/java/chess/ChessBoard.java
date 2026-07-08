@@ -14,6 +14,7 @@ public class ChessBoard {
     List<List<Integer>> white_king = new ArrayList<>();
     List<List<Integer>> black_king = new ArrayList<>();
     public ChessBoard() {
+
     }
 
     /**

@@ -9,12 +9,11 @@ import java.util.*;
  * signature of the existing methods.
  */
 public class ChessGame {
-
     ChessBoard game = new ChessBoard();
     TeamColor current_turn = TeamColor.WHITE;
 
     public ChessGame() {
-
+        game.resetBoard(); // here is where you call it!! Calling it above makes it fail, and we only want to reset the board once each time
     }
 
     /**
@@ -181,7 +180,7 @@ public class ChessGame {
             Collection<ChessMove> valid_moves = validMoves(start);
             for (ChessMove moves : valid_moves) {
                 ChessPosition move_end = moves.getEndPosition();
-                if (endposition.equals(move_end)) { // then its valid
+                if (endposition.equals(move_end)) { // then its valid, also using equals lets it run, == does not work like in python
                     piece = board.squares[start_row][start_col];
                     if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                         ChessPiece.PieceType promote = move.getPromotionPiece();
