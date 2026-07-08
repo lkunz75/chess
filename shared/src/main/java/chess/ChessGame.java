@@ -8,6 +8,7 @@ import java.util.*;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
+// A lot of the syntax took time to learn
 public class ChessGame {
     ChessBoard game = new ChessBoard();
     TeamColor current_turn = TeamColor.WHITE;
