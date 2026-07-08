@@ -215,64 +215,27 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         int row = 0;
         int col = 0;
-        ChessPosition king_position = null; // initialize it
+        ChessPosition king_position = getKingPosition(teamColor);
         // pieceMoves(ChessBoard board, ChessPosition myPosition)
-        if (teamColor != TeamColor.BLACK) {
-            // to check if white is in check, you have to go through the valid Black Moves and see if its where the white king is
-            // you need to find where the White King is.
-            List<List<Integer>> white_king = game.returnWhiteKing();
-            for (List<Integer> king : white_king) {
-                int k_row = king.get(0);
-                int k_col = king.get(1);
-                king_position = new ChessPosition(k_row + 1, k_col + 1);
-            }
-            while (row < 8) {
-                while (col < 8) {
-                    ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
-                    ChessPiece piece = game.squares[row][col];
-                    if (piece != null && piece.getTeamColor() == TeamColor.BLACK) { // this should be checked because we want to check and see if opposing team puts us in check
-                        Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
-                        for (ChessMove move : list_of_moves) {
-                            ChessPosition endPosition = move.getEndPosition();
-                            if (endPosition.equals(king_position)) {
-                                return true;
-                            } // is in check
-                        }
+        while (row < 8) {
+            while (col < 8) {
+                ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
+                ChessPiece piece = game.squares[row][col];
+                if (piece != null && piece.getTeamColor() != teamColor) { // this should be checked because we want to check and see if opposing team puts us in check
+                    Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
+                    for (ChessMove move : list_of_moves) {
+                        ChessPosition endPosition = move.getEndPosition();
+                        if (endPosition.equals(king_position)) {
+                            return true;
+                        } // is in check
                     }
-                    col++;
                 }
-                col = 0;
-                row++;
+                col++;
             }
-            return false; // went through it all without hitting the king
-        } else {
-            // goes through other team colors
-            List<List<Integer>> black_king = game.returnBlackKing();
-            for (List<Integer> king : black_king) {
-                int k_row = king.get(0);
-                int k_col = king.get(1);
-                king_position = new ChessPosition(k_row + 1, k_col + 1);
-            }
-            while (row < 8) {
-                while (col < 8) {
-                    ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
-                    ChessPiece piece = game.squares[row][col]; // remember how your indexed!!
-                    if (piece != null && piece.getTeamColor() == TeamColor.WHITE) { // this should be checked because we want to check and see if opposing team puts us in check
-                        Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
-                        for (ChessMove move : list_of_moves) {
-                            ChessPosition endPosition = move.getEndPosition();
-                            if (endPosition.equals(king_position)) {
-                                return true;
-                            } // is in check
-                        }
-                    }
-                    col++;
-                }
-                col = 0;
-                row++;
-            }
-            return false; // went through it all without hitting the king
+            col = 0;
+            row++;
         }
+        return false; // went through it all without hitting the king
     }
 
     /**
@@ -282,60 +245,17 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        List<List<Integer>> king = new ArrayList<>();
-        int k_row = 0;
-        int k_col = 0;
-        if (teamColor == TeamColor.BLACK) {
-            king = game.returnBlackKing();
-        }
-        if (teamColor == TeamColor.WHITE) {
-            king = game.returnWhiteKing();
-        }
-        for (List<Integer> k : king) {
-            k_row = k.get(0);
-            k_col = k.get(1);
-        }
-        ChessPosition king_position = new ChessPosition(k_row + 1, k_col + 1);
+        ChessPosition king_position = getKingPosition(teamColor);
         Collection<ChessMove> moves = validMoves(king_position);
-        int row = 0;
-        int col = 0;
         if (moves.isEmpty()) { // checks if the other pieces can protect it
-            while (row < 8) {
-                while (col < 8) {
-                    ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
-                    ChessPiece piece = game.squares[row][col]; // remember how your indexed!!
-                    if (piece != null && piece.getTeamColor() == teamColor) { // this should be checked because we want to check and see if opposing team puts us in check
-                        Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
-                        for (ChessMove move : list_of_moves) {
-                            ChessPosition startPosition = move.getStartPosition();
-                            Collection<ChessMove> valid_moves = validMoves(startPosition);
-                            if (!valid_moves.isEmpty()){
-                                return false;
-                            }
-                        }
-                    }
-                    col++;
-                }
-                col = 0;
-                row++;
-            }
-            return true;
+            return chekingHelper(teamColor);
         }
         else {return false;}
     }
 
-    /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves while not in check.
-     *
-     * @param teamColor which team to check for stalemate
-     * @return True if the specified team is in stalemate, otherwise false
-     */
-    public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheck(teamColor)) {return false;}
+    public boolean chekingHelper(TeamColor teamColor){
         int row = 0;
         int col = 0;
-
         while (row < 8) {
             while (col < 8) {
                 ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
@@ -356,6 +276,35 @@ public class ChessGame {
             row++;
         }
         return true;
+    }
+
+    public ChessPosition getKingPosition(TeamColor teamColor){
+        List<List<Integer>> king = new ArrayList<>();
+        int k_row = 0;
+        int k_col = 0;
+        if (teamColor == TeamColor.BLACK) {
+            king = game.returnBlackKing();
+        }
+        if (teamColor == TeamColor.WHITE) {
+            king = game.returnWhiteKing();
+        }
+        for (List<Integer> k : king) {
+            k_row = k.get(0);
+            k_col = k.get(1);
+        }
+        return new ChessPosition(k_row + 1, k_col + 1);
+    }
+
+    /**
+     * Determines if the given team is in stalemate, which here is defined as having
+     * no valid moves while not in check.
+     *
+     * @param teamColor which team to check for stalemate
+     * @return True if the specified team is in stalemate, otherwise false
+     */
+    public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)) {return false;}
+        return chekingHelper(teamColor);
     }
 
     /**
