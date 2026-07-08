@@ -201,17 +201,18 @@ public class ChessGame {
                 ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
                 ChessPiece piece = game.squares[row][col];
                 // check opposing team
-                if (piece == null || piece.getTeamColor() == teamColor) {col++;}
-                else {
-                    Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
-                    for (ChessMove move : list_of_moves) {
-                        ChessPosition endPosition = move.getEndPosition();
-                        if (endPosition.equals(king_position)) {
-                            return true;
-                        } // is in check
-                    }
+                if (piece == null || piece.getTeamColor() == teamColor) {
                     col++;
+                    continue;
                 }
+                Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
+                for (ChessMove move : list_of_moves) {
+                    ChessPosition endPosition = move.getEndPosition();
+                    if (endPosition.equals(king_position)) {
+                        return true;
+                    } // is in check
+                }
+                col++;
             }
             col = 0;
             row++;
@@ -242,18 +243,19 @@ public class ChessGame {
                 ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
                 // indexed properly
                 ChessPiece piece = game.squares[row][col];
-                if (piece == null || piece.getTeamColor() != teamColor) {col++;}
-                else{
-                    Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
-                    for (ChessMove move : list_of_moves) {
-                        ChessPosition startPosition = move.getStartPosition();
-                        Collection<ChessMove> valid_moves = validMoves(startPosition);
-                        if (!valid_moves.isEmpty()){
-                            return false;
-                        }
-                    }
+                if (piece == null || piece.getTeamColor() != teamColor) {
                     col++;
+                    continue;
                 }
+                Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
+                for (ChessMove move : list_of_moves) {
+                    ChessPosition startPosition = move.getStartPosition();
+                    Collection<ChessMove> valid_moves = validMoves(startPosition);
+                    if (!valid_moves.isEmpty()){
+                        return false;
+                    }
+                }
+                col++;
             }
             col = 0;
             row++;

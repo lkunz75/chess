@@ -366,19 +366,9 @@ public class ChessPiece { // so confused by cloneable
             int row = move.get(0);
             int col = move.get(1);
             ChessPosition validMove = new ChessPosition(row+1, col+1);
-            if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.WHITE && row == 7){
+            if ((piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.WHITE && row == 7)||
+                    ((piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.BLACK && row == 0))){
                 //promote the pawn when it reaches the end it can become any of these four things!
-                ChessMove new_queen = new ChessMove(myPosition, validMove, PieceType.QUEEN);
-                converted_move.add(new_queen);
-                ChessMove new_rook = new ChessMove(myPosition, validMove, PieceType.ROOK);
-                converted_move.add(new_rook);
-                ChessMove new_bishop = new ChessMove(myPosition, validMove, PieceType.BISHOP);
-                converted_move.add(new_bishop);
-                ChessMove new_knight = new ChessMove(myPosition, validMove, PieceType.KNIGHT);
-                converted_move.add(new_knight);
-            }
-            else if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.BLACK && row == 0){
-                //promote
                 ChessMove new_queen = new ChessMove(myPosition, validMove, PieceType.QUEEN);
                 converted_move.add(new_queen);
                 ChessMove new_rook = new ChessMove(myPosition, validMove, PieceType.ROOK);
