@@ -10,7 +10,8 @@ import java.util.*;
  */
 public class ChessBoard {
 
-    ChessPiece[][] squares = new ChessPiece[8][8]; //remember that its zero indexed! These are just dimensions!
+    // zero indexed
+    ChessPiece[][] squares = new ChessPiece[8][8];
     List<List<Integer>> whiteKing = new ArrayList<>();
     List<List<Integer>> blackKing = new ArrayList<>();
     public ChessBoard() {
@@ -52,7 +53,7 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return squares[position.getRow()-1][position.getColumn()-1]; // just return the piece, remember that its zero indexed!
+        return squares[position.getRow()-1][position.getColumn()-1];
     }
 
 

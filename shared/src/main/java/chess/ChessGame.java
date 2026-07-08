@@ -44,7 +44,8 @@ public class ChessGame {
     // looked up how to make a clone + watched videos
     // One such method is to have ChessBoard implement Cloneable,
     // then in the override clone method, you loop through the 2d ChessPiece array,
-    // and do Arrays.copyOf to copy the chess board row by row, then finally putting the 2d array into the cloned ChessBoard.
+    // and do Arrays.copyOf to copy the chess board row by row
+    // then finally putting the 2d array into the cloned ChessBoard.
     public static class CloneCopy implements Cloneable {
         ChessPiece[][] data;
 
@@ -81,13 +82,14 @@ public class ChessGame {
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         List<ChessMove> valid_moves = new ArrayList<>();
         int col = startPosition.getColumn() - 1;
-        int row = startPosition.getRow() - 1; // index it for an array
+        int row = startPosition.getRow() - 1;
         if (game.squares[row][col] == null) {
             return null;
         }
+        // know king placement and moves
         ChessPiece piece = game.squares[row][col];
-        TeamColor color = piece.getTeamColor(); // know the color so you know if your king is at risk
-        Collection<ChessMove> moves = piece.pieceMoves(game, startPosition); // gets all of the moves
+        TeamColor color = piece.getTeamColor();
+        Collection<ChessMove> moves = piece.pieceMoves(game, startPosition);
 
         CloneCopy original = new CloneCopy();
         original.data = game.squares;
@@ -119,30 +121,31 @@ public class ChessGame {
                 ChessPosition validMove = new ChessPosition(end.getRow(), end.getColumn());
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 7) {
                     //promote the pawn when it reaches the end it can become any of these four things!
-                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN); //this should be null
+                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN);
                     valid_moves.add(new_queen);
-                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK); //this should be null
+                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK);
                     valid_moves.add(new_rook);
-                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP); //this should be null
+                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP);
                     valid_moves.add(new_bishop);
-                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT); //this should be null
+                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT);
                     valid_moves.add(new_knight);
                 } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 0) {
                     //promote
-                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN); //this should be null
+                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN);
                     valid_moves.add(new_queen);
-                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK); //this should be null
+                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK);
                     valid_moves.add(new_rook);
-                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP); //this should be null
+                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP);
                     valid_moves.add(new_bishop);
-                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT); //this should be null
+                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT);
                     valid_moves.add(new_knight);
                 } else {
-                    ChessMove new_piece = new ChessMove(start, validMove, null); //this should be null
+                    ChessMove new_piece = new ChessMove(start, validMove, null);
                     valid_moves.add(new_piece);
                 }
             }
-            game.squares[start.getRow() - 1][start.getColumn() - 1] = piece; // go back to OG
+            // resetting the changes
+            game.squares[start.getRow() - 1][start.getColumn() - 1] = piece;
             game.squares[end.getRow() - 1][end.getColumn() - 1] = promoted;
             if (game.squares[start.getRow() - 1][start.getColumn() - 1].getPieceType() == ChessPiece.PieceType.KING){
                 if (color == TeamColor.WHITE){
@@ -177,11 +180,12 @@ public class ChessGame {
         if (board.squares[start_row][start_col] != null) {
             // check color so we know whose turn is next
             TeamColor color = board.squares[start_row][start_col].getTeamColor();
-            if (color != currentTurn){throw new InvalidMoveException();} // only moving during their turn!
+            if (color != currentTurn){throw new InvalidMoveException();}
             Collection<ChessMove> valid_moves = validMoves(start);
             for (ChessMove moves : valid_moves) {
                 ChessPosition move_end = moves.getEndPosition();
-                if (endposition.equals(move_end)) { // then its valid, also using equals lets it run, == does not work like in python
+                //using .equals allows java to compare
+                if (endposition.equals(move_end)) {
                     piece = board.squares[start_row][start_col];
                     if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                         ChessPiece.PieceType promote = move.getPromotionPiece();
@@ -221,7 +225,8 @@ public class ChessGame {
             while (col < 8) {
                 ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
                 ChessPiece piece = game.squares[row][col];
-                if (piece != null && piece.getTeamColor() != teamColor) { // this should be checked because we want to check and see if opposing team puts us in check
+                // check opposing team
+                if (piece != null && piece.getTeamColor() != teamColor) {
                     Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
                     for (ChessMove move : list_of_moves) {
                         ChessPosition endPosition = move.getEndPosition();
@@ -259,8 +264,9 @@ public class ChessGame {
         while (row < 8) {
             while (col < 8) {
                 ChessPosition board_spot = new ChessPosition(row + 1, col + 1);
-                ChessPiece piece = game.squares[row][col]; // remember how your indexed!!
-                if (piece != null && piece.getTeamColor() == teamColor) { // this should be checked because we want to check and see if opposing team puts us in check
+                // indexed properly
+                ChessPiece piece = game.squares[row][col];
+                if (piece != null && piece.getTeamColor() == teamColor) {
                     Collection<ChessMove> list_of_moves = piece.pieceMoves(game, board_spot);
                     for (ChessMove move : list_of_moves) {
                         ChessPosition startPosition = move.getStartPosition();

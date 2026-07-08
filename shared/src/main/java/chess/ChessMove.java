@@ -47,7 +47,8 @@ public class ChessMove {
 
     @Override
     public String toString() {
-        return String.format("%s%s", startPosition, endPosition); // format function will call to_string on start and end automatically
+        return String.format("%s%s", startPosition, endPosition);
+        // format function will call to_string on start and end automatically
     }
 
     @Override
@@ -56,7 +57,8 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(startPosition, chessMove.startPosition) && Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
+        return Objects.equals(startPosition, chessMove.startPosition) &&
+                Objects.equals(endPosition, chessMove.endPosition) && promotionPiece == chessMove.promotionPiece;
     }
 
     @Override
