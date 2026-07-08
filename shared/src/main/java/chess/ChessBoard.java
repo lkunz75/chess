@@ -36,11 +36,11 @@ public class ChessBoard {
         }
     }
 
-    public List<List<Integer>> return_white_king(){
+    public List<List<Integer>> returnWhiteKing(){
         return whiteKing;
     }
 
-    public List<List<Integer>> return_black_king(){
+    public List<List<Integer>> returnBlackKing(){
         return blackKing;
     }
 

@@ -116,29 +116,29 @@ public class ChessGame {
                 }
             }
             if (!isInCheck(color)) {
-                ChessPosition ValidMove = new ChessPosition(end.getRow(), end.getColumn());
+                ChessPosition validMove = new ChessPosition(end.getRow(), end.getColumn());
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == ChessGame.TeamColor.WHITE && row == 7) {
                     //promote the pawn when it reaches the end it can become any of these four things!
-                    ChessMove new_queen = new ChessMove(start, ValidMove, ChessPiece.PieceType.QUEEN); //this should be null
+                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN); //this should be null
                     valid_moves.add(new_queen);
-                    ChessMove new_rook = new ChessMove(start, ValidMove, ChessPiece.PieceType.ROOK); //this should be null
+                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK); //this should be null
                     valid_moves.add(new_rook);
-                    ChessMove new_bishop = new ChessMove(start, ValidMove, ChessPiece.PieceType.BISHOP); //this should be null
+                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP); //this should be null
                     valid_moves.add(new_bishop);
-                    ChessMove new_knight = new ChessMove(start, ValidMove, ChessPiece.PieceType.KNIGHT); //this should be null
+                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT); //this should be null
                     valid_moves.add(new_knight);
                 } else if (piece.getPieceType() == ChessPiece.PieceType.PAWN && piece.getTeamColor() == ChessGame.TeamColor.BLACK && row == 0) {
                     //promote
-                    ChessMove new_queen = new ChessMove(start, ValidMove, ChessPiece.PieceType.QUEEN); //this should be null
+                    ChessMove new_queen = new ChessMove(start, validMove, ChessPiece.PieceType.QUEEN); //this should be null
                     valid_moves.add(new_queen);
-                    ChessMove new_rook = new ChessMove(start, ValidMove, ChessPiece.PieceType.ROOK); //this should be null
+                    ChessMove new_rook = new ChessMove(start, validMove, ChessPiece.PieceType.ROOK); //this should be null
                     valid_moves.add(new_rook);
-                    ChessMove new_bishop = new ChessMove(start, ValidMove, ChessPiece.PieceType.BISHOP); //this should be null
+                    ChessMove new_bishop = new ChessMove(start, validMove, ChessPiece.PieceType.BISHOP); //this should be null
                     valid_moves.add(new_bishop);
-                    ChessMove new_knight = new ChessMove(start, ValidMove, ChessPiece.PieceType.KNIGHT); //this should be null
+                    ChessMove new_knight = new ChessMove(start, validMove, ChessPiece.PieceType.KNIGHT); //this should be null
                     valid_moves.add(new_knight);
                 } else {
-                    ChessMove new_piece = new ChessMove(start, ValidMove, null); //this should be null
+                    ChessMove new_piece = new ChessMove(start, validMove, null); //this should be null
                     valid_moves.add(new_piece);
                 }
             }
@@ -220,7 +220,7 @@ public class ChessGame {
         if (teamColor != TeamColor.BLACK) {
             // to check if white is in check, you have to go through the valid Black Moves and see if its where the white king is
             // you need to find where the White King is.
-            List<List<Integer>> white_king = game.return_white_king();
+            List<List<Integer>> white_king = game.returnWhiteKing();
             for (List<Integer> king : white_king) {
                 int k_row = king.get(0);
                 int k_col = king.get(1);
@@ -247,7 +247,7 @@ public class ChessGame {
             return false; // went through it all without hitting the king
         } else {
             // goes through other team colors
-            List<List<Integer>> black_king = game.return_black_king();
+            List<List<Integer>> black_king = game.returnBlackKing();
             for (List<Integer> king : black_king) {
                 int k_row = king.get(0);
                 int k_col = king.get(1);
@@ -286,10 +286,10 @@ public class ChessGame {
         int k_row = 0;
         int k_col = 0;
         if (teamColor == TeamColor.BLACK) {
-            king = game.return_black_king();
+            king = game.returnBlackKing();
         }
         if (teamColor == TeamColor.WHITE) {
-            king = game.return_white_king();
+            king = game.returnWhiteKing();
         }
         for (List<Integer> k : king) {
             k_row = k.get(0);

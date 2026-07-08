@@ -477,37 +477,35 @@ public class ChessPiece { // so confused by cloneable
 
 
     // just moved it for added clarity
-    Collection<ChessMove> convert_moves(ChessPosition myPosition, List<List<Integer>> valid_moves, ChessPiece piece){
+    Collection<ChessMove> convertMoves(ChessPosition myPosition, List<List<Integer>> validMoves, ChessPiece piece){
         List<ChessMove> converted_move = new ArrayList<>();
-        for (List<Integer> move:valid_moves) {
+        for (List<Integer> move:validMoves) {
             int row = move.get(0);
             int col = move.get(1);
+            ChessPosition validMove = new ChessPosition(row+1, col+1);
             if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.WHITE && row == 7){
                 //promote the pawn when it reaches the end it can become any of these four things!
-                ChessPosition ValidMove = new ChessPosition(row+1, col+1);
-                ChessMove new_queen = new ChessMove(myPosition, ValidMove, PieceType.QUEEN); //this should be null
+                ChessMove new_queen = new ChessMove(myPosition, validMove, PieceType.QUEEN); //this should be null
                 converted_move.add(new_queen);
-                ChessMove new_rook = new ChessMove(myPosition, ValidMove, PieceType.ROOK); //this should be null
+                ChessMove new_rook = new ChessMove(myPosition, validMove, PieceType.ROOK); //this should be null
                 converted_move.add(new_rook);
-                ChessMove new_bishop = new ChessMove(myPosition, ValidMove, PieceType.BISHOP); //this should be null
+                ChessMove new_bishop = new ChessMove(myPosition, validMove, PieceType.BISHOP); //this should be null
                 converted_move.add(new_bishop);
-                ChessMove new_knight = new ChessMove(myPosition, ValidMove, PieceType.KNIGHT); //this should be null
+                ChessMove new_knight = new ChessMove(myPosition, validMove, PieceType.KNIGHT); //this should be null
                 converted_move.add(new_knight);
             }
             else if (piece.getPieceType() == PieceType.PAWN && piece.pieceColor == ChessGame.TeamColor.BLACK && row == 0){
                 //promote
-                ChessPosition ValidMove = new ChessPosition(row+1, col+1);
-                ChessMove new_queen = new ChessMove(myPosition, ValidMove, PieceType.QUEEN); //this should be null
+                ChessMove new_queen = new ChessMove(myPosition, validMove, PieceType.QUEEN); //this should be null
                 converted_move.add(new_queen);
-                ChessMove new_rook = new ChessMove(myPosition, ValidMove, PieceType.ROOK); //this should be null
+                ChessMove new_rook = new ChessMove(myPosition, validMove, PieceType.ROOK); //this should be null
                 converted_move.add(new_rook);
-                ChessMove new_bishop = new ChessMove(myPosition, ValidMove, PieceType.BISHOP); //this should be null
+                ChessMove new_bishop = new ChessMove(myPosition, validMove, PieceType.BISHOP); //this should be null
                 converted_move.add(new_bishop);
-                ChessMove new_knight = new ChessMove(myPosition, ValidMove, PieceType.KNIGHT); //this should be null
+                ChessMove new_knight = new ChessMove(myPosition, validMove, PieceType.KNIGHT); //this should be null
                 converted_move.add(new_knight);
             }
             else {
-                ChessPosition validMove = new ChessPosition(row+1, col+1);
                 ChessMove new_piece = new ChessMove(myPosition, validMove, null); //this should be null
                 converted_move.add(new_piece);
             }
@@ -543,7 +541,7 @@ public class ChessPiece { // so confused by cloneable
         if (piece.getPieceType() == PieceType.ROOK){
             validMoves = rookMovesCalculator(board, myPosition);
         }
-        return convert_moves(myPosition, validMoves, piece);
+        return convertMoves(myPosition, validMoves, piece);
     }
 
     @Override
