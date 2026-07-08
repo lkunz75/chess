@@ -11,7 +11,7 @@ import java.util.*;
 // A lot of the syntax took time to learn
 public class ChessGame {
     ChessBoard game = new ChessBoard();
-    TeamColor current_turn = TeamColor.WHITE;
+    TeamColor currentTurn = TeamColor.WHITE;
 
     public ChessGame() {
         game.resetBoard(); // here is where you call it!! Calling it above makes it fail, and we only want to reset the board once each time
@@ -21,7 +21,7 @@ public class ChessGame {
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        return current_turn;
+        return currentTurn;
     }
 
     /**
@@ -30,7 +30,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        current_turn = team;
+        currentTurn = team;
     }
 
     /**
@@ -107,12 +107,12 @@ public class ChessGame {
                 if (color == TeamColor.WHITE){
                     List<List<Integer>> updated_wk = new ArrayList<>();
                     updated_wk.add(Arrays.asList(end.getRow()-1, end.getColumn()-1));
-                    game.white_king = updated_wk;
+                    game.whiteKing = updated_wk;
                 }
                 if (color == TeamColor.BLACK){
                     List<List<Integer>> updated_bk = new ArrayList<>();
                     updated_bk.add(Arrays.asList(end.getRow()-1, end.getColumn()-1));
-                    game.black_king = updated_bk;
+                    game.blackKing = updated_bk;
                 }
             }
             if (!isInCheck(color)) {
@@ -148,12 +148,12 @@ public class ChessGame {
                 if (color == TeamColor.WHITE){
                     List<List<Integer>> updated_wk = new ArrayList<>();
                     updated_wk.add(Arrays.asList(start.getRow()-1, start.getColumn()-1));
-                    game.white_king = updated_wk;
+                    game.whiteKing = updated_wk;
                 }
                 if (color == TeamColor.BLACK){
                     List<List<Integer>> updated_bk = new ArrayList<>();
                     updated_bk.add(Arrays.asList(start.getRow()-1, start.getColumn()-1));
-                    game.black_king = updated_bk;
+                    game.blackKing = updated_bk;
                 }
             }
         }
@@ -177,7 +177,7 @@ public class ChessGame {
         if (board.squares[start_row][start_col] != null) {
             // check color so we know whose turn is next
             TeamColor color = board.squares[start_row][start_col].getTeamColor();
-            if (color != current_turn){throw new InvalidMoveException();} // only moving during their turn!
+            if (color != currentTurn){throw new InvalidMoveException();} // only moving during their turn!
             Collection<ChessMove> valid_moves = validMoves(start);
             for (ChessMove moves : valid_moves) {
                 ChessPosition move_end = moves.getEndPosition();
@@ -192,10 +192,10 @@ public class ChessGame {
                     board.squares[endposition.getRow() - 1][endposition.getColumn() - 1] = piece;
                     board.squares[start_row][start_col] = null;
                     if (color == TeamColor.WHITE) {
-                        current_turn = TeamColor.BLACK;
+                        currentTurn = TeamColor.BLACK;
                     }
                     else {
-                        current_turn = TeamColor.WHITE;
+                        currentTurn = TeamColor.WHITE;
                     }
                     return;
                 }
@@ -380,7 +380,7 @@ public class ChessGame {
     public String toString() {
         return "ChessGame{" +
                 "game=" + game +
-                ", current_turn=" + current_turn +
+                ", current_turn=" + currentTurn +
                 '}';
     }
 
@@ -390,11 +390,11 @@ public class ChessGame {
             return false;
         }
         ChessGame chessGame = (ChessGame) o;
-        return Objects.equals(game, chessGame.game) && current_turn == chessGame.current_turn;
+        return Objects.equals(game, chessGame.game) && currentTurn == chessGame.currentTurn;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(game, current_turn);
+        return Objects.hash(game, currentTurn);
     }
 }

@@ -11,8 +11,8 @@ import java.util.*;
 public class ChessBoard {
 
     ChessPiece[][] squares = new ChessPiece[8][8]; //remember that its zero indexed! These are just dimensions!
-    List<List<Integer>> white_king = new ArrayList<>();
-    List<List<Integer>> black_king = new ArrayList<>();
+    List<List<Integer>> whiteKing = new ArrayList<>();
+    List<List<Integer>> blackKing = new ArrayList<>();
     public ChessBoard() {
 
     }
@@ -26,22 +26,22 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
         if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.WHITE){
-            white_king = new ArrayList<>(); // clear the old spot
-            white_king.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
+            whiteKing = new ArrayList<>(); // clear the old spot
+            whiteKing.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
         }
 
         if (piece != null && piece.getPieceType() == ChessPiece.PieceType.KING && squares[position.getRow()-1][position.getColumn()-1].getTeamColor() == ChessGame.TeamColor.BLACK){
-            black_king = new ArrayList<>();
-            black_king.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
+            blackKing = new ArrayList<>();
+            blackKing.add(Arrays.asList(position.getRow()-1, position.getColumn()-1));
         }
     }
 
     public List<List<Integer>> return_white_king(){
-        return white_king;
+        return whiteKing;
     }
 
     public List<List<Integer>> return_black_king(){
-        return black_king;
+        return blackKing;
     }
 
     /**

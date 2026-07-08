@@ -46,7 +46,7 @@ public class ChessPiece { // so confused by cloneable
     }
 
     // listing out the different kinds of moves for each piece type
-    public List<List<Integer>> BishopMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> bishopMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         List<List<Integer>> valid_move = new ArrayList<>();
         //Bishops can move diagonally any number of squares
         int initial_row = myPosition.getRow()-1; // be in array mode
@@ -129,7 +129,7 @@ public class ChessPiece { // so confused by cloneable
     }
 
     //KING
-    public List<List<Integer>> KingMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> kingMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         // A King can move one block in any direction
         List<List<Integer>> king_move = new ArrayList<>();
         int initial_row = myPosition.getRow() - 1;
@@ -181,7 +181,7 @@ public class ChessPiece { // so confused by cloneable
         return king_move;
     }
 
-    public List<List<Integer>> KnightMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> knightMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         // moves in an L shape
         List<List<Integer>> knight_move = new ArrayList<>();
         int initial_row = myPosition.getRow() - 1;
@@ -221,7 +221,7 @@ public class ChessPiece { // so confused by cloneable
         return knight_move;
     }
 
-    public List<List<Integer>> PawnMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> pawnMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         List<List<Integer>> pawn_move = new ArrayList<>();
         int initial_row = myPosition.getRow() - 1;
         int initial_col = myPosition.getColumn() - 1;
@@ -258,7 +258,7 @@ public class ChessPiece { // so confused by cloneable
         return pawn_move;
     }
 
-    public List<List<Integer>> QueenMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> queenMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         // can move diagonal, forward, backward, side to side
         List<List<Integer>> valid_move = new ArrayList<>();
         //Bishops can move diagonally any number of squares
@@ -403,7 +403,7 @@ public class ChessPiece { // so confused by cloneable
         return valid_move;
     }
 
-    public List<List<Integer>> RookMovesCalculator(ChessBoard board, ChessPosition myPosition) {
+    public List<List<Integer>> rookMovesCalculator(ChessBoard board, ChessPosition myPosition) {
         // can move diagonal, forward, backward, side to side copied over from queen
         List<List<Integer>> valid_move = new ArrayList<>();
         int initial_row = myPosition.getRow() - 1; // be in array mode
@@ -524,26 +524,26 @@ public class ChessPiece { // so confused by cloneable
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        List<List<Integer>> valid_moves = new ArrayList<>();
+        List<List<Integer>> validMoves = new ArrayList<>();
         if (piece.getPieceType() == PieceType.BISHOP){
-             valid_moves = BishopMovesCalculator(board, myPosition);
+            validMoves = bishopMovesCalculator(board, myPosition);
         }
         if (piece.getPieceType() == PieceType.KING){
-            valid_moves = KingMovesCalculator(board, myPosition);
+            validMoves = kingMovesCalculator(board, myPosition);
         }
         if (piece.getPieceType() == PieceType.KNIGHT){
-            valid_moves = KnightMovesCalculator(board, myPosition);
+            validMoves = knightMovesCalculator(board, myPosition);
         }
         if (piece.getPieceType() == PieceType.PAWN){
-            valid_moves = PawnMovesCalculator(board, myPosition);
+            validMoves = pawnMovesCalculator(board, myPosition);
         }
         if (piece.getPieceType() == PieceType.QUEEN){
-            valid_moves = QueenMovesCalculator(board, myPosition);
+            validMoves = queenMovesCalculator(board, myPosition);
         }
         if (piece.getPieceType() == PieceType.ROOK){
-            valid_moves = RookMovesCalculator(board, myPosition);
+            validMoves = rookMovesCalculator(board, myPosition);
         }
-        return convert_moves(myPosition, valid_moves, piece);
+        return convert_moves(myPosition, validMoves, piece);
     }
 
     @Override
