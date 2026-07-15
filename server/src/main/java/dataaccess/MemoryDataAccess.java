@@ -10,17 +10,21 @@ import java.util.List;
 public class MemoryDataAccess {
     List<List<String>> userInfo = new ArrayList<>();
 
-    public void createUser(UserData username) throws DataAccessException {
+    public List<String> createUser(UserData user) throws DataAccessException {
         // insert new user here
         // also gives them an authToken
-        for (List<String> user:userInfo) {
-            String name = user.getFirst(); // same as .get(0)
-            if (username.username().toString().equals(name)) {
+        List<String> createdUser = new ArrayList<>();
+        for (List<String> info:userInfo) {
+            String name = info.getFirst(); // same as .get(0)
+            if (user.username().toString().equals(name)) {
                 throw new DataAccessException("403 Error: Username already taken");
             }
         }
-        new_user = new UserData(username.username(), username.password(), username.email());
-        userInfo.add(Arrays.asList(username.username().toString(), AuthData.generateToken()));
+        UserData new_user = new UserData(user.username(), user.password(), user.email());
+        String authToken = AuthData.generateToken();
+        userInfo.add(Arrays.asList(user.username().toString(), authToken));
+        createdUser.add(user.username().toString());
+        createdUser.add(authToken);
+        return createdUser;
     }
-
 }
