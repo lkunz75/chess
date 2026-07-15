@@ -8,23 +8,33 @@ import java.util.List;
 
 // responsible for storing and retrieving the server's data
 public class MemoryDataAccess {
-    List<List<String>> userInfo = new ArrayList<>();
+    //HashMaps would be simple
+    List<AuthData.AuthRecord> authInfo = new ArrayList<>();
+    List<UserData> userInfo = new ArrayList<>();
 
-    public List<String> createUser(UserData user) throws DataAccessException {
-        // insert new user here
-        // also gives them an authToken
-        List<String> createdUser = new ArrayList<>();
-        for (List<String> info:userInfo) {
-            String name = info.getFirst(); // same as .get(0)
-            if (user.username().toString().equals(name)) {
-                throw new DataAccessException("403 Error: Username already taken");
+    public UserData getUserData(String username){
+        // Checking will move to userService layer
+        for (UserData info:userInfo){
+            String name = info.username(); // same as .get(0)
+            if (name.equals(username)) {
+                return info; // we want to return our already found data
             }
         }
-        UserData new_user = new UserData(user.username(), user.password(), user.email());
+        // will return user data it found, or will return null (could throw the exception if you want)
+        return null; // not found
+    }
+
+    public void createUserData(UserData user){
+        // this is where I actually it after I know its valid
+        // create, all we do it add it
+        userInfo.add(user);
+    }
+
+    public AuthData.AuthRecord createAuthData(UserData user) throws DataAccessException {
+        // only needs to be these three lines
         String authToken = AuthData.generateToken();
-        userInfo.add(Arrays.asList(user.username().toString(), authToken));
-        createdUser.add(user.username().toString());
-        createdUser.add(authToken);
-        return createdUser;
+        AuthData.AuthRecord newAuthData = new AuthData.AuthRecord(user.username(), authToken);
+        authInfo.add(newAuthData);
+        return newAuthData;
     }
 }
