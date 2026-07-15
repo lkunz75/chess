@@ -11,4 +11,5 @@ public interface GameDataAccess {
     GameData getGame(int gameID) throws DataAccessException;
     void createGame(GameData game) throws DataAccessException;
     int newGameID() throws DataAccessException;
+    boolean getColor() throws DataAccessException;
 }

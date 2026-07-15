@@ -45,9 +45,29 @@ public class GameService {
             throw new DataAccessException("401 Error: Unauthorized");
         }
     }
+
+    public JoinResult join(JoinRequest joinRequest) throws DataAccessException {
+        try {
+            AuthData.AuthRecord authToken = service.registeredData.getAuthToken(joinRequest.authToken());
+            if (authToken == null) {
+                throw new DataAccessException("401 Error: Unauthorized");
+            }
+            else {
+                if (service.registeredData.getColor(joinRequest.color(), joinRequest.GameID())){
+                    service.registeredData.joinGame(authToken.username(), joinRequest.color(), joinRequest.GameID());
+                    return new JoinResult();
+                }
+                throw new DataAccessException("401 Error: Unauthorized");
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException("401 Error: Unauthorized");
+        }
+    }
 }
 
 record ListRequest(String authToken) {};
 record ListResult(List<List<String>> games) {};
 record CreateRequest(String authToken, String gameName) {};
 record CreateResult(int gameID) {};
+record JoinRequest(String authToken, String color, int GameID) {};
+record JoinResult(){};

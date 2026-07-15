@@ -101,4 +101,42 @@ public class MemoryDataAccess {
         return currentID;
     }
 
+    public boolean getColor(String color, int gameID){
+        for (GameData game: allGameData){
+            int id = game.gameID();
+            String whiteName = game.whiteUsername();
+            String blackName = game.blackUsername();
+            if (id == gameID){
+                if (color.equals("WHITE") && whiteName == null){
+                    return true;
+                }
+                else if (color.equals("BLACK") && blackName == null){
+                    return true;
+                }
+                else {return false;}
+            }
+        }
+        return false;
+    }
+
+    public void joinGame(String username, String color, int gameID){
+        int index = 0;
+        for (GameData game: allGameData){
+            int id = game.gameID();
+            if (id == gameID){
+                GameData newGame = null;
+                if (color.equals("WHITE")){
+                    newGame = new GameData(gameID, username, game.blackUsername(), game.gameName(), game.game());
+                }
+                else {
+                    newGame = new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game());
+                }
+                allGameData.remove(index); // remove the old game
+                createGame(newGame); // insert the updated game
+                return;
+            }
+            index++;
+        }
+    }
+
 }
