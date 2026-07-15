@@ -8,3 +8,4 @@ public class ServerMain {
         System.out.println("♕ 240 Chess Server");
     }
 }
+
