@@ -1,9 +1,11 @@
 package dataaccess;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 // responsible for storing and retrieving the server's data
@@ -11,6 +13,9 @@ public class MemoryDataAccess {
     //HashMaps would be simpler
     List<AuthData.AuthRecord> authInfo = new ArrayList<>();
     List<UserData> userInfo = new ArrayList<>();
+    Collection<GameData> allGameData = new ArrayList<>();
+    List<List<String>> listGames = new ArrayList<>();
+    int currentID = 1234;
 
     public UserData getUserData(String username){
         // Checking will move to userService layer
@@ -71,6 +76,29 @@ public class MemoryDataAccess {
             }
             index++;
         }
+    }
+
+    public List<List<String>> listGames(){
+        return listGames;
+    }
+
+    public GameData getGame(String gameName) {
+        for (GameData game: allGameData){
+            String name = game.gameName();
+            if (name.equals(gameName)){
+                return game;
+            }
+        }
+        return null;
+    }
+
+    public void createGame(GameData game){
+        allGameData.add(game);
+    }
+
+    public int newGameID() {
+        currentID++;
+        return currentID;
     }
 
 }
