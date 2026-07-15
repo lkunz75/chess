@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccessException;
+import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,10 +61,39 @@ public class UserServiceTest {
         LoginRequest loginRequest = new LoginRequest("Bob", "6784");
         try {
             LoginResult loginResult = service.login(loginRequest);
-            fail("Expected DataAccessException to be thrown. Should not have signed in");
+            fail("Expected DataAccessException to be thrown. Should not have signed in!");
         }
         catch (DataAccessException e){
             assertEquals("400 Error: Bad Request", e.getMessage());
         }
     }
+
+    //LOGOUT
+    @Test
+    @DisplayName("Positive Logout")
+    public void logoutUserPositive() throws DataAccessException{
+        UserService service = new UserService();
+        RegisterRequest registerRequest = new RegisterRequest("Jessica", "6767", "jessica67@gmail.com");
+        RegisterResult registerResult= service.register(registerRequest);
+        LoginRequest loginRequest = new LoginRequest("Jessica", "6767");
+        LoginResult loginResult = service.login(loginRequest);
+        LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
+        LogoutResult logoutResult = service.logout(logoutRequest);
+        assertEquals(new LogoutResult(), logoutResult);
+    }
+
+    @Test
+    @DisplayName("Negative LogoutTest")
+    public void logoutUserNegative() throws DataAccessException{
+        UserService service = new UserService();
+        LogoutRequest loginRequest = new LogoutRequest("6784");
+        try {
+            LogoutResult logoutResult = service.logout(loginRequest);
+            fail("Expected DataAccessException to be thrown. Should not have logged out!");
+        }
+        catch (DataAccessException e){
+            assertEquals("401 Error: Unauthorized", e.getMessage());
+        }
+    }
+
 }

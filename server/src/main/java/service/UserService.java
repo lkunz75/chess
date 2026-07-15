@@ -42,6 +42,21 @@ public class UserService {
             throw new DataAccessException("400 Error: Bad Request");
         }
     }
+
+    public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
+        try {
+            AuthData.AuthRecord authToken = registeredData.getAuthToken(logoutRequest.authToken());
+            if (authToken == null) {
+                throw new DataAccessException("401 Error: Unauthorized");
+            }
+            else {
+                registeredData.deleteAuthToken(logoutRequest.authToken());
+                return new LogoutResult();
+            }
+        } catch (DataAccessException e) {
+            throw new DataAccessException("401 Error: Unauthorized");
+        }
+    }
 }
 
 record RegisterRequest(String username, String password, String email) {}

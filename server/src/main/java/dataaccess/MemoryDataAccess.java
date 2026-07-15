@@ -67,6 +67,7 @@ public class MemoryDataAccess {
             if (token.equals(authToken)) {
                 // remove it all because it will get reassigned when done
                 authInfo.remove(index);
+                return; // return so we don't keep looping through for no reason
             }
             index++;
         }
