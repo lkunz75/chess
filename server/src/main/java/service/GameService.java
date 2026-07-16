@@ -72,12 +72,3 @@ public class GameService {
         return new DeleteResult();
     }
 }
-
-record ListRequest(String authToken) {};
-record ListResult(List<List<String>> games) {};
-record CreateRequest(String authToken, String gameName) {};
-record CreateResult(int gameID) {};
-record JoinRequest(String authToken, String color, int GameID) {};
-record JoinResult(){};
-record DeleteRequest() {};
-record DeleteResult(){};
