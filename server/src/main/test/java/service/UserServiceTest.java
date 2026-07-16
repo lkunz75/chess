@@ -21,7 +21,7 @@ public class UserServiceTest {
     }
 
 
-    //REGISTER
+    // REGISTER
     @Test
     @DisplayName("Positive RegisterTest")
     public void registerUserPositive() throws DataAccessException{
@@ -46,7 +46,7 @@ public class UserServiceTest {
         }
     }
 
-    //LOGIN
+    // LOGIN
     @Test
     @DisplayName("Positive LoginTest")
     public void loginUserPositive() throws DataAccessException{
@@ -75,7 +75,7 @@ public class UserServiceTest {
         }
     }
 
-    //LOGOUT
+    // LOGOUT
     @Test
     @DisplayName("Positive Logout")
     public void logoutUserPositive() throws DataAccessException{
@@ -101,7 +101,7 @@ public class UserServiceTest {
         }
     }
 
-    //DELETE
+    // DELETE
     @Test
     @DisplayName("Positive DeleteTest")
     public void deleteUserPositive() throws DataAccessException{
@@ -109,6 +109,6 @@ public class UserServiceTest {
         RegisterResult registerResult= service.register(registerRequest);
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
         DeleteUserResult result = service.deleteUser(deleteUserRequest);
-        assertEquals(result, new DeleteUserResult());
+        assertEquals(new DeleteUserResult(), result);
     }
 }
