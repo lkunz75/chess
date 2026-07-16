@@ -45,8 +45,8 @@ public class UserService {
 
     public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
         try {
-            AuthData.AuthRecord authToken = registeredData.getAuthToken(logoutRequest.authToken());
-            if (authToken == null) {
+            AuthData.AuthRecord authData = registeredData.getAuthData(logoutRequest.authToken());
+            if (authData == null) {
                 throw new DataAccessException("401 Error: Unauthorized");
             }
             else {

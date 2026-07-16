@@ -11,11 +11,11 @@ import java.util.List;
 // responsible for storing and retrieving the server's data
 public class MemoryDataAccess {
     //HashMaps would be simpler
-    List<AuthData.AuthRecord> authInfo = new ArrayList<>();
-    List<UserData> userInfo = new ArrayList<>();
-    Collection<GameData> allGameData = new ArrayList<>();
-    List<List<String>> listGames = new ArrayList<>();
-    int currentID = 1234;
+    static List<AuthData.AuthRecord> authInfo = new ArrayList<>();
+    static List<UserData> userInfo = new ArrayList<>();
+    static Collection<GameData> allGameData = new ArrayList<>();
+    static List<List<String>> listGames = new ArrayList<>();
+    static int currentID = 0;
 
     public UserData getUserData(String username){
         // Checking will move to userService layer
@@ -54,7 +54,7 @@ public class MemoryDataAccess {
         return newAuthData;
     }
 
-    public AuthData.AuthRecord getAuthToken(String authToken){
+    public AuthData.AuthRecord getAuthData(String authToken){
         if (authToken == null) {return null;} // person is signed out
         for (AuthData.AuthRecord info:authInfo){
             String token = info.authToken(); // same as .get(0)
@@ -113,14 +113,12 @@ public class MemoryDataAccess {
                 else if (color.equals("BLACK") && blackName == null){
                     return true;
                 }
-                else {return false;}
             }
         }
         return false;
     }
 
     public void joinGame(String username, String color, int gameID){
-        int index = 0;
         for (GameData game: allGameData){
             int id = game.gameID();
             if (id == gameID){
@@ -131,11 +129,10 @@ public class MemoryDataAccess {
                 else {
                     newGame = new GameData(gameID, game.whiteUsername(), username, game.gameName(), game.game());
                 }
-                allGameData.remove(index); // remove the old game
+                allGameData.remove(game); //since it's a collection, remove by the actual game!
                 createGame(newGame); // insert the updated game
                 return;
             }
-            index++;
         }
     }
 

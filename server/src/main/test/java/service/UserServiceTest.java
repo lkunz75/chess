@@ -1,7 +1,9 @@
 package service;
 
 import dataaccess.DataAccessException;
+import org.eclipse.jetty.server.Authentication;
 import org.eclipse.jetty.util.log.Log;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,12 +11,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
     // looked up notation and classes to do this
+    static final UserService service = new UserService();
+
+    // following the pet class outline and lets us make it static so info can be shared
+    @BeforeEach
+    void clear() throws DataAccessException {
+        DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
+        DeleteUserResult result = service.deleteUser(deleteUserRequest);
+    }
+
 
     //REGISTER
     @Test
     @DisplayName("Positive RegisterTest")
     public void registerUserPositive() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         RegisterResult result = service.register(request);
         assertNotNull(result.authToken());
@@ -24,7 +34,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Negative RegisterTest")
     public void registerUserNegative() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest request1 = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         RegisterResult result1 = service.register(request1);
         RegisterRequest request2 = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
@@ -41,7 +50,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Positive LoginTest")
     public void loginUserPositive() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest registerRequest = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         RegisterResult registerResult= service.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Bob", "1234");
@@ -53,7 +61,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Negative LoginTest")
     public void loginUserNegative() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest bobRegister = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         service.register(bobRegister);
         RegisterRequest janeRegister = new RegisterRequest("Jane", "6784", "jane6789@gmail.com");
@@ -72,7 +79,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Positive Logout")
     public void logoutUserPositive() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest registerRequest = new RegisterRequest("Jessica", "6767", "jessica67@gmail.com");
         RegisterResult registerResult= service.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Jessica", "6767");
@@ -85,7 +91,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Negative LogoutTest")
     public void logoutUserNegative() throws DataAccessException{
-        UserService service = new UserService();
         LogoutRequest loginRequest = new LogoutRequest("6784");
         try {
             LogoutResult logoutResult = service.logout(loginRequest);
@@ -100,7 +105,6 @@ public class UserServiceTest {
     @Test
     @DisplayName("Positive DeleteTest")
     public void deleteUserPositive() throws DataAccessException{
-        UserService service = new UserService();
         RegisterRequest registerRequest = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         RegisterResult registerResult= service.register(registerRequest);
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
