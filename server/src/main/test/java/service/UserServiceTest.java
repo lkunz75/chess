@@ -96,4 +96,15 @@ public class UserServiceTest {
         }
     }
 
+    //DELETE
+    @Test
+    @DisplayName("Positive DeleteTest")
+    public void deleteUserPositive() throws DataAccessException{
+        UserService service = new UserService();
+        RegisterRequest registerRequest = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
+        RegisterResult registerResult= service.register(registerRequest);
+        DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
+        DeleteUserResult result = service.deleteUser(deleteUserRequest);
+        assertEquals(result, new DeleteUserResult());
+    }
 }

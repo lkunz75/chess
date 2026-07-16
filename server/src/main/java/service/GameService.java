@@ -8,6 +8,7 @@ import model.GameData;
 import java.util.Collection;
 import java.util.List;
 
+
 public class GameService {
     // create this so I can go through the registeredData
     UserService service = new UserService();
@@ -63,6 +64,12 @@ public class GameService {
             throw new DataAccessException("401 Error: Unauthorized");
         }
     }
+
+    public DeleteResult delete(DeleteRequest deleteRequest) throws DataAccessException {
+        service.registeredData.deleteAllGameData();
+        service = new UserService();
+        return new DeleteResult();
+    }
 }
 
 record ListRequest(String authToken) {};
@@ -71,3 +78,5 @@ record CreateRequest(String authToken, String gameName) {};
 record CreateResult(int gameID) {};
 record JoinRequest(String authToken, String color, int GameID) {};
 record JoinResult(){};
+record DeleteRequest() {};
+record DeleteResult(){};

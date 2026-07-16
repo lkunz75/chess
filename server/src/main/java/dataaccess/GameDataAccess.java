@@ -1,9 +1,5 @@
 package dataaccess;
-
 import model.GameData;
-
-import javax.xml.crypto.Data;
-import java.util.Collection;
 import java.util.List;
 
 public interface GameDataAccess {
@@ -12,4 +8,5 @@ public interface GameDataAccess {
     void createGame(GameData game) throws DataAccessException;
     int newGameID() throws DataAccessException;
     boolean getColor() throws DataAccessException;
+    void deleteAllGameData() throws DataAccessException;
 }

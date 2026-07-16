@@ -139,4 +139,18 @@ public class MemoryDataAccess {
         }
     }
 
+    public void deleteAllGameData() {
+        currentID = 0;
+        allGameData = new ArrayList<>();
+        listGames = new ArrayList<>();
+    }
+
+    public void deleteAllAuthData() {
+        authInfo = new ArrayList<>();
+    }
+
+    public void deleteAllUserData() {
+        userInfo = new ArrayList<>();
+    }
+
 }

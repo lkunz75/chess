@@ -57,6 +57,14 @@ public class UserService {
             throw new DataAccessException("401 Error: Unauthorized");
         }
     }
+
+    public DeleteUserResult deleteUser(DeleteUserRequest deleteRequest) throws DataAccessException {
+        registeredData.deleteAllUserData();
+        registeredData.deleteAllAuthData();
+        registeredData = new MemoryDataAccess();
+        return new DeleteUserResult();
+    }
+
 }
 
 record RegisterRequest(String username, String password, String email) {}
@@ -67,3 +75,5 @@ record LoginResult(String username, String authToken) {}
 
 record LogoutRequest(String authToken) {}
 record LogoutResult() {}
+record DeleteUserRequest() {};
+record DeleteUserResult(){};
