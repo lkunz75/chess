@@ -3,9 +3,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
-import org.eclipse.jetty.util.log.Log;
-
-import java.util.List;
+import service.userRequests.*;
 
 public class UserService {
     // created registeredData above so it accesses the same thing once instead of creating new each time

@@ -1,13 +1,11 @@
 package service;
 
-import chess.ChessGame;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
+import service.gameRequests.*;
 
-import java.util.Collection;
 import java.util.List;
 
 

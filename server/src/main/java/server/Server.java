@@ -5,10 +5,10 @@ import com.google.gson.JsonObject;
 import dataaccess.DataAccessException;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.AuthData;
-import model.GameData;
 import model.UserData;
 import service.*;
+import service.gameRequests.*;
+import service.userRequests.*;
 
 public class Server {
 

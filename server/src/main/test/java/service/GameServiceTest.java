@@ -5,9 +5,13 @@ import model.GameInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import service.gameRequests.*;
+import service.userRequests.DeleteUserRequest;
+import service.userRequests.DeleteUserResult;
+import service.userRequests.RegisterRequest;
+import service.userRequests.RegisterResult;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

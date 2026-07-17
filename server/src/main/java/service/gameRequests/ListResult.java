@@ -1,4 +1,4 @@
-package service;
+package service.gameRequests;
 import model.GameInfo;
 import java.util.List;
 

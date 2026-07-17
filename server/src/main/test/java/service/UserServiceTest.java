@@ -1,11 +1,10 @@
 package service;
 
 import dataaccess.DataAccessException;
-import org.eclipse.jetty.server.Authentication;
-import org.eclipse.jetty.util.log.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import service.userRequests.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
