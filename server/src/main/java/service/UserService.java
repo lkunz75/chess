@@ -3,7 +3,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
-import service.userRequests.*;
+import service.userrequests.*;
 
 public class UserService {
     // created registeredData above so it accesses the same thing once instead of creating new each time

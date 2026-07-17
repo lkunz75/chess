@@ -7,8 +7,8 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
 import service.*;
-import service.gameRequests.*;
-import service.userRequests.*;
+import service.gamerequests.*;
+import service.userrequests.*;
 
 public class Server {
 

@@ -5,11 +5,11 @@ import model.GameInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.gameRequests.*;
-import service.userRequests.DeleteUserRequest;
-import service.userRequests.DeleteUserResult;
-import service.userRequests.RegisterRequest;
-import service.userRequests.RegisterResult;
+import service.gamerequests.*;
+import service.userrequests.DeleteUserRequest;
+import service.userrequests.DeleteUserResult;
+import service.userrequests.RegisterRequest;
+import service.userrequests.RegisterResult;
 
 import java.util.ArrayList;
 import java.util.List;

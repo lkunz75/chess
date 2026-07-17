@@ -1,3 +1,3 @@
-package service.gameRequests;
+package service.gamerequests;
 
 public record JoinResult(){}

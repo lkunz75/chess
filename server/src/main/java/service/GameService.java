@@ -4,7 +4,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
-import service.gameRequests.*;
+import service.gamerequests.*;
 
 import java.util.List;
 

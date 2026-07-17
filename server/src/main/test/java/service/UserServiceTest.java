@@ -4,7 +4,7 @@ import dataaccess.DataAccessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.userRequests.*;
+import service.userrequests.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
