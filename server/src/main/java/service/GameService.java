@@ -30,7 +30,7 @@ public class GameService {
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
-        if (createRequest.gameName() == null){
+        else if (createRequest.gameName() == null){
             throw new DataAccessException("400 Error: Bad request");
         }
         else {
@@ -49,16 +49,17 @@ public class GameService {
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
-        else {
-            if (joinRequest.color() == null){
-                throw new DataAccessException("400 Error: Bad request");
-            }
+        if (joinRequest.color() == null || joinRequest.GameID() == 0){
+            throw new DataAccessException("400 Error: Bad request");
+        }
+        if (joinRequest.color().equals("WHITE") || joinRequest.color().equals("BLACK")){
             if (service.registeredData.getColor(joinRequest.color(), joinRequest.GameID())){
                 service.registeredData.joinGame(authData.username(), joinRequest.color(), joinRequest.GameID());
                 return new JoinResult();
             }
             throw new DataAccessException("403 Error: already taken");
         }
+        throw new DataAccessException("400 Error: bad request");
     }
 
     public DeleteResult delete(DeleteRequest deleteRequest) throws DataAccessException {

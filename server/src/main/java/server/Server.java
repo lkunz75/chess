@@ -84,7 +84,12 @@ public class Server {
         String authToken = context.header("authorization");
         // looked up this notation
         JsonObject json = new Gson().fromJson(context.body(), JsonObject.class);
-        CreateRequest createRequest = new CreateRequest(authToken, json.get("gameName").getAsString());
+        String gameName = null;
+        if (json != null && json.has("gameName") && !json.get("gameName").isJsonNull()) {
+            // have to check things this way to make sure we can check it
+            gameName = json.get("gameName").getAsString();
+        }
+        CreateRequest createRequest = new CreateRequest(authToken, gameName);
         try {
             CreateResult createResult = gameService.create(createRequest);
             context.result(new Gson().toJson(createResult)); // serialized it
@@ -110,8 +115,17 @@ public class Server {
     private void joinHandler(Context context) throws DataAccessException{
         //playerColor, gameID
         String authToken = context.header("authorization");
+        String playerColor = null;
+        int gameID = 0;
         JsonObject json = new Gson().fromJson(context.body(), JsonObject.class);
-        JoinRequest joinRequest = new JoinRequest(authToken, json.get("playerColor").getAsString(), json.get("gameID").getAsInt());
+        if (json != null && json.has("playerColor") && !json.get("playerColor").isJsonNull()) {
+            playerColor = json.get("playerColor").getAsString();
+        }
+        if (json != null && json.has("gameID") && !json.get("gameID").isJsonNull()) {
+            // have to check things this way to make sure we can check it
+            gameID = json.get("gameID").getAsInt();
+        }
+        JoinRequest joinRequest = new JoinRequest(authToken, playerColor, gameID);
         try {
             JoinResult joinResult = gameService.join(joinRequest);
             context.result(new Gson().toJson(joinResult)); // serialized it
