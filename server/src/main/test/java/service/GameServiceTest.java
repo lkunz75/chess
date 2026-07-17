@@ -15,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameServiceTest {
 
-    final static UserService userService = new UserService();
-    final static GameService gameService = new GameService();
+    final static UserService USER_SERVICE = new UserService();
+    final static GameService GAME_SERVICE = new GameService();
     @BeforeEach
     void clear() throws DataAccessException {
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
-        DeleteUserResult result = userService.deleteUser(deleteUserRequest);
+        DeleteUserResult result = USER_SERVICE.deleteUser(deleteUserRequest);
         DeleteRequest deleteRequest = new DeleteRequest();
-        DeleteResult deleteResult = gameService.delete(deleteRequest);
+        DeleteResult deleteResult = GAME_SERVICE.delete(deleteRequest);
     }
 
     // CREATE
@@ -30,9 +30,9 @@ public class GameServiceTest {
     @DisplayName("Positive CreateTest")
     public void createUserPositive() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
-        CreateResult createResult = gameService.create(createRequest);
+        CreateResult createResult = GAME_SERVICE.create(createRequest);
         assertEquals(new CreateResult(1), createResult);
     }
 
@@ -40,10 +40,10 @@ public class GameServiceTest {
     @DisplayName("Negative CreateTest")
     public void createUserNegative() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         CreateRequest createRequest = new CreateRequest("1234", "GameTest123");
         try {
-            CreateResult createResult = gameService.create(createRequest);
+            CreateResult createResult = GAME_SERVICE.create(createRequest);
             fail("Expected DataAccessException to be thrown. You are allowing someone without a proper authToken in!");
         }
         catch (DataAccessException e){
@@ -56,11 +56,11 @@ public class GameServiceTest {
     @DisplayName("Positive JoinTest")
     public void joinUserPositive() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
-        CreateResult createResult = gameService.create(createRequest);
+        CreateResult createResult = GAME_SERVICE.create(createRequest);
         JoinRequest joinRequest = new JoinRequest(result.authToken(), "WHITE", createResult.gameID());
-        JoinResult joinResult = gameService.join(joinRequest);
+        JoinResult joinResult = GAME_SERVICE.join(joinRequest);
         assertEquals(new JoinResult(), joinResult);
     }
 
@@ -68,20 +68,20 @@ public class GameServiceTest {
     @DisplayName("negative JoinTest")
     public void joinUserNegative() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         RegisterRequest request2 = new RegisterRequest("Jane", "6767", "jane67@gmail.com");
-        RegisterResult result2 = userService.register(request2);
+        RegisterResult result2 = USER_SERVICE.register(request2);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
-        CreateResult createResult = gameService.create(createRequest);
+        CreateResult createResult = GAME_SERVICE.create(createRequest);
         JoinRequest joinRequest = new JoinRequest(result.authToken(), "WHITE", createResult.gameID());
-        JoinResult joinResult = gameService.join(joinRequest);
+        JoinResult joinResult = GAME_SERVICE.join(joinRequest);
         JoinRequest joinRequest2 = new JoinRequest(result2.authToken(), "WHITE", createResult.gameID());
         try {
-            JoinResult joinResult2 = gameService.join(joinRequest2);
+            JoinResult joinResult2 = GAME_SERVICE.join(joinRequest2);
             fail("Expected DataAccessException to be thrown. You are allowing someone with the same color to join!");
         }
         catch(DataAccessException e) {
-            assertEquals("401 Error: Unauthorized", e.getMessage());
+            assertEquals("403 Error: already taken", e.getMessage());
         }
     }
 
@@ -90,13 +90,13 @@ public class GameServiceTest {
     @DisplayName("Positive ListTest")
     public void listUserPositive() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
-        CreateResult createResult = gameService.create(createRequest);
+        CreateResult createResult = GAME_SERVICE.create(createRequest);
         JoinRequest joinRequest = new JoinRequest(result.authToken(), "WHITE", createResult.gameID());
-        JoinResult joinResult = gameService.join(joinRequest);
+        JoinResult joinResult = GAME_SERVICE.join(joinRequest);
         ListRequest listRequest = new ListRequest(result.authToken());
-        ListResult listResult = gameService.list(listRequest);
+        ListResult listResult = GAME_SERVICE.list(listRequest);
         GameInfo gameInfo = new GameInfo(1, "Bob", null, "GameTest123");
         List<GameInfo> gameList = new ArrayList<>();
         gameList.add(gameInfo);
@@ -107,14 +107,14 @@ public class GameServiceTest {
     @DisplayName("Negative ListTest")
     public void listUserNegative() throws DataAccessException {
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = userService.register(request);
+        RegisterResult result = USER_SERVICE.register(request);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
-        CreateResult createResult = gameService.create(createRequest);
+        CreateResult createResult = GAME_SERVICE.create(createRequest);
         JoinRequest joinRequest = new JoinRequest(result.authToken(), "WHITE", createResult.gameID());
-        JoinResult joinResult = gameService.join(joinRequest);
+        JoinResult joinResult = GAME_SERVICE.join(joinRequest);
         ListRequest listRequest = new ListRequest("badauth123");
         try {
-            ListResult listResult = gameService.list(listRequest);
+            ListResult listResult = GAME_SERVICE.list(listRequest);
             fail("Expected DataAccessException to be thrown. You are allowing someone with a bad authToken to join.");
         } catch (DataAccessException e) {
             assertEquals("401 Error: Unauthorized", e.getMessage());

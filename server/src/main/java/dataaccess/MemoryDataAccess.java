@@ -11,8 +11,6 @@ import java.util.List;
 
 // responsible for storing and retrieving the server's data
 public class MemoryDataAccess {
-    //HashMaps would be simpler
-
     static List<AuthData.AuthRecord> authInfo = new ArrayList<>();
     static List<UserData> userInfo = new ArrayList<>();
     static Collection<GameData> allGameData = new ArrayList<>();

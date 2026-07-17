@@ -11,13 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
     // looked up notation and classes to do this
-    static final UserService service = new UserService();
+    static final UserService SERVICE = new UserService();
 
     // following the pet class outline and lets us make it static so info can be shared
     @BeforeEach
     void clear() throws DataAccessException {
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
-        DeleteUserResult result = service.deleteUser(deleteUserRequest);
+        DeleteUserResult result = SERVICE.deleteUser(deleteUserRequest);
     }
 
 
@@ -26,7 +26,7 @@ public class UserServiceTest {
     @DisplayName("Positive RegisterTest")
     public void registerUserPositive() throws DataAccessException{
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result = service.register(request);
+        RegisterResult result = SERVICE.register(request);
         assertNotNull(result.authToken());
         assertEquals("Bob", result.username());
     }
@@ -35,10 +35,10 @@ public class UserServiceTest {
     @DisplayName("Negative RegisterTest")
     public void registerUserNegative() throws DataAccessException{
         RegisterRequest request1 = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult result1 = service.register(request1);
+        RegisterResult result1 = SERVICE.register(request1);
         RegisterRequest request2 = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         try {
-            RegisterResult result2 = service.register(request2);
+            RegisterResult result2 = SERVICE.register(request2);
             fail("Expected DataAccessException to be thrown. You are allowing duplicates!");
         }
         catch (DataAccessException e){
@@ -51,9 +51,9 @@ public class UserServiceTest {
     @DisplayName("Positive LoginTest")
     public void loginUserPositive() throws DataAccessException{
         RegisterRequest registerRequest = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult registerResult= service.register(registerRequest);
+        RegisterResult registerResult= SERVICE.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Bob", "1234");
-        LoginResult loginResult = service.login(loginRequest);
+        LoginResult loginResult = SERVICE.login(loginRequest);
         // checked to see new auth token assertEquals(registerResult.authToken(), loginResult.authToken());
         assertNotNull(loginResult.authToken()); // if it creates an authToken then all was good
     }
@@ -62,16 +62,16 @@ public class UserServiceTest {
     @DisplayName("Negative LoginTest")
     public void loginUserNegative() throws DataAccessException{
         RegisterRequest bobRegister = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        service.register(bobRegister);
+        SERVICE.register(bobRegister);
         RegisterRequest janeRegister = new RegisterRequest("Jane", "6784", "jane6789@gmail.com");
-        service.register(janeRegister);
+        SERVICE.register(janeRegister);
         LoginRequest loginRequest = new LoginRequest("Bob", "6784");
         try {
-            LoginResult loginResult = service.login(loginRequest);
+            LoginResult loginResult = SERVICE.login(loginRequest);
             fail("Expected DataAccessException to be thrown. Should not have signed in!");
         }
         catch (DataAccessException e){
-            assertEquals("400 Error: Bad Request", e.getMessage());
+            assertEquals("401 Error: Unauthorized", e.getMessage());
         }
     }
 
@@ -80,11 +80,11 @@ public class UserServiceTest {
     @DisplayName("Positive Logout")
     public void logoutUserPositive() throws DataAccessException{
         RegisterRequest registerRequest = new RegisterRequest("Jessica", "6767", "jessica67@gmail.com");
-        RegisterResult registerResult= service.register(registerRequest);
+        RegisterResult registerResult= SERVICE.register(registerRequest);
         LoginRequest loginRequest = new LoginRequest("Jessica", "6767");
-        LoginResult loginResult = service.login(loginRequest);
+        LoginResult loginResult = SERVICE.login(loginRequest);
         LogoutRequest logoutRequest = new LogoutRequest(loginResult.authToken());
-        LogoutResult logoutResult = service.logout(logoutRequest);
+        LogoutResult logoutResult = SERVICE.logout(logoutRequest);
         assertEquals(new LogoutResult(), logoutResult);
     }
 
@@ -93,7 +93,7 @@ public class UserServiceTest {
     public void logoutUserNegative() throws DataAccessException{
         LogoutRequest loginRequest = new LogoutRequest("6784");
         try {
-            LogoutResult logoutResult = service.logout(loginRequest);
+            LogoutResult logoutResult = SERVICE.logout(loginRequest);
             fail("Expected DataAccessException to be thrown. Should not have logged out!");
         }
         catch (DataAccessException e){
@@ -106,9 +106,9 @@ public class UserServiceTest {
     @DisplayName("Positive DeleteTest")
     public void deleteUserPositive() throws DataAccessException{
         RegisterRequest registerRequest = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
-        RegisterResult registerResult= service.register(registerRequest);
+        RegisterResult registerResult= SERVICE.register(registerRequest);
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
-        DeleteUserResult result = service.deleteUser(deleteUserRequest);
+        DeleteUserResult result = SERVICE.deleteUser(deleteUserRequest);
         assertEquals(new DeleteUserResult(), result);
     }
 }

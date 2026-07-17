@@ -49,12 +49,12 @@ public class GameService {
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
-        if (joinRequest.color() == null || joinRequest.GameID() == 0){
+        if (joinRequest.color() == null || joinRequest.gameID() == 0){
             throw new DataAccessException("400 Error: Bad request");
         }
         if (joinRequest.color().equals("WHITE") || joinRequest.color().equals("BLACK")){
-            if (service.registeredData.getColor(joinRequest.color(), joinRequest.GameID())){
-                service.registeredData.joinGame(authData.username(), joinRequest.color(), joinRequest.GameID());
+            if (service.registeredData.getColor(joinRequest.color(), joinRequest.gameID())){
+                service.registeredData.joinGame(authData.username(), joinRequest.color(), joinRequest.gameID());
                 return new JoinResult();
             }
             throw new DataAccessException("403 Error: already taken");
