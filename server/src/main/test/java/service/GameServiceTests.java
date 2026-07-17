@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class GameServiceTest {
+public class GameServiceTests {
 
     final static UserService USER_SERVICE = new UserService();
     final static GameService GAME_SERVICE = new GameService();

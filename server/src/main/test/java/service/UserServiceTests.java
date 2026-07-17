@@ -8,7 +8,7 @@ import service.userrequests.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserServiceTest {
+public class UserServiceTests {
     // looked up notation and classes to do this
     static final UserService SERVICE = new UserService();
 
