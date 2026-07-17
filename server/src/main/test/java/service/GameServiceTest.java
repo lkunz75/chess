@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.DataAccessException;
+import model.GameInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,9 +97,10 @@ public class GameServiceTest {
         JoinResult joinResult = gameService.join(joinRequest);
         ListRequest listRequest = new ListRequest(result.authToken());
         ListResult listResult = gameService.list(listRequest);
-        List<List<String>> compareList = new ArrayList<>();
-        compareList.add(Arrays.asList("1", "Bob", null, "GameTest123"));
-        assertEquals(new ListResult(compareList),listResult);
+        GameInfo gameInfo = new GameInfo(1, "Bob", null, "GameTest123");
+        List<GameInfo> gameList = new ArrayList<>();
+        gameList.add(gameInfo);
+        assertEquals(new ListResult(gameList),listResult);
     }
 
     @Test

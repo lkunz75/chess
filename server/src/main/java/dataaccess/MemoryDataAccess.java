@@ -1,6 +1,7 @@
 package dataaccess;
 import model.AuthData;
 import model.GameData;
+import model.GameInfo;
 import model.UserData;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class MemoryDataAccess {
     static List<AuthData.AuthRecord> authInfo = new ArrayList<>();
     static List<UserData> userInfo = new ArrayList<>();
     static Collection<GameData> allGameData = new ArrayList<>();
-    static List<List<String>> listGames = new ArrayList<>();
+    static List<GameInfo> listGames = new ArrayList<>();
     static int currentID = 0;
 
     public UserData getUserData(String username){
@@ -79,7 +80,7 @@ public class MemoryDataAccess {
         }
     }
 
-    public List<List<String>> listGames(){
+    public List<GameInfo> listGames(){
         return listGames;
     }
 
@@ -95,7 +96,8 @@ public class MemoryDataAccess {
 
     public void createGame(GameData game){
         allGameData.add(game);
-        listGames.add(Arrays.asList(String.valueOf(game.gameID()), game.whiteUsername(), game.blackUsername(), game.gameName()));
+        GameInfo newGameInfo = new GameInfo(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName());
+        listGames.add(newGameInfo);
     }
 
     public int newGameID() {

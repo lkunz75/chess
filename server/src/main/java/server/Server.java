@@ -47,8 +47,11 @@ public class Server {
             RegisterResult registerResult = userService.register(registerRequest);
             context.result(new Gson().toJson(registerResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(403);
-            context.result(e.getMessage()); // come back
+            // this gets the first 3, since I've coded it to always start with the numbers
+            // parseInt turns it into integers
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
@@ -59,8 +62,9 @@ public class Server {
             LoginResult loginResult = userService.login(loginRequest);
             context.result(new Gson().toJson(loginResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(400);
-            context.result(e.getMessage()); // come back
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
@@ -70,8 +74,9 @@ public class Server {
             LogoutResult logoutResult = userService.logout(logoutRequest);
             context.result(new Gson().toJson(logoutResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(401);
-            context.result(e.getMessage()); // come back
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
@@ -84,8 +89,9 @@ public class Server {
             CreateResult createResult = gameService.create(createRequest);
             context.result(new Gson().toJson(createResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(401);
-            context.result(e.getMessage()); // come back
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
@@ -95,8 +101,9 @@ public class Server {
             ListResult listResult = gameService.list(listRequest);
             context.result(new Gson().toJson(listResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(401);
-            context.result(e.getMessage()); // come back
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
@@ -109,8 +116,9 @@ public class Server {
             JoinResult joinResult = gameService.join(joinRequest);
             context.result(new Gson().toJson(joinResult)); // serialized it
         } catch (DataAccessException e) {
-            context.status(401);
-            context.result(e.getMessage()); // come back
+            String message = e.getMessage();
+            context.status(Integer.parseInt(message.substring(0,3)));
+            context.result(new Gson().toJson(new ErrorMessage(message)));
         }
     }
 
