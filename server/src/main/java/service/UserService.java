@@ -36,7 +36,6 @@ public class UserService {
         }
         AuthData.AuthRecord userAuthData = registeredData.createAuthData(dataBaseUser);
         return new LoginResult(userAuthData.username(), userAuthData.authToken());
-
     }
 
     public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
