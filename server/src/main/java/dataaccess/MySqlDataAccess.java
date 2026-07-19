@@ -1,18 +1,24 @@
 package dataaccess;
 
+import com.google.gson.Gson;
+import model.UserData;
+
 import java.sql.Connection;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 
 public class MySqlDataAccess {
-    public MySqlDataAccess() throws DataAccessException{
-        configureDatabase;
+    public MySqlDataAccess() throws DataAccessException {
+        configureDatabase();
     }
-
     // we have to have a function here for every function in our MemoryDataAccess class!
-
-
-
+    public UserData createUserData(UserData user) throws DataAccessException {
+        var statement = "INSERT INTO userData (username, password, json) VALUES (?,?,?)";
+        String json = new Gson().toJson(user);
+        String password = execuateUpdate(statement, user.username(), user.password(), json);
+        String email = executeUpdate(statement, user.username(), user.email(), json);
+        return new UserData(user.username(), user.password(), user.email());
+    }
 
     private final String[] createStatements = {
             """
@@ -43,9 +49,17 @@ public class MySqlDataAccess {
               INDEX(gameName)
               INDEX(game)
             ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
+            """,
+            // String username, String authToken
+            """
+            CREATE TABLE IF NOT EXISTS authData (
+              'username' varchar(256) NOT NULL,
+              'authToken' varchar(256) NOT NULL,
+              PRIMARY KEY ('username')
+              INDEX(authToken)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
             """
     };
-
 
     private void configureDatabase() throws DataAccessException{
         DatabaseManager.createDatabase();
@@ -56,7 +70,8 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+            // come back
+            throw new DataAccessException(DataAccessException.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
 }
