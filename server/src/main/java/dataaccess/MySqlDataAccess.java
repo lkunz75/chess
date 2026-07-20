@@ -3,21 +3,36 @@ package dataaccess;
 import com.google.gson.Gson;
 import model.UserData;
 
-import java.sql.Connection;
-import java.sql.SQLDataException;
-import java.sql.SQLException;
+import java.sql.*;
+
+import static java.sql.Types.NULL;
 
 public class MySqlDataAccess {
     public MySqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
+
     // we have to have a function here for every function in our MemoryDataAccess class!
     public UserData createUserData(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO userData (username, password, json) VALUES (?,?,?)";
+        var statement = "INSERT INTO userData (username, password, email, json) VALUES (?,?,?,?)";
         String json = new Gson().toJson(user);
-        String password = execuateUpdate(statement, user.username(), user.password(), json);
-        String email = executeUpdate(statement, user.username(), user.email(), json);
+        int rowsMade = executeUpdateUser(statement, user.username(), user.password(), user.email(), json);
         return new UserData(user.username(), user.password(), user.email());
+    }
+
+    private int executeUpdateUser(String statement, Object... params) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
+                for (int i = 0; i < params.length; i++){
+                    Object param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                return ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("unable to update database: %s, %s, %s, %s", statement, e.getMessage()));
+        }
     }
 
     private final String[] createStatements = {
