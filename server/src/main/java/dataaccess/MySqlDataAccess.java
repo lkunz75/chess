@@ -1,11 +1,16 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
+import model.GameData;
+import model.GameInfo;
 import model.UserData;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.sql.Types.NULL;
 
@@ -44,7 +49,6 @@ public class MySqlDataAccess {
                     // could have a while loop to check uniqueness for gameData
                     // always call rs.next to get to the first row
                     if (!rs.next()) {return false;}
-                    rs.next();
                     UserData user = readUser(rs);
                     if (user.password().equals(password)) {
                         return true;
@@ -80,7 +84,6 @@ public class MySqlDataAccess {
                 try (ResultSet rs = ps.executeQuery()) {
                     ps.setString(2, authToken); // fills the ?
                     if (!rs.next()) { return null;}
-                    rs.next();
                     AuthData.AuthRecord info = readAuth(rs);
                     if (info.authToken().equals(authToken)){
                         return info;
@@ -96,6 +99,69 @@ public class MySqlDataAccess {
     public void deleteAuthToken(String authToken) throws DataAccessException {
         var statement = "DELETE FROM authData WHERE authToken=?";
         executeUpdate(statement, authToken);
+    }
+
+    public List<GameInfo> listGames() throws DataAccessException{
+        List<GameInfo> result = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT *, json FROM gameData";
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readGameInfo(rs));
+                    }
+                    return result;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
+    }
+
+    public GameData createGameData(GameData game) throws DataAccessException {
+        var statement = "INSERT INTO userData (gameID, whiteUsername, blackUsername, gameName, game, json) VALUES (?,?,?,?,?,?)";
+        String json = new Gson().toJson(game);
+        int rowsMade = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), json);
+        return new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+    }
+
+    public boolean getColor(String color, int gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT *, json FROM gameData WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setInt(1, gameID); // fills the ?
+                    if (!rs.next()) {return false;}
+                    GameData gameData = readGameData(rs);
+                    if (color.equals("WHITE") && gameData.whiteUsername() == null) {return true;}
+                    if (color.equals("BLACK") && gameData.blackUsername() == null) {return true;}
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
+        return false;
+    }
+
+    public void joinGame(String username, String color, int gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT *, json FROM gameData WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setInt(1, gameID);
+                    if (!rs.next()) {return;}
+                    GameData gameData = readGameData(rs);
+                    if (color.equals("WHITE") && gameData.whiteUsername() == null) {
+                        executeUpdate("UPDATE gameData SET whiteUsername =? WHERE gameID=?", username, gameID);
+                    }
+                    if (color.equals("BLACK") && gameData.blackUsername() == null) {
+                        executeUpdate("UPDATE gameData SET blackUsername =? WHERE gameID=?", username, gameID);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
@@ -124,22 +190,22 @@ public class MySqlDataAccess {
               PRIMARY KEY (`username`),
               INDEX(password)
               INDEX(email)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
             """,
             """
             CREATE TABLE IF NOT EXISTS gameData (
-              `gameID` int,
+              `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `game` ENUM(ChessGame),
               `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`gameID`),
-              INDEX(whiteUSername),
-              INDEX(blackUSername),
+              INDEX(whiteUsername),
+              INDEX(blackUsername),
               INDEX(gameName),
               INDEX(game)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
             """,
             """
             CREATE TABLE IF NOT EXISTS authData (
@@ -147,7 +213,7 @@ public class MySqlDataAccess {
               `authToken` varchar(256) NOT NULL,
               PRIMARY KEY (`username`),
               INDEX(authToken),
-            ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
             """
     };
 
@@ -176,5 +242,22 @@ public class MySqlDataAccess {
         String username = RowInfo.getString("username");
         String authToken = RowInfo.getString("authToken");
         return new AuthData.AuthRecord(username, authToken);
+    }
+
+    private GameData readGameData(ResultSet RowInfo) throws SQLException{
+        int gameID = RowInfo.getInt("gameID");
+        String whiteUsername = RowInfo.getString("whiteUsername");
+        String blackUsername = RowInfo.getString("blackUsername");
+        String gameName = RowInfo.getString("gameName");
+        ChessGame game = RowInfo.getObject("game", ChessGame.class);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+    }
+
+    private GameInfo readGameInfo(ResultSet RowInfo) throws SQLException {
+        int gameID = RowInfo.getInt("gameID");
+        String whiteUsername = RowInfo.getString("whiteUsername");
+        String blackUsername = RowInfo.getString("blackUsername");
+        String gameName = RowInfo.getString("gameName");
+        return new GameInfo(gameID, whiteUsername, blackUsername, gameName);
     }
 }
