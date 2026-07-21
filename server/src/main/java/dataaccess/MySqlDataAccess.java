@@ -3,6 +3,7 @@ package dataaccess;
 import com.google.gson.Gson;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 
 import static java.sql.Types.NULL;
@@ -20,7 +21,33 @@ public class MySqlDataAccess {
         return new UserData(user.username(), user.password(), user.email());
     }
 
-    private int executeUpdateUser(String statement, Object... params) throws DataAccessException {
+    public String getUserPassword(String username, String password) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT *, json FROM userData WHERE username=?";
+            // * gets all the data in the row (all columns that belong in the table. Builds the rows of the table
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setString(1, username);
+                    if (rs.next()) {
+                        // could have a while loop to check uniqueness for gameData
+                        // always call rs.next to get to the first row
+                        String newPassword = readUser(rs);
+
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    public void deleteAuthToken(String authToken) throws DataAccessException {
+        var statement = "DELETE FROM authData WHERE authToken=?";
+        executeUpdate(statement, authToken);
+    }
+
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++){
@@ -31,11 +58,12 @@ public class MySqlDataAccess {
                 return ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(DataAccessException.Code.ServerError, String.format("unable to update database: %s, %s, %s, %s", statement, e.getMessage()));
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
         }
     }
 
     private final String[] createStatements = {
+            // move these into 3 levels
             """
             CREATE TABLE IF NOT EXISTS userData (
               `username` varchar(256) NOT NULL,
