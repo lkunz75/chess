@@ -3,6 +3,7 @@ import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.userrequests.*;
 
 public class UserService {
@@ -16,7 +17,8 @@ public class UserService {
                 || registerRequest.email() == null) {
             throw new DataAccessException("400 Error: Bad request");
         }
-        UserData user = new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email());
+        String hashedPassword = BCrypt.hashpw(registerRequest.password(), BCrypt.gensalt());
+        UserData user = new UserData(registerRequest.username(), hashedPassword, registerRequest.email());
         UserData dataBaseUser = registeredData.getUserData(user.username());
         if (dataBaseUser != null){
             throw new DataAccessException("403 Error: Username already taken");
@@ -33,7 +35,7 @@ public class UserService {
         if (loginRequest.username() == null || loginRequest.password() == null) {
             throw new DataAccessException("400 Error: Bad Request");
         }
-        if (dataBaseUser == null || !registeredData.getUserPassword(loginRequest.username(), loginRequest.password())){
+        if (dataBaseUser == null || !BCrypt.checkpw(loginRequest.password(), dataBaseUser.password())){
             throw new DataAccessException("401 Error: Unauthorized");
         }
         AuthData.AuthRecord userAuthData = registeredData.createAuthData(dataBaseUser);
