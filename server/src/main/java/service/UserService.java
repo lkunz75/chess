@@ -9,6 +9,8 @@ public class UserService {
     // created registeredData above so it accesses the same thing once instead of creating new each time
     MemoryDataAccess registeredData = new MemoryDataAccess();
 
+
+    //ADD PASSWORD HASHING HERE
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
         if (registerRequest.username() == null || registerRequest.password() == null
                 || registerRequest.email() == null) {

@@ -42,7 +42,7 @@ public class MySqlDataAccess {
     public boolean getUserPassword(String username, String password) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT *, json FROM userData WHERE username=?";
-            // * gets all the data in the row (all columns that belong in the table. Builds the rows of the table
+            // * gets all the data in the row/all columns that belong in the table. Builds the rows of the table
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     ps.setString(1, username);
@@ -53,7 +53,6 @@ public class MySqlDataAccess {
                     if (user.password().equals(password)) {
                         return true;
                     }
-
                 }
             }
         } catch (SQLException e) {
@@ -164,6 +163,21 @@ public class MySqlDataAccess {
         }
     }
 
+    public void deleteAllGameData() throws DataAccessException {
+        var statement = "DELETE FROM GameData";
+        executeUpdate(statement);
+    }
+
+    public void deleteAllUserData() throws DataAccessException {
+        var statement = "DELETE FROM UserData";
+        executeUpdate(statement);
+    }
+
+    public void deleteAllAuthData() throws DataAccessException {
+        var statement = "DELETE FROM AuthData";
+        executeUpdate(statement);
+    }
+
     private int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
@@ -226,7 +240,6 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException ex) {
-            // come back
             throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
     }
