@@ -1,6 +1,7 @@
 package dataaccess;
 
 import com.google.gson.Gson;
+import model.AuthData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
@@ -42,12 +43,13 @@ public class MySqlDataAccess {
                     ps.setString(1, username);
                     // could have a while loop to check uniqueness for gameData
                     // always call rs.next to get to the first row
-                    if (rs.next()) {
-                        UserData user = readUser(rs);
-                        if (user.password().equals(password)) {
-                            return true;
-                        }
+                    if (!rs.next()) {return false;}
+                    rs.next();
+                    UserData user = readUser(rs);
+                    if (user.password().equals(password)) {
+                        return true;
                     }
+
                 }
             }
         } catch (SQLException e) {
@@ -61,6 +63,34 @@ public class MySqlDataAccess {
         String json = new Gson().toJson(user);
         int rowsMade = executeUpdate(statement, user.username(), user.password(), user.email(), json);
         return new UserData(user.username(), user.password(), user.email());
+    }
+
+    public AuthData.AuthRecord createAuthData(UserData user) throws DataAccessException {
+        var statement = "INSERT INTO authData (username, authToken, json) VALUES (?,?,?)";
+        String json = new Gson().toJson(user);
+        String authToken = AuthData.generateToken();
+        executeUpdate(statement, user.username(), authToken, json);
+        return new AuthData.AuthRecord(user.username(), authToken);
+    }
+
+    public AuthData.AuthRecord getAuthData(String authToken) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT *, json FROM authData WHERE authToken=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setString(2, authToken); // fills the ?
+                    if (!rs.next()) { return null;}
+                    rs.next();
+                    AuthData.AuthRecord info = readAuth(rs);
+                    if (info.authToken().equals(authToken)){
+                        return info;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
+        return null;
     }
 
     public void deleteAuthToken(String authToken) throws DataAccessException {
@@ -140,5 +170,11 @@ public class MySqlDataAccess {
         String password = RowInfo.getString("password");
         String email = RowInfo.getString("email");
         return new UserData(username, password, email);
+    }
+
+    private AuthData.AuthRecord readAuth(ResultSet RowInfo) throws SQLException {
+        String username = RowInfo.getString("username");
+        String authToken = RowInfo.getString("authToken");
+        return new AuthData.AuthRecord(username, authToken);
     }
 }
