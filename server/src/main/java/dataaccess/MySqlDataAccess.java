@@ -14,24 +14,14 @@ public class MySqlDataAccess {
     }
 
     // we have to have a function here for every function in our MemoryDataAccess class!
-    public UserData createUserData(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO userData (username, password, email, json) VALUES (?,?,?,?)";
-        String json = new Gson().toJson(user);
-        int rowsMade = executeUpdateUser(statement, user.username(), user.password(), user.email(), json);
-        return new UserData(user.username(), user.password(), user.email());
-    }
-
-    public String getUserPassword(String username, String password) throws DataAccessException {
+    public UserData getUserData(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
             var statement = "SELECT *, json FROM userData WHERE username=?";
-            // * gets all the data in the row (all columns that belong in the table. Builds the rows of the table
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setString(1, username);
+                    ps.setString(1, username); // fills the ?
                     if (rs.next()) {
-                        // could have a while loop to check uniqueness for gameData
-                        // always call rs.next to get to the first row
-                        String newPassword = readUser(rs);
+                        return readUser(rs);
 
                     }
                 }
@@ -40,6 +30,37 @@ public class MySqlDataAccess {
             throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
         }
         return null;
+    }
+
+    // just moved location to visually follow MemoryDataAccess
+    public boolean getUserPassword(String username, String password) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT *, json FROM userData WHERE username=?";
+            // * gets all the data in the row (all columns that belong in the table. Builds the rows of the table
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setString(1, username);
+                    // could have a while loop to check uniqueness for gameData
+                    // always call rs.next to get to the first row
+                    if (rs.next()) {
+                        UserData user = readUser(rs);
+                        if (user.password().equals(password)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+        }
+        return false;
+    }
+
+    public UserData createUserData(UserData user) throws DataAccessException {
+        var statement = "INSERT INTO userData (username, password, email, json) VALUES (?,?,?,?)";
+        String json = new Gson().toJson(user);
+        int rowsMade = executeUpdate(statement, user.username(), user.password(), user.email(), json);
+        return new UserData(user.username(), user.password(), user.email());
     }
 
     public void deleteAuthToken(String authToken) throws DataAccessException {
@@ -63,7 +84,7 @@ public class MySqlDataAccess {
     }
 
     private final String[] createStatements = {
-            // move these into 3 levels
+            // move these into 3 levels if you run into code quality errors
             """
             CREATE TABLE IF NOT EXISTS userData (
               `username` varchar(256) NOT NULL,
@@ -75,8 +96,6 @@ public class MySqlDataAccess {
               INDEX(email)
             ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
             """,
-            //int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game
-            // how do I declare it's a chess game??
             """
             CREATE TABLE IF NOT EXISTS gameData (
               `gameID` int,
@@ -92,7 +111,6 @@ public class MySqlDataAccess {
               INDEX(game)
             ) ENGINE=InnoDB DEFAULT CHARSET=utft8mb4 COLLATE=utf8mb_0900_ai_ci
             """,
-            // String username, String authToken
             """
             CREATE TABLE IF NOT EXISTS authData (
               `username` varchar(256) NOT NULL,
@@ -113,7 +131,14 @@ public class MySqlDataAccess {
             }
         } catch (SQLException ex) {
             // come back
-            throw new DataAccessException(DataAccessException.ServerError, String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
         }
+    }
+
+    private UserData readUser(ResultSet RowInfo) throws SQLException {
+        String username = RowInfo.getString("username");
+        String password = RowInfo.getString("password");
+        String email = RowInfo.getString("email");
+        return new UserData(username, password, email);
     }
 }
