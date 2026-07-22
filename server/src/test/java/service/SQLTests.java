@@ -41,6 +41,7 @@ public class SQLTests {
         assertEquals("bob1234@gmail.com", data.email());
     }
 
+
     @Test
     @DisplayName("Negative CreateUser")
     public void createUserNegative() throws DataAccessException{
