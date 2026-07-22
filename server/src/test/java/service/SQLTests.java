@@ -91,6 +91,16 @@ public class SQLTests {
         assertFalse(result);
     }
 
+    @Test
+    @DisplayName("Positive DeleteUserData")
+    public void deleteUserDataPositive() throws DataAccessException{
+        UserData user = new UserData("Bob", "1234", "bob1234@gmail.com");
+        dataAccess.createUserData(user);
+        dataAccess.deleteAllUserData();
+        UserData data = dataAccess.getUserData("Bob");
+        assertNull(data);
+    }
+
     // AUTH TESTS
     @Test
     @DisplayName("Positive AuthData")
@@ -153,6 +163,16 @@ public class SQLTests {
         dataAccess.deleteAuthToken("123456");
     }
 
+    @Test
+    @DisplayName("Positive DeleteAuthData")
+    public void deleteAuthDataPositive() throws DataAccessException{
+        UserData user = new UserData("Bob", "1234", "bob1234@gmail.com");
+        dataAccess.createUserData(user);
+        AuthData.AuthRecord createdData = dataAccess.createAuthData(user);
+        dataAccess.deleteAllAuthData();
+        assertNull(dataAccess.getAuthData(createdData.authToken()));
+    }
+
     //GAME TESTS
     @Test
     @DisplayName("Positive CreateGame")
@@ -201,7 +221,7 @@ public class SQLTests {
 
     @Test
     @DisplayName("Positive GameID")
-    public void GameIDPositive() throws DataAccessException{
+    public void gameIDPositive() throws DataAccessException{
         int gameID = dataAccess.newGameID();
         GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
         dataAccess.createGame(game);
@@ -214,13 +234,62 @@ public class SQLTests {
 
     @Test
     @DisplayName("Negative GameID")
-    public void GameIDNegative() throws DataAccessException{
+    public void gameIDNegative() throws DataAccessException{
         int gameID = dataAccess.newGameID();
         assertEquals(1, gameID);
     }
 
+    @Test
+    @DisplayName("Positive GetColor")
+    public void getColorPositive() throws DataAccessException{
+        int gameID = dataAccess.newGameID();
+        GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
+        dataAccess.createGame(game);
+        assertTrue(dataAccess.getColor("WHITE", 1));
+    }
 
+    @Test
+    @DisplayName("Negative GetColor")
+    public void getColorNegative() throws DataAccessException{
+        int gameID = dataAccess.newGameID();
+        GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
+        dataAccess.createGame(game);
+        dataAccess.joinGame("Bob", "WHITE", 1);
+        assertFalse(dataAccess.getColor("WHITE", 1));
+    }
 
+    @Test
+    @DisplayName("Positive JoinGame")
+    public void joinGamePositive() throws DataAccessException{
+        int gameID = dataAccess.newGameID();
+        GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
+        dataAccess.createGame(game);
+        dataAccess.joinGame("Bob", "WHITE", 1);
+        GameData gameData = dataAccess.getGame("Bob's Game");
+        assertEquals("Bob", gameData.whiteUsername());
+    }
 
+    @Test
+    @DisplayName("Negative JoinGame")
+    public void joinGameNegative() throws DataAccessException{
+        int gameID = dataAccess.newGameID();
+        GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
+        dataAccess.createGame(game);
+        dataAccess.joinGame("Bob", "WHITE", 1);
+        try {
+            dataAccess.joinGame("June", "WHITE", 1);
+        } catch (DataAccessException e) {
+            assertTrue(e.getMessage().contains("403"));
+        }
+    }
 
+    @Test
+    @DisplayName("Positive DeleteGameData")
+    public void deleteGameDataPositive() throws DataAccessException{
+        int gameID = dataAccess.newGameID();
+        GameData game = new GameData(gameID, null, null, "Bob's Game", new ChessGame());
+        dataAccess.createGame(game);
+        dataAccess.deleteAllGameData();
+        assertNull(dataAccess.getGame("Bob's Game"));
+    }
 }

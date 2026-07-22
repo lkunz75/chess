@@ -181,10 +181,13 @@ public class MySqlDataAccess implements DataAccess{
                     GameData gameData = readGameData(rs);
                     if (color.equals("WHITE") && gameData.whiteUsername() == null) {
                         executeUpdate("UPDATE gameData SET whiteUsername =? WHERE gameID=?", username, gameID);
+                        return;
                     }
                     if (color.equals("BLACK") && gameData.blackUsername() == null) {
                         executeUpdate("UPDATE gameData SET blackUsername =? WHERE gameID=?", username, gameID);
+                        return;
                     }
+                    throw new DataAccessException("403 Error: already taken");
                 }
             }
         } catch (SQLException e) {
