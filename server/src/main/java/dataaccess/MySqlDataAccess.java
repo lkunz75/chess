@@ -112,14 +112,15 @@ public class MySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 Error: unable to update database: %s", e.getMessage()));
         }
     }
 
     public void createGame(GameData game) throws DataAccessException {
         var statement = "INSERT INTO userData (gameID, whiteUsername, blackUsername, gameName, game, json) VALUES (?,?,?,?,?,?)";
         String json = new Gson().toJson(game);
-        int rowsMade = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), json);
+        String playedGame = new Gson().toJson(game.game());
+        int rowsMade = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), playedGame, json);
         return;
     }
 
@@ -135,10 +136,10 @@ public class MySqlDataAccess implements DataAccess{
                         max = rs.getInt("gameID");
                     }
                 }
-                return max;
+                return max+1;
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 Error: unable to update database: %s", e.getMessage()));
         }
     }
 
@@ -155,7 +156,7 @@ public class MySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 Error: unable to update database: %s", e.getMessage()));
         }
         return false;
     }
@@ -171,7 +172,7 @@ public class MySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 Error: unable to update database: %s", e.getMessage()));
         }
         return null;
     }
@@ -193,7 +194,7 @@ public class MySqlDataAccess implements DataAccess{
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 Error: unable to update database: %s", e.getMessage()));
         }
     }
 
@@ -246,7 +247,7 @@ public class MySqlDataAccess implements DataAccess{
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
-              `game` ENUM(ChessGame),
+              `game` varchar(256),
               `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`gameID`),
               INDEX(whiteUsername),
@@ -296,8 +297,12 @@ public class MySqlDataAccess implements DataAccess{
         String whiteUsername = RowInfo.getString("whiteUsername");
         String blackUsername = RowInfo.getString("blackUsername");
         String gameName = RowInfo.getString("gameName");
-        ChessGame game = RowInfo.getObject("game", ChessGame.class);
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+
+        //ChessGame serialization and deserialization
+        //Is this where I should implement this? Nothing is actually getting changed within my chess game
+        var serializer = new Gson();
+        ChessGame chessBoardJson = serializer.fromJson(RowInfo.getString("game"), ChessGame.class);
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, chessBoardJson);
     }
 
     private GameInfo readGameInfo(ResultSet RowInfo) throws SQLException {

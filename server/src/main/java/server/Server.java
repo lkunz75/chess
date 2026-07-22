@@ -15,13 +15,15 @@ public class Server {
     private final Javalin javalin;
     private final UserService userService;
     private final GameService gameService;
+    DataAccess dataAccess;
 
-    public Server(){
-        this(new MySqlDataAccess());
-        // can't get it, and couldn't focus
-    }
-
-    public Server(DataAccess dataAccess) {
+    public Server() {
+        try{
+            dataAccess = new MySqlDataAccess();
+        } catch (DataAccessException e) {
+            // if it fails it lets us switch to memory
+            dataAccess = new MemoryDataAccess();
+        }
         this.userService = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
