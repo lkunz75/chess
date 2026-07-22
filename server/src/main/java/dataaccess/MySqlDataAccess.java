@@ -13,7 +13,7 @@ import java.util.List;
 
 import static java.sql.Types.NULL;
 
-public class MySqlDataAccess {
+public class MySqlDataAccess implements DataAccess{
     public MySqlDataAccess() throws DataAccessException {
         configureDatabase();
     }
@@ -60,11 +60,11 @@ public class MySqlDataAccess {
         return false;
     }
 
-    public UserData createUserData(UserData user) throws DataAccessException {
+    public void createUserData(UserData user) throws DataAccessException {
         var statement = "INSERT INTO userData (username, password, email, json) VALUES (?,?,?,?)";
         String json = new Gson().toJson(user);
         int rowsMade = executeUpdate(statement, user.username(), user.password(), user.email(), json);
-        return new UserData(user.username(), user.password(), user.email());
+        return;
     }
 
     public AuthData.AuthRecord createAuthData(UserData user) throws DataAccessException {
@@ -116,11 +116,30 @@ public class MySqlDataAccess {
         }
     }
 
-    public GameData createGameData(GameData game) throws DataAccessException {
+    public void createGame(GameData game) throws DataAccessException {
         var statement = "INSERT INTO userData (gameID, whiteUsername, blackUsername, gameName, game, json) VALUES (?,?,?,?,?,?)";
         String json = new Gson().toJson(game);
         int rowsMade = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), json);
-        return new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        return;
+    }
+
+    @Override
+    public int newGameID() throws DataAccessException {
+        int max = 0;
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT *, json FROM gameData";
+            try (PreparedStatement ps = conn.prepareStatement(statement)){
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {return max;}
+                    if (max < rs.getInt("gameID")) {
+                        max = rs.getInt("gameID");
+                    }
+                }
+                return max;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+        }
     }
 
     public boolean getColor(String color, int gameID) throws DataAccessException {
@@ -139,6 +158,22 @@ public class MySqlDataAccess {
             throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
         return false;
+    }
+    public GameData getGame(String gameName) throws DataAccessException{
+        try (Connection conn = DatabaseManager.getConnection()){
+            var statement = "SELECT *, json FROM gameData WHERE gameName=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    ps.setString(4, gameName); // fills the ?
+                    if (rs.next()) {
+                        return readGameData(rs);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
+        }
+        return null;
     }
 
     public void joinGame(String username, String color, int gameID) throws DataAccessException {

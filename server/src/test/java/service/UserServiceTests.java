@@ -16,7 +16,6 @@ public class UserServiceTests {
     final UserService SERVICE;
 
     public UserServiceTests() {
-
         this.dataAccess = new MemoryDataAccess();
         this.SERVICE = new UserService(dataAccess);
     }

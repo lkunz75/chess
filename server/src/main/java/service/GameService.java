@@ -14,6 +14,7 @@ import java.util.List;
 public class GameService {
     private final UserService service;
     // create this so I can go through the registeredData
+    // have to have this so we can change between the different types flawlessly
     public GameService(DataAccess dataAccess) {
         this.service = new UserService(dataAccess);
     }

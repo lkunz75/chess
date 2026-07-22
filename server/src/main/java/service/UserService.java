@@ -9,14 +9,12 @@ import org.mindrot.jbcrypt.BCrypt;
 import service.userrequests.*;
 
 public class UserService {
-    private final DataAccess dataAccess;
+    MemoryDataAccess registeredData = new MemoryDataAccess();
+    DataAccess dataAccess;
 
-    // this is so we can switch back and forth between types
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-
-    MemoryDataAccess registeredData = new MemoryDataAccess();
 
     //ADD PASSWORD HASHING HERE
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {

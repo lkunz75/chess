@@ -2,10 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
-import dataaccess.UserDataAccess;
+import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
@@ -19,8 +16,9 @@ public class Server {
     private final UserService userService;
     private final GameService gameService;
 
-    public Server() {
-        this(new MemoryDataAccess());
+    public Server(){
+        this(new MySqlDataAccess());
+        // can't get it, and couldn't focus
     }
 
     public Server(DataAccess dataAccess) {

@@ -14,6 +14,7 @@ public interface DataAccess {
     boolean getUserPassword(String username, String password) throws DataAccessException;
     void deleteAllUserData() throws DataAccessException;
 
+    AuthData.AuthRecord getAuthData(String authToken) throws DataAccessException;
     AuthData.AuthRecord createAuthData(UserData user) throws DataAccessException;
     void deleteAuthToken(String authToken) throws DataAccessException;
     void deleteAllAuthData() throws DataAccessException;
