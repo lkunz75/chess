@@ -32,7 +32,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
         return false;
     }
@@ -89,7 +89,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
         return null;
     }
@@ -112,7 +112,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
     }
 
@@ -136,7 +136,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
         return false;
     }
@@ -158,7 +158,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
     }
 
@@ -188,7 +188,7 @@ public class MySqlDataAccess {
                 return ps.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s", e.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
     }
 
@@ -239,7 +239,7 @@ public class MySqlDataAccess {
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+            throw new DataAccessException(String.format("500 ERROR: Unable to configure database: %s", ex.getMessage()));
         }
     }
 

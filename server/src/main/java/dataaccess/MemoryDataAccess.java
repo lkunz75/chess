@@ -5,15 +5,14 @@ import model.GameInfo;
 import model.UserData;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 // responsible for storing and retrieving the server's data
-public class MemoryDataAccess {
+public class MemoryDataAccess implements DataAccess {
     static List<AuthData.AuthRecord> authInfo = new ArrayList<>();
     static List<UserData> userInfo = new ArrayList<>();
-    static Collection<GameData> allGameData = new ArrayList<>();
+    static List<GameData> allGameData = new ArrayList<>();
     static List<GameInfo> listGames = new ArrayList<>();
     static int currentID = 0;
 

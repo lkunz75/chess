@@ -1,6 +1,8 @@
 package service;
 
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.UserDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
@@ -10,8 +12,12 @@ import java.util.List;
 
 
 public class GameService {
+    private final UserService service;
     // create this so I can go through the registeredData
-    UserService service = new UserService();
+    public GameService(DataAccess dataAccess) {
+        this.service = new UserService(dataAccess);
+    }
+
     public ListResult list(ListRequest listRequest) throws DataAccessException {
         AuthData.AuthRecord authData = service.registeredData.getAuthData(listRequest.authToken());
         if (authData == null) {
@@ -62,7 +68,7 @@ public class GameService {
 
     public DeleteResult delete(DeleteRequest deleteRequest) throws DataAccessException {
         service.registeredData.deleteAllGameData();
-        service = new UserService();
+        service.registeredData.deleteAllUserData();
         return new DeleteResult();
     }
 }

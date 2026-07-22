@@ -1,6 +1,9 @@
 package service;
 
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
+import dataaccess.UserDataAccess;
 import model.GameInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +22,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GameServiceTests {
 
-    final static UserService USER_SERVICE = new UserService();
-    final static GameService GAME_SERVICE = new GameService();
+    // have to do this everywhere UserService is called
+    final DataAccess dataAccess;
+    final UserService USER_SERVICE;
+    final GameService GAME_SERVICE;
+
+    public GameServiceTests() {
+        this.dataAccess = new MemoryDataAccess();
+        this.USER_SERVICE = new UserService(dataAccess);
+        this.GAME_SERVICE = new GameService(dataAccess);
+    }
+
     @BeforeEach
     void clear() throws DataAccessException {
         DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
@@ -128,10 +140,10 @@ public class GameServiceTests {
     @Test
     @DisplayName("Positive DeleteTest")
     public void deleteUserPositive() throws DataAccessException {
-        UserService userService = new UserService();
+        UserService userService = new UserService(dataAccess);
         RegisterRequest request = new RegisterRequest("Bob", "1234", "bob1234@gmail.com");
         RegisterResult result = userService.register(request);
-        GameService gameService = new GameService();
+        GameService gameService = new GameService(dataAccess);
         CreateRequest createRequest = new CreateRequest(result.authToken(), "GameTest123");
         DeleteRequest deleteRequest = new DeleteRequest();
         DeleteResult deleteResult = gameService.delete(deleteRequest);

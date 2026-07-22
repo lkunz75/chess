@@ -1,6 +1,8 @@
 package service;
 
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,8 +11,16 @@ import service.userrequests.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTests {
+
+    final DataAccess dataAccess;
+    final UserService SERVICE;
+
+    public UserServiceTests() {
+        this.dataAccess = new MemoryDataAccess();
+        this.SERVICE = new UserService(dataAccess);
+    }
     // looked up notation and classes to do this
-    static final UserService SERVICE = new UserService();
+
 
     // following the pet class outline and lets us make it static so info can be shared
     @BeforeEach

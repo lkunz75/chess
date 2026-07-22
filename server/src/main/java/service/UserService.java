@@ -1,15 +1,22 @@
 package service;
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
+import dataaccess.UserDataAccess;
 import model.AuthData;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 import service.userrequests.*;
 
 public class UserService {
-    // created registeredData above so it accesses the same thing once instead of creating new each time
-    MemoryDataAccess registeredData = new MemoryDataAccess();
+    private final DataAccess dataAccess;
 
+    // this is so we can switch back and forth between types
+    public UserService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
+
+    MemoryDataAccess registeredData = new MemoryDataAccess();
 
     //ADD PASSWORD HASHING HERE
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {

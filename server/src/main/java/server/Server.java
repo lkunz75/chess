@@ -2,7 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import dataaccess.MemoryDataAccess;
+import dataaccess.UserDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
@@ -13,10 +16,16 @@ import service.userrequests.*;
 public class Server {
 
     private final Javalin javalin;
-    private final UserService userService = new UserService();
-    private final GameService gameService = new GameService();
+    private final UserService userService;
+    private final GameService gameService;
 
     public Server() {
+        this(new MemoryDataAccess());
+    }
+
+    public Server(DataAccess dataAccess) {
+        this.userService = new UserService(dataAccess);
+        this.gameService = new GameService(dataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
