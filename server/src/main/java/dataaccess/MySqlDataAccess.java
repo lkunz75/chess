@@ -21,13 +21,12 @@ public class MySqlDataAccess implements DataAccess{
     // we have to have a function here for every function in our MemoryDataAccess class!
     public UserData getUserData(String username) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
-            var statement = "SELECT *, json FROM userData WHERE username=?";
+            var statement = "SELECT * FROM userData WHERE username=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username); // fills the ?
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setString(1, username); // fills the ?
                     if (rs.next()) {
                         return readUser(rs);
-
                     }
                 }
             }
@@ -40,12 +39,11 @@ public class MySqlDataAccess implements DataAccess{
     // just moved location to visually follow MemoryDataAccess
     public boolean getUserPassword(String username, String password) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
-            var statement = "SELECT *, json FROM userData WHERE username=?";
+            var statement = "SELECT * FROM userData WHERE username=?";
             // * gets all the data in the row/all columns that belong in the table. Builds the rows of the table
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setString(1, username);
-                    // could have a while loop to check uniqueness for gameData
                     // always call rs.next to get to the first row
                     if (!rs.next()) {return false;}
                     UserData user = readUser(rs);
@@ -68,30 +66,25 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     public AuthData.AuthRecord createAuthData(UserData user) throws DataAccessException {
-        var statement = "INSERT INTO authData (username, authToken, json) VALUES (?,?,?)";
-        String json = new Gson().toJson(user);
+        var statement = "INSERT INTO authData (username, authToken) VALUES (?,?)";
         String authToken = AuthData.generateToken();
-        executeUpdate(statement, user.username(), authToken, json);
+        executeUpdate(statement, user.username(), authToken);
         return new AuthData.AuthRecord(user.username(), authToken);
     }
 
     public AuthData.AuthRecord getAuthData(String authToken) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()){
-            var statement = "SELECT *, json FROM authData WHERE authToken=?";
+            var statement = "SELECT * FROM authData WHERE authToken=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken); // fills the ?
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setString(2, authToken); // fills the ?
-                    if (!rs.next()) { return null;}
-                    AuthData.AuthRecord info = readAuth(rs);
-                    if (info.authToken().equals(authToken)){
-                        return info;
-                    }
+                    if (!rs.next()) {return null;}
+                    return readAuth(rs);
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
-        return null;
     }
 
     public void deleteAuthToken(String authToken) throws DataAccessException {
@@ -102,7 +95,7 @@ public class MySqlDataAccess implements DataAccess{
     public List<GameInfo> listGames() throws DataAccessException{
         List<GameInfo> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT *, json FROM gameData";
+            var statement = "SELECT * FROM gameData";
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -117,23 +110,23 @@ public class MySqlDataAccess implements DataAccess{
     }
 
     public void createGame(GameData game) throws DataAccessException {
-        var statement = "INSERT INTO userData (gameID, whiteUsername, blackUsername, gameName, game, json) VALUES (?,?,?,?,?,?)";
+        var statement = "INSERT INTO gameData (gameID, whiteUsername, blackUsername, gameName, game, json) VALUES (?,?,?,?,?,?)";
         String json = new Gson().toJson(game);
         String playedGame = new Gson().toJson(game.game());
         int rowsMade = executeUpdate(statement, game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), playedGame, json);
-        return;
+        if (rowsMade != 1) {throw new DataAccessException("500 Error: Did not make");};
     }
 
-    @Override
     public int newGameID() throws DataAccessException {
         int max = 0;
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT *, json FROM gameData";
+            var statement = "SELECT * FROM gameData";
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {return max;}
-                    if (max < rs.getInt("gameID")) {
-                        max = rs.getInt("gameID");
+                    while(rs.next()) {
+                        if (max < rs.getInt("gameID")) {
+                            max = rs.getInt("gameID");
+                        }
                     }
                 }
                 return max+1;
@@ -145,10 +138,10 @@ public class MySqlDataAccess implements DataAccess{
 
     public boolean getColor(String color, int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT *, json FROM gameData WHERE gameID=?";
+            var statement = "SELECT * FROM gameData WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setInt(1, gameID); // fills the ?
                     if (!rs.next()) {return false;}
                     GameData gameData = readGameData(rs);
                     if (color.equals("WHITE") && gameData.whiteUsername() == null) {return true;}
@@ -160,12 +153,13 @@ public class MySqlDataAccess implements DataAccess{
         }
         return false;
     }
+
     public GameData getGame(String gameName) throws DataAccessException{
         try (Connection conn = DatabaseManager.getConnection()){
-            var statement = "SELECT *, json FROM gameData WHERE gameName=?";
+            var statement = "SELECT * FROM gameData WHERE gameName=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, gameName);
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setString(4, gameName); // fills the ?
                     if (rs.next()) {
                         return readGameData(rs);
                     }
@@ -179,10 +173,10 @@ public class MySqlDataAccess implements DataAccess{
 
     public void joinGame(String username, String color, int gameID) throws DataAccessException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT *, json FROM gameData WHERE gameID=?";
+            var statement = "SELECT * FROM gameData WHERE gameID=?";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
-                    ps.setInt(1, gameID);
                     if (!rs.next()) {return;}
                     GameData gameData = readGameData(rs);
                     if (color.equals("WHITE") && gameData.whiteUsername() == null) {
@@ -219,6 +213,7 @@ public class MySqlDataAccess implements DataAccess{
                 for (int i = 0; i < params.length; i++){
                     Object param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 return ps.executeUpdate();
@@ -237,32 +232,31 @@ public class MySqlDataAccess implements DataAccess{
               `email` varchar(256) NOT NULL,
               `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`username`),
-              INDEX(password)
+              INDEX(password),
               INDEX(email)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
             """
             CREATE TABLE IF NOT EXISTS gameData (
-              `gameID` int NOT NULL AUTO_INCREMENT,
+              `gameID` int NOT NULL,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
-              `game` varchar(256),
+              `game` TEXT,
               `json` TEXT DEFAULT NULL,
               PRIMARY KEY (`gameID`),
               INDEX(whiteUsername),
               INDEX(blackUsername),
-              INDEX(gameName),
-              INDEX(game)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
+              INDEX(gameName)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
             """
             CREATE TABLE IF NOT EXISTS authData (
               `username` varchar(256) NOT NULL,
               `authToken` varchar(256) NOT NULL,
               PRIMARY KEY (`username`),
-              INDEX(authToken),
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb_0900_ai_ci
+              INDEX(authToken)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
 

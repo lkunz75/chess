@@ -13,25 +13,27 @@ import java.util.List;
 
 public class GameService {
     private final UserService service;
+    private final DataAccess dataAccess;
     // create this so I can go through the registeredData
     // have to have this so we can change between the different types flawlessly
     public GameService(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
         this.service = new UserService(dataAccess);
     }
 
     public ListResult list(ListRequest listRequest) throws DataAccessException {
-        AuthData.AuthRecord authData = service.registeredData.getAuthData(listRequest.authToken());
+        AuthData.AuthRecord authData = service.dataAccess.getAuthData(listRequest.authToken());
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
         else {
-            List<GameInfo> games = service.registeredData.listGames();
+            List<GameInfo> games = service.dataAccess.listGames();
             return new ListResult(games);
         }
     }
 
     public CreateResult create(CreateRequest createRequest) throws DataAccessException {
-        AuthData.AuthRecord authData = service.registeredData.getAuthData(createRequest.authToken());
+        AuthData.AuthRecord authData = service.dataAccess.getAuthData(createRequest.authToken());
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
@@ -39,10 +41,10 @@ public class GameService {
             throw new DataAccessException("400 Error: Bad request");
         }
         else {
-            if (service.registeredData.getGame(createRequest.gameName()) == null) {
-                int newID = service.registeredData.newGameID();
+            if (service.dataAccess.getGame(createRequest.gameName()) == null) {
+                int newID = service.dataAccess.newGameID();
                 GameData game = new GameData(newID, null, null, createRequest.gameName(), null);
-                service.registeredData.createGame(game);
+                service.dataAccess.createGame(game);
                 return new CreateResult(newID);
             }
             throw new DataAccessException("400 Error: Bad request");
@@ -50,7 +52,7 @@ public class GameService {
     }
 
     public JoinResult join(JoinRequest joinRequest) throws DataAccessException {
-        AuthData.AuthRecord authData = service.registeredData.getAuthData(joinRequest.authToken());
+        AuthData.AuthRecord authData = service.dataAccess.getAuthData(joinRequest.authToken());
         if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
         }
@@ -58,8 +60,8 @@ public class GameService {
             throw new DataAccessException("400 Error: Bad request");
         }
         if (joinRequest.color().equals("WHITE") || joinRequest.color().equals("BLACK")){
-            if (service.registeredData.getColor(joinRequest.color(), joinRequest.gameID())){
-                service.registeredData.joinGame(authData.username(), joinRequest.color(), joinRequest.gameID());
+            if (service.dataAccess.getColor(joinRequest.color(), joinRequest.gameID())){
+                service.dataAccess.joinGame(authData.username(), joinRequest.color(), joinRequest.gameID());
                 return new JoinResult();
             }
             throw new DataAccessException("403 Error: already taken");
@@ -68,8 +70,8 @@ public class GameService {
     }
 
     public DeleteResult delete(DeleteRequest deleteRequest) throws DataAccessException {
-        service.registeredData.deleteAllGameData();
-        service.registeredData.deleteAllUserData();
+        service.dataAccess.deleteAllGameData();
+        service.dataAccess.deleteAllUserData();
         return new DeleteResult();
     }
 }
