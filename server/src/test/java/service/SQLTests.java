@@ -11,8 +11,6 @@ import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.userrequests.RegisterRequest;
-import service.userrequests.RegisterResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +38,6 @@ public class SQLTests {
         UserData data = dataAccess.getUserData("Bob");
         assertEquals("bob1234@gmail.com", data.email());
     }
-
 
     @Test
     @DisplayName("Negative CreateUser")

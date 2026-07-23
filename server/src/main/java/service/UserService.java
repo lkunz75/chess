@@ -64,7 +64,6 @@ public class UserService {
     public DeleteUserResult deleteUser(DeleteUserRequest deleteRequest) throws DataAccessException {
         dataAccess.deleteAllUserData();
         dataAccess.deleteAllAuthData();
-        dataAccess = new MemoryDataAccess();
         return new DeleteUserResult();
     }
 }

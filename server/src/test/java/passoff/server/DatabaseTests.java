@@ -222,5 +222,4 @@ public class DatabaseTests {
     private interface TableAction {
         void execute(String tableName, Connection connection) throws SQLException;
     }
-
 }
