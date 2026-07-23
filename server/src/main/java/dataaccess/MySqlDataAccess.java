@@ -124,9 +124,8 @@ public class MySqlDataAccess implements DataAccess{
             try (PreparedStatement ps = conn.prepareStatement(statement)){
                 try (ResultSet rs = ps.executeQuery()) {
                     while(rs.next()) {
-                        if (max < rs.getInt("gameID")) {
-                            max = rs.getInt("gameID");
-                        }
+                        //without this code quality is overnested, so I looked up the Java equivalent to python max
+                        max = Math.max(max, rs.getInt("gameID"));
                     }
                 }
                 return max+1;
@@ -187,7 +186,6 @@ public class MySqlDataAccess implements DataAccess{
                         executeUpdate("UPDATE gameData SET blackUsername =? WHERE gameID=?", username, gameID);
                         return;
                     }
-                    //throw new DataAccessException("403 Error: already taken");
                 }
             }
         } catch (SQLException e) {
@@ -215,9 +213,9 @@ public class MySqlDataAccess implements DataAccess{
             try (PreparedStatement ps = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 for (int i = 0; i < params.length; i++){
                     Object param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
+                    if (param instanceof String p) {ps.setString(i + 1, p);}
+                    else if (param instanceof Integer p) {ps.setInt(i + 1, p);}
+                    else if (param == null) {ps.setNull(i + 1, NULL);}
                 }
                 return ps.executeUpdate();
             }
@@ -275,37 +273,37 @@ public class MySqlDataAccess implements DataAccess{
         }
     }
 
-    private UserData readUser(ResultSet RowInfo) throws SQLException {
-        String username = RowInfo.getString("username");
-        String password = RowInfo.getString("password");
-        String email = RowInfo.getString("email");
+    private UserData readUser(ResultSet rowInfo) throws SQLException {
+        String username = rowInfo.getString("username");
+        String password = rowInfo.getString("password");
+        String email = rowInfo.getString("email");
         return new UserData(username, password, email);
     }
 
-    private AuthData.AuthRecord readAuth(ResultSet RowInfo) throws SQLException {
-        String username = RowInfo.getString("username");
-        String authToken = RowInfo.getString("authToken");
+    private AuthData.AuthRecord readAuth(ResultSet rowInfo) throws SQLException {
+        String username = rowInfo.getString("username");
+        String authToken = rowInfo.getString("authToken");
         return new AuthData.AuthRecord(username, authToken);
     }
 
-    private GameData readGameData(ResultSet RowInfo) throws SQLException{
-        int gameID = RowInfo.getInt("gameID");
-        String whiteUsername = RowInfo.getString("whiteUsername");
-        String blackUsername = RowInfo.getString("blackUsername");
-        String gameName = RowInfo.getString("gameName");
+    private GameData readGameData(ResultSet rowInfo) throws SQLException{
+        int gameID = rowInfo.getInt("gameID");
+        String whiteUsername = rowInfo.getString("whiteUsername");
+        String blackUsername = rowInfo.getString("blackUsername");
+        String gameName = rowInfo.getString("gameName");
 
         //ChessGame serialization and deserialization
         //Is this where I should implement this? Nothing is actually getting changed within my chess game
         var serializer = new Gson();
-        ChessGame chessBoardJson = serializer.fromJson(RowInfo.getString("game"), ChessGame.class);
+        ChessGame chessBoardJson = serializer.fromJson(rowInfo.getString("game"), ChessGame.class);
         return new GameData(gameID, whiteUsername, blackUsername, gameName, chessBoardJson);
     }
 
-    private GameInfo readGameInfo(ResultSet RowInfo) throws SQLException {
-        int gameID = RowInfo.getInt("gameID");
-        String whiteUsername = RowInfo.getString("whiteUsername");
-        String blackUsername = RowInfo.getString("blackUsername");
-        String gameName = RowInfo.getString("gameName");
+    private GameInfo readGameInfo(ResultSet rowInfo) throws SQLException {
+        int gameID = rowInfo.getInt("gameID");
+        String whiteUsername = rowInfo.getString("whiteUsername");
+        String blackUsername = rowInfo.getString("blackUsername");
+        String gameName = rowInfo.getString("gameName");
         return new GameInfo(gameID, whiteUsername, blackUsername, gameName);
     }
 }
