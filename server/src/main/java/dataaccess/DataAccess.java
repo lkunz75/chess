@@ -23,7 +23,7 @@ public interface DataAccess {
     GameData getGame(String gameName) throws DataAccessException;
     void createGame(GameData game) throws DataAccessException;
     int newGameID() throws DataAccessException;
-    boolean getColor(String color, int GameID) throws DataAccessException;
+    boolean getColor(String color, int gameID) throws DataAccessException;
     void deleteAllGameData() throws DataAccessException;
     void joinGame(String username, String color, int gameID) throws DataAccessException;
 }
