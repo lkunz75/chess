@@ -52,6 +52,9 @@ public class Server {
         // this gets the first 3, since I've coded it to always start with the numbers
         // parseInt turns it into integers
         String message = e.getMessage();
+        if (e.getMessage().equals("failed to get connection")){
+            message = "500 Error: dataaccess.DataAccessException: failed to get connection";
+        }
         context.status(Integer.parseInt(message.substring(0,3)));
         context.result(new Gson().toJson(new ErrorMessage(message)));
     }
@@ -140,11 +143,15 @@ public class Server {
     }
 
     private void deleteHandler(Context context) throws DataAccessException {
-        DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
-        DeleteUserResult deleteUserResult = userService.deleteUser(deleteUserRequest);
-        context.result(new Gson().toJson(deleteUserResult));
-        DeleteRequest deleteRequest = new DeleteRequest();
-        DeleteResult deleteResult = gameService.delete(deleteRequest);
-        context.result(new Gson().toJson(deleteResult));
+        try {
+            DeleteUserRequest deleteUserRequest = new DeleteUserRequest();
+            DeleteUserResult deleteUserResult = userService.deleteUser(deleteUserRequest);
+            context.result(new Gson().toJson(deleteUserResult));
+            DeleteRequest deleteRequest = new DeleteRequest();
+            DeleteResult deleteResult = gameService.delete(deleteRequest);
+            context.result(new Gson().toJson(deleteResult));
+        } catch (DataAccessException e) {
+            parseExceptions(e, context);
+        }
     }
 }

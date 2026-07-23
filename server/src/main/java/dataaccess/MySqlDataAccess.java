@@ -28,12 +28,12 @@ public class MySqlDataAccess implements DataAccess{
                     if (rs.next()) {
                         return readUser(rs);
                     }
+                    return null;
                 }
             }
         } catch (SQLException e) {
             throw new DataAccessException(String.format("500 ERROR: unable to update database: %s", e.getMessage()));
         }
-        return null;
     }
 
     // just moved location to visually follow MemoryDataAccess
@@ -187,7 +187,7 @@ public class MySqlDataAccess implements DataAccess{
                         executeUpdate("UPDATE gameData SET blackUsername =? WHERE gameID=?", username, gameID);
                         return;
                     }
-                    throw new DataAccessException("403 Error: already taken");
+                    //throw new DataAccessException("403 Error: already taken");
                 }
             }
         } catch (SQLException e) {
@@ -256,7 +256,8 @@ public class MySqlDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS authData (
               `username` varchar(256) NOT NULL,
-              `authToken` varchar(256) NOT NULL
+              `authToken` varchar(256) NOT NULL,
+              PRIMARY KEY (authToken)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };

@@ -47,17 +47,13 @@ public class UserService {
     }
 
     public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
-        try {
-            AuthData.AuthRecord authData = dataAccess.getAuthData(logoutRequest.authToken());
-            if (authData == null) {
-                throw new DataAccessException("401 Error: Unauthorized");
-            }
-            else {
-                dataAccess.deleteAuthToken(logoutRequest.authToken());
-                return new LogoutResult();
-            }
-        } catch (DataAccessException e) {
+        AuthData.AuthRecord authData = dataAccess.getAuthData(logoutRequest.authToken());
+        if (authData == null) {
             throw new DataAccessException("401 Error: Unauthorized");
+        }
+        else {
+            dataAccess.deleteAuthToken(logoutRequest.authToken());
+            return new LogoutResult();
         }
     }
 

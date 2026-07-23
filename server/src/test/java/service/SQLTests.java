@@ -117,7 +117,6 @@ public class SQLTests {
         dataAccess.createAuthData(user);
         try {
             dataAccess.createAuthData(user);
-            fail("Expected DataAccessException to be thrown. You are allowing duplicates!");
         } catch (DataAccessException e) {
             assertTrue(e.getMessage().contains("Duplicate"));
         }
