@@ -1,9 +1,6 @@
-package service;
+package dataaccess;
 
 import chess.ChessGame;
-import dataaccess.DataAccess;
-import dataaccess.DataAccessException;
-import dataaccess.MySqlDataAccess;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
@@ -18,7 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SQLTests {
+public class DataAccessTests {
     private DataAccess dataAccess;
 
     @BeforeEach
