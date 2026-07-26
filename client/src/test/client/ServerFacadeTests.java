@@ -4,8 +4,7 @@ import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
-import service.gamerequests.CreateRequest;
-import service.gamerequests.DeleteRequest;
+import service.gamerequests.*;
 import service.userrequests.*;
 
 import static java.util.Objects.isNull;
@@ -165,6 +164,55 @@ public class ServerFacadeTests {
             assertTrue(e.getMessage().contains("Bad"));
         }
     }
+
+    //LIST
+    @DisplayName("Positive ListTest")
+    @Test
+    void listPositive() throws DataAccessException {
+        RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
+        var authData = facade.register(request);
+        LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
+        var loginData = facade.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginData.authToken(), "Jane's Game");
+        var createData = facade.create(createRequest);
+        ListRequest listRequest = new ListRequest(authData.authToken());
+        var listGames = facade.list(listRequest);
+        assertEquals(1, listGames.games().size());
+    }
+
+    @DisplayName("Negative ListTest")
+    @Test
+    void listNegative() throws DataAccessException {
+        RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
+        var authData = facade.register(request);
+        LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
+        var loginData = facade.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginData.authToken(), "Jane's Game");
+        facade.create(createRequest);
+        ListRequest listRequest = new ListRequest("1234433");
+        try {
+            facade.list(listRequest);
+            fail("Invalid authToken, but still listed games!");
+        } catch (DataAccessException e) {
+            assertTrue(e.getMessage().contains("Unauthorized"));
+        }
+    }
+
+    // Join
+    @DisplayName("Positive JoinTest")
+    @Test
+    void joinPositive() throws DataAccessException {
+        RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
+        var authData = facade.register(request);
+        LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
+        var loginData = facade.login(loginRequest);
+        CreateRequest createRequest = new CreateRequest(loginData.authToken(), "Jane's Game");
+        var createData = facade.create(createRequest);
+        JoinRequest joinRequest = new JoinRequest(authData.authToken(), "WHITE", createData.gameID());
+        var joinData = facade.join(joinRequest);
+        assertEquals(new JoinResult(), joinData);
+    }
+
 
 
 
