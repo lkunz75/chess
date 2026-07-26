@@ -3,11 +3,9 @@ package server;
 import com.google.gson.Gson;
 
 import dataaccess.*;
-import service.*;
 import service.gamerequests.*;
 import service.userrequests.*;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -23,59 +21,60 @@ public class ServerFacade {
 
 
     public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
-        var request = buildRequest("POST", "/user", registerRequest);
+        var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
-        var request = buildRequest("POST", "/session", loginRequest);
+        var request = buildRequest("POST", "/session", loginRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
     public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
-        var request = buildRequest("DELETE", "/session", logoutRequest);
+        var request = buildRequest("DELETE", "/session", logoutRequest, logoutRequest.authToken());
+        // uses authorization header!!
         var response = sendRequest(request);
         return handleResponse(response, LogoutResult.class);
     }
 
-    public DeleteUserResult deleteUser(DeleteUserRequest deleteUserRequest) throws DataAccessException {
-        var request = buildRequest("DELETE", "db", deleteUserRequest);
+    public void delete(DeleteRequest deleteRequest, DeleteUserRequest deleteUserRequest) throws DataAccessException {
+        var request = buildRequest("DELETE", "/db", deleteRequest, null);
         var response = sendRequest(request);
-        return handleResponse(response, DeleteUserResult.class);
-    }
-
-    public DeleteResult delete(DeleteRequest deleteRequest) throws DataAccessException {
-        var request = buildRequest("DELETE", "db", deleteRequest);
-        var response = sendRequest(request);
-        return handleResponse(response, DeleteResult.class);
+        handleResponse(response, DeleteResult.class);
+        var request2 = buildRequest("DELETE", "/db", deleteUserRequest, null);
+        var response2 = sendRequest(request2);
+        handleResponse(response, DeleteUserResult.class);
     }
 
     public CreateResult create(CreateRequest createRequest) throws DataAccessException {
-        var request = buildRequest("POST", "/game", createRequest);
+        var request = buildRequest("POST", "/game", createRequest, createRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, CreateResult.class);
     }
 
     public ListResult list(ListRequest listRequest) throws DataAccessException {
-        var request = buildRequest("GET", "/game", listRequest);
+        var request = buildRequest("GET", "/game", listRequest, listRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, ListResult.class);
     }
 
     public JoinResult join(JoinRequest joinRequest) throws DataAccessException {
-        var request = buildRequest("PUT", "/game", joinRequest);
+        var request = buildRequest("PUT", "/game", joinRequest, joinRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, JoinResult.class);
     }
-    
-    // followed PetShop
-    private HttpRequest buildRequest(String method, String path, Object body) {
+
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         // creates the new URL with the request info
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
-                .method(method, makeRequestBody(body)); 
+                .method(method, makeRequestBody(body));
+        if (authToken != null) {
+            // have to check AuthToken so authorization checks can be run
+            request.setHeader("authorization", authToken );
+        }
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
@@ -104,7 +103,6 @@ public class ServerFacade {
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body!= null) {
-                // figure out how to do this!
                 throw DataAccessException.fromJson(body);
             }
             throw new DataAccessException(String.valueOf(status)); // to make it a string

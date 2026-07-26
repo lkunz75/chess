@@ -21,6 +21,7 @@ public class DataAccessException extends Exception{
     public static DataAccessException fromJson(String json) {
         var map = new Gson().fromJson(json, HashMap.class);
         String message = map.get("message").toString();
-        return new DataAccessException(message);
+        // does substring, because they do not need to 404 or number error
+        return new DataAccessException(message.substring(3));
     }
 }
