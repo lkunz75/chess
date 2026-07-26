@@ -18,14 +18,8 @@ public class DataAccessException extends Exception{
         super(message, ex);
     }
 
-    public String toJson() {
-        int code = Integer.parseInt(getMessage().substring(0,3));
-        return new Gson().toJson(Map.of("message", getMessage(), "status", code));
-    }
-
     public static DataAccessException fromJson(String json) {
         var map = new Gson().fromJson(json, HashMap.class);
-        var status = HttpStatus.Code.valueOf(map.get("status").toString());
         String message = map.get("message").toString();
         return new DataAccessException(message);
     }

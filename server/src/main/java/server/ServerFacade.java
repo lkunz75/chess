@@ -7,6 +7,7 @@ import service.*;
 import service.gamerequests.*;
 import service.userrequests.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -92,7 +93,8 @@ public class ServerFacade {
         try {
             // figure out what send should be!
             return client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (DataAccessException e) {
+            //Exception is a more general thing that will catch the errors send might produce
+        } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
     }
@@ -105,7 +107,7 @@ public class ServerFacade {
                 // figure out how to do this!
                 throw DataAccessException.fromJson(body);
             }
-            throw new DataAccessException(DataAccessException.fromHttpStatusCode(status));
+            throw new DataAccessException(String.valueOf(status)); // to make it a string
         }
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
