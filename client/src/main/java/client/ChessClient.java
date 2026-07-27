@@ -1,8 +1,14 @@
 package client;
 
+import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import model.GameInfo;
 import server.ServerFacade;
+import service.gamerequests.CreateRequest;
+import service.gamerequests.JoinRequest;
+import service.gamerequests.ListRequest;
+import service.gamerequests.ListResult;
 import service.userrequests.LoginRequest;
 import service.userrequests.LoginResult;
 import service.userrequests.LogoutRequest;
@@ -13,6 +19,8 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
+
+// DO I NEED TO HAVE A DELETE DATA? They shouldn't have access to that right?
 
 public class ChessClient {
     private State state = State.SIGNEDOUT;
@@ -42,7 +50,6 @@ public class ChessClient {
         System.out.println();
     }
 
-
     public String eval(String input) {
         try {
             String [] tokens = input.toLowerCase().split(" "); // helps avoid random crashes
@@ -53,7 +60,7 @@ public class ChessClient {
                 case "login" -> login(params);
                 case "logout" -> logout(params);
                 case "create" -> create(params);
-                case "list" -> list(params);
+                case "list" -> list();
                 case "join" -> join(params);
                 case "quit" -> "quit";
                 default -> help();
@@ -100,8 +107,34 @@ public class ChessClient {
         throw new DataAccessException("Unable to sign out. Were you signed in?");
     }
 
+    public String create(String...params) throws DataAccessException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            server.create(new CreateRequest(authToken, params[0]));
+            return String.format("Game created %s", params[0]);
+        }
+        throw new DataAccessException("Expected <gameName>");
+    }
 
+    public String list() throws DataAccessException {
+        assertSignedIn();
+        ListResult games = server.list(new ListRequest(authToken));
+        var result = new StringBuilder();
+        var gson = new Gson();
+        for (GameInfo game : games.games()) {
+            result.append(gson.toJson(game)).append('\n');
+        }
+        return result.toString();
+    }
 
+    public String join(String...params) throws DataAccessException {
+        assertSignedIn();
+        if (params.length >= 2) {
+            server.join(new JoinRequest(authToken, params[0], Integer.parseInt(params[1])));
+            return String.format("Joined game %s, as %s", params[0], params[1]);
+        }
+        throw new DataAccessException("Expected: <gameName>, <color>");
+    }
 
     public String help() {
         if (state == State.SIGNEDOUT) {
@@ -123,7 +156,7 @@ public class ChessClient {
                 """;
     }
 
-    private void assertSingedIn() throws DataAccessException {
+    private void assertSignedIn() throws DataAccessException {
         if (state == State.SIGNEDOUT) {
             throw new DataAccessException("You must sign in.");
         }
