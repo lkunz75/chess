@@ -213,7 +213,27 @@ public class ServerFacadeTests {
         assertEquals(new JoinResult(), joinData);
     }
 
-
-
-
+    @DisplayName("Negative JoinTest")
+    @Test
+    void joinNegative() throws DataAccessException {
+        RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
+        var authData = facade.register(request);
+        LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
+        var loginData = facade.login(loginRequest);
+        RegisterRequest request2 = new RegisterRequest("Bob", "bobby", "bob@email.com");
+        var authData2 = facade.register(request2);
+        LoginRequest loginRequest2 = new LoginRequest(authData2.username(), "bobby");
+        var loginData2 = facade.login(loginRequest2);
+        CreateRequest createRequest = new CreateRequest(loginData.authToken(), "The Best Game");
+        var createData = facade.create(createRequest);
+        JoinRequest joinRequest = new JoinRequest(loginData.authToken(), "BLACK", createData.gameID());
+        var joinData = facade.join(joinRequest);
+        JoinRequest joinRequest2 = new JoinRequest(loginData2.authToken(), "BLACK", createData.gameID());
+        try {
+            facade.join(joinRequest2);
+            fail("This color was already taken, but you are letting them join anyways!");
+        } catch (DataAccessException e) {
+            assertTrue(e.getMessage().contains("taken"));
+        }
+    }
 }
