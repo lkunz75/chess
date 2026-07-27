@@ -1,8 +1,14 @@
 package client;
 
+import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import server.ServerFacade;
+import service.userrequests.LoginRequest;
+import service.userrequests.LoginResult;
+import service.userrequests.LogoutRequest;
+import service.userrequests.RegisterRequest;
 
+import javax.xml.crypto.Data;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -11,6 +17,8 @@ import static ui.EscapeSequences.*;
 public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
+    private String authToken;
+    private String userName;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -59,6 +67,39 @@ public class ChessClient {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>>" + SET_TEXT_COLOR_GREEN);
     }
 
+    public String register(String...params) throws DataAccessException {
+        if (params.length >= 3) {
+            state = State.SIGNEDIN;
+            userName = String.join("-", params[0]);
+            RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
+            server.register(registerRequest);
+            return String.format("You signed in as %s", userName);
+        }
+        throw new DataAccessException("Expected: <username>, <password>, <email>");
+    }
+
+    public String login(String...params) throws DataAccessException {
+        if (params.length >= 3) {
+            state = State.SIGNEDIN;
+            userName = String.join("-", params[0]);
+            LoginResult loginResult = server.login(new LoginRequest(params[0], params[1]));
+            authToken = loginResult.authToken();
+            // Do I need ws here?
+            return String.format("You signed in as %s", userName);
+        }
+        throw new DataAccessException("Expected: <username>, <password>");
+    }
+
+    public String logout(String...params) throws DataAccessException {
+        if (params.length >= 1) {
+            state = State.SIGNEDOUT;
+            userName = null;
+            server.logout(new LogoutRequest(authToken));
+            return "You are now signed out.";
+        }
+        throw new DataAccessException("Unable to sign out. Were you signed in?");
+    }
+
 
 
 
@@ -80,5 +121,11 @@ public class ChessClient {
                 quit - playing chess
                 help - with possible commands
                 """;
+    }
+
+    private void assertSingedIn() throws DataAccessException {
+        if (state == State.SIGNEDOUT) {
+            throw new DataAccessException("You must sign in.");
+        }
     }
 }
