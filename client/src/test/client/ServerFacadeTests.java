@@ -7,7 +7,6 @@ import server.ServerFacade;
 import service.gamerequests.*;
 import service.userrequests.*;
 
-import static java.util.Objects.isNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -208,7 +207,8 @@ public class ServerFacadeTests {
         var loginData = facade.login(loginRequest);
         CreateRequest createRequest = new CreateRequest(loginData.authToken(), "Jane's Game");
         var createData = facade.create(createRequest);
-        JoinRequest joinRequest = new JoinRequest(authData.authToken(), "WHITE", createData.gameID());
+        // the small names like playerColor vs Color seem insignificant, but WILL cause crashes if not fixed
+        JoinRequest joinRequest = new JoinRequest(loginData.authToken(), "BLACK", createData.gameID());
         var joinData = facade.join(joinRequest);
         assertEquals(new JoinResult(), joinData);
     }

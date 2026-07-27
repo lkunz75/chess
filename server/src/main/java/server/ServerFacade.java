@@ -2,9 +2,10 @@ package server;
 
 import com.google.gson.Gson;
 
-import dataaccess.*;
+import dataaccess.DataAccessException;
 import service.gamerequests.*;
 import service.userrequests.*;
+
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -90,9 +91,7 @@ public class ServerFacade {
     
     private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException {
         try {
-            // figure out what send should be!
             return client.send(request, HttpResponse.BodyHandlers.ofString());
-            //Exception is a more general thing that will catch the errors send might produce
         } catch (Exception e) {
             throw new DataAccessException(e.getMessage());
         }
