@@ -1,7 +1,6 @@
 package client;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import model.GameInfo;
 import server.ServerFacade;
@@ -14,7 +13,6 @@ import service.userrequests.LoginResult;
 import service.userrequests.LogoutRequest;
 import service.userrequests.RegisterRequest;
 
-import javax.xml.crypto.Data;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -53,9 +51,9 @@ public class ChessClient {
     public String eval(String input) {
         try {
             String [] tokens = input.toLowerCase().split(" "); // helps avoid random crashes
-            String cdm = (tokens.length > 0) ? tokens[0] : "help";
-            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            return switch (cdm) {
+            String command = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length); // ordered without the command
+            return switch (command) {
                 case "register" -> register(params);
                 case "login" -> login(params);
                 case "logout" -> logout(params);
@@ -71,13 +69,13 @@ public class ChessClient {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>>" + SET_TEXT_COLOR_GREEN);
+        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     public String register(String...params) throws DataAccessException {
         if (params.length >= 3) {
             state = State.SIGNEDIN;
-            userName = String.join("-", params[0]);
+            userName = String.join("-", params[1]);
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
             server.register(registerRequest);
             return String.format("You signed in as %s", userName);
