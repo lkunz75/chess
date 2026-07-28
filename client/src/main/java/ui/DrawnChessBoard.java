@@ -11,6 +11,11 @@ public class DrawnChessBoard {
     // Board dimensions.
     private static final int HEIGHT = 8;
     private static final int WIDTH = 8;
+    private static final String[] BLACK_PLAYERS = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN,
+            BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
+    private static final String[] WHITE_PLAYERS = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN,
+            WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
+
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
@@ -32,11 +37,11 @@ public class DrawnChessBoard {
 
     private static void drawHeaders(PrintStream out, String[] headers) {
         setGray(out);
-        out.print("   ");
+        out.print("  ");
         for (int boardCol = 0; boardCol < WIDTH; ++boardCol) {
             drawHeader(out, headers[boardCol]);
         }
-        out.print("   ");
+        out.print("  ");
         out.print(RESET_BG_COLOR);
         out.println();
     }
@@ -44,7 +49,7 @@ public class DrawnChessBoard {
     private static void drawHeader(PrintStream out, String headerText) {
         out.print(" ");
         printHeaderText(out, headerText);
-        out.print(" ");
+        out.print("  ");
     }
 
     private static void drawSideHeader(PrintStream out, int rowNumber) {
@@ -69,7 +74,29 @@ public class DrawnChessBoard {
                 } else {
                     setWhite(out);
                 }
-                out.print("   ");
+                if (row == 0) {
+                    out.print(SET_TEXT_COLOR_BLACK);
+                    out.print(SET_TEXT_BOLD);
+                    out.print(WHITE_PLAYERS[col]);
+                }
+                else if (row == 1) {
+                    out.print(SET_TEXT_COLOR_BLACK);
+                    out.print(SET_TEXT_BOLD);
+                    out.print(WHITE_PAWN);
+                }
+                else if (row == 6) {
+                    out.print(SET_TEXT_COLOR_MAGENTA);
+                    out.print(SET_TEXT_BOLD);
+                    out.print(BLACK_PAWN);
+                }
+                else if (row == 7) {
+                    out.print(SET_TEXT_COLOR_MAGENTA);
+                    out.print(SET_TEXT_BOLD);
+                    out.print(BLACK_PLAYERS[col]);
+                }
+                else {
+                    out.print(EMPTY);
+                }
             }
             drawSideHeader(out, 8-row);
             out.print(RESET_TEXT_COLOR);
@@ -84,21 +111,12 @@ public class DrawnChessBoard {
     }
 
     private static void setBlue(PrintStream out) {
-        out.print(SET_BG_COLOR_BLUE);
-        out.print(SET_TEXT_COLOR_BLUE);
+        out.print(SET_BG_COLOR_DARK_GREY);
+        out.print(SET_TEXT_COLOR_DARK_GREY);
     }
 
     private static void setGray(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_LIGHT_GREY);
-    }
-
-    private static void printPlayer(PrintStream out, String player) {
-        out.print(SET_BG_COLOR_WHITE);
-        out.print(SET_TEXT_COLOR_BLACK);
-
-        out.print(player);
-
-        setWhite(out);
     }
 }
