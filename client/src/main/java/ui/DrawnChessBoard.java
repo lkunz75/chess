@@ -2,69 +2,79 @@ package ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Random;
 
 import static ui.EscapeSequences.*;
 
 public class DrawnChessBoard {
-
     // Board dimensions.
-    private static final int BOARD_SIZE_IN_SQUARES = 8;
-    private static final int SQUARE_SIZE_IN_PADDED_CHARS = 8;
-    private static final int LINE_WIDTH_IN_PADDED_CHARS = 1;
+    private static final int HEIGHT = 8;
+    private static final int WIDTH = 8;
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
-        drawHeaders(out);
-        drawInitialChessBoard(out);
-
-        out.print(SET_BG_COLOR_BLACK);
+        String[] headers = {};
+//        if ("WHITE".equals(args")) {
+//            headers = new String[]{"a", "b", "c", "b", "e", "f", "g", "h"};
+//            drawHeaders(out, headers);
+//            drawInitialChessBoard(out);
+//            drawHeaders(out, headers);
+//        }
+        headers = new String[]{"a", "b", "c", "b", "e", "f", "g", "h"};
+        drawHeaders(out, headers);
+        drawBoard(out);
+        drawHeaders(out, headers);
+        out.print(SET_BG_COLOR_BLUE);
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void drawHeaders(PrintStream out) {
-        setBlack(out);
-        String[] headers = { "1", "2", "3", "4", "5", "6", "7", "8" };
-        for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; ++boardCol) {
+    private static void drawHeaders(PrintStream out, String[] headers) {
+        setGray(out);
+        out.print("   ");
+        for (int boardCol = 0; boardCol < WIDTH; ++boardCol) {
             drawHeader(out, headers[boardCol]);
         }
+        out.print("   ");
         out.print(RESET_BG_COLOR);
         out.println();
     }
 
     private static void drawHeader(PrintStream out, String headerText) {
-        int prefixLength = SQUARE_SIZE_IN_PADDED_CHARS/9;
-        int suffixLength = SQUARE_SIZE_IN_PADDED_CHARS - prefixLength - 1;
-        out.print("  ");
+        out.print(" ");
         printHeaderText(out, headerText);
-        out.print("  ");
+        out.print(" ");
+    }
 
-
+    private static void drawSideHeader(PrintStream out, int rowNumber) {
+        setGray(out);
+        out.print(SET_TEXT_COLOR_GREEN);
+        out.print(" " + rowNumber + " ");
     }
 
     private static void printHeaderText(PrintStream out, String player) {
-        out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_GREEN);
         out.print(player);
-        setBlack(out);
+        setGray(out);
     }
 
-    private static void drawInitialChessBoard(PrintStream out) {
-        for (int boardRow = 0; boardRow < BOARD_SIZE_IN_SQUARES; boardRow++) {
-            for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
-                if ((boardRow + boardCol) % 2 == 0) {
+    private static void drawBoard(PrintStream out) {
+        for (int row = 0; row < HEIGHT; row++) {
+            drawSideHeader(out, 8-row);
+            for (int col = 0; col < WIDTH; col++) {
+                if ((row + col) % 2 == 0) {
                     setBlue(out);
                 } else {
                     setWhite(out);
                 }
-                out.print("     ");
-                //out.print(EMPTY);
+                out.print("   ");
             }
+            drawSideHeader(out, 8-row);
             out.print(RESET_TEXT_COLOR);
             out.print(RESET_BG_COLOR);
             out.println(); // gets it to the next line
-
         }
     }
 
@@ -73,19 +83,14 @@ public class DrawnChessBoard {
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void setRed(PrintStream out) {
-        out.print(SET_BG_COLOR_RED);
-        out.print(SET_TEXT_COLOR_RED);
-    }
-
     private static void setBlue(PrintStream out) {
         out.print(SET_BG_COLOR_BLUE);
         out.print(SET_TEXT_COLOR_BLUE);
     }
 
-    private static void setBlack(PrintStream out) {
-        out.print(SET_BG_COLOR_BLACK);
-        out.print(SET_TEXT_COLOR_BLACK);
+    private static void setGray(PrintStream out) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_LIGHT_GREY);
     }
 
     private static void printPlayer(PrintStream out, String player) {
