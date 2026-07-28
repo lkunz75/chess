@@ -8,10 +8,7 @@ import service.gamerequests.CreateRequest;
 import service.gamerequests.JoinRequest;
 import service.gamerequests.ListRequest;
 import service.gamerequests.ListResult;
-import service.userrequests.LoginRequest;
-import service.userrequests.LoginResult;
-import service.userrequests.LogoutRequest;
-import service.userrequests.RegisterRequest;
+import service.userrequests.*;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -24,27 +21,31 @@ public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
     private String authToken;
-    private String userName;
+    private String username;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
     }
 
     public void run() {
-        System.out.println("♕ Welcome to 240 Chess. Type Help to get started. ♕");
+        System.out.println("♕ Welcome to 240 Chess. Type help to get started. ♕");
         Scanner scanner = new Scanner(System.in);
-        var result = "";
-        while (!result.equals("quit")) {
+        var result = " ";
+        while (!"quit".equals(result)) {
             printPrompt();
             String line = scanner.nextLine();
             try {
                 result = eval(line);
+                System.out.println(username);
                 System.out.print(SET_TEXT_COLOR_MAGENTA  + result);
             } catch (Exception e) {
                 var message = e.toString();
                 System.out.print(message);
             }
         }
+        username = null;
+        state = State.SIGNEDOUT;
+        authToken = null;
         System.out.println();
     }
 
@@ -53,13 +54,15 @@ public class ChessClient {
             String [] tokens = input.toLowerCase().split(" "); // helps avoid random crashes
             String command = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length); // ordered without the command
+            // System.out.println(Arrays.toString(params));
             return switch (command) {
                 case "register" -> register(params);
                 case "login" -> login(params);
-                case "logout" -> logout(params);
+                case "logout" -> logout();
                 case "create" -> create(params);
                 case "list" -> list();
                 case "join" -> join(params);
+                case "observe" -> observe(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -74,35 +77,33 @@ public class ChessClient {
 
     public String register(String...params) throws DataAccessException {
         if (params.length >= 3) {
-            state = State.SIGNEDIN;
-            userName = String.join("-", params[1]);
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
-            server.register(registerRequest);
-            return String.format("You signed in as %s", userName);
+            RegisterResult registerResult = server.register(registerRequest);
+            state = State.SIGNEDIN;
+            username = String.join("-", registerResult.username());
+            authToken = registerResult.authToken();
+            return String.format("You signed in as %s", username);
         }
         throw new DataAccessException("Expected: <username>, <password>, <email>");
     }
 
     public String login(String...params) throws DataAccessException {
-        if (params.length >= 3) {
-            state = State.SIGNEDIN;
-            userName = String.join("-", params[0]);
+        if (params.length >= 2) {
             LoginResult loginResult = server.login(new LoginRequest(params[0], params[1]));
             authToken = loginResult.authToken();
+            state = State.SIGNEDIN;
+            username = String.join("-", params[0]);
             // Do I need ws here?
-            return String.format("You signed in as %s", userName);
+            return String.format("You signed in as %s", username);
         }
         throw new DataAccessException("Expected: <username>, <password>");
     }
 
-    public String logout(String...params) throws DataAccessException {
-        if (params.length >= 1) {
-            state = State.SIGNEDOUT;
-            userName = null;
-            server.logout(new LogoutRequest(authToken));
-            return "You are now signed out.";
-        }
-        throw new DataAccessException("Unable to sign out. Were you signed in?");
+    public String logout() throws DataAccessException {
+        state = State.SIGNEDOUT;
+        username = null;
+        server.logout(new LogoutRequest(authToken));
+        return "You are now signed out.";
     }
 
     public String create(String...params) throws DataAccessException {
@@ -125,13 +126,20 @@ public class ChessClient {
         return result.toString();
     }
 
+    public String observe(String...params) throws DataAccessException {
+        //figure out code here
+        return "This";
+    }
+
     public String join(String...params) throws DataAccessException {
         assertSignedIn();
         if (params.length >= 2) {
-            server.join(new JoinRequest(authToken, params[0], Integer.parseInt(params[1])));
-            return String.format("Joined game %s, as %s", params[0], params[1]);
+            int gameID = Integer.parseInt(params[0]);
+            String color = params[1].toUpperCase();
+            server.join(new JoinRequest(authToken, color, gameID));
+            return String.format("Joined game %s, as %s", gameID, color);
         }
-        throw new DataAccessException("Expected: <gameName>, <color>");
+        throw new DataAccessException("Expected: <gameID>, <WHITE|BLACK>");
     }
 
     public String help() {
