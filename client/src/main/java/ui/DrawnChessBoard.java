@@ -41,19 +41,16 @@ public class DrawnChessBoard {
         drawHeaders(out, headers);
         drawBoard(out);
         drawHeaders(out, headers);
-//        out.print(RESET_BG_COLOR);
-//        out.print(RESET_TEXT_COLOR);
-//        out.print(RESET_TEXT_BOLD_FAINT);
     }
 
     private static void drawHeaders(PrintStream out, String[] headers) {
         setGray(out);
-        out.print("  ");
+        out.print("   ");
         out.print(SET_TEXT_BOLD);
         for (int boardCol = 0; boardCol < WIDTH; ++boardCol) {
             drawHeader(out, headers[boardCol]);
         }
-        out.print("  ");
+        out.print(" ");
         out.print(RESET_BG_COLOR);
         out.println();
     }
