@@ -9,6 +9,7 @@ import service.gamerequests.JoinRequest;
 import service.gamerequests.ListRequest;
 import service.gamerequests.ListResult;
 import service.userrequests.*;
+import ui.DrawnChessBoard;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -36,7 +37,6 @@ public class ChessClient {
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.println(username);
                 System.out.print(SET_TEXT_COLOR_MAGENTA  + result);
             } catch (Exception e) {
                 var message = e.toString();
@@ -127,8 +127,8 @@ public class ChessClient {
     }
 
     public String observe(String...params) throws DataAccessException {
-        //figure out code here
-        return "This";
+        DrawnChessBoard.ChessBoard("WHITE");
+        return String.format("Observing Game %s", params[0]);
     }
 
     public String join(String...params) throws DataAccessException {
@@ -137,6 +137,7 @@ public class ChessClient {
             int gameID = Integer.parseInt(params[0]);
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
+            DrawnChessBoard.ChessBoard(color);
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new DataAccessException("Expected: <gameID>, <WHITE|BLACK>");

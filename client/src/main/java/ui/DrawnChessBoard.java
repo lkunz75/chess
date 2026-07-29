@@ -2,13 +2,10 @@ package ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-import java.util.Random;
 
 import static ui.EscapeSequences.*;
 
 public class DrawnChessBoard {
-    // Board dimensions.
     private static final int HEIGHT = 8;
     private static final int WIDTH = 8;
     private static final String[] BLACK_PLAYERS = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN,
@@ -21,17 +18,18 @@ public class DrawnChessBoard {
     private static String OPPOSING_PAWN;
     private static String START_COLOR = null;
 
-    public static void main(String[] args) {
+
+    public static void ChessBoard(String color) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         String[] headers = {};
-        if (args.length >= 1 && "BLACK".equals(args[0])) {
+        if ("BLACK".equals(color)) {
             headers = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
             START_PLAYERS = BLACK_PLAYERS;
             START_PAWN = BLACK_PAWN;
             OPPOSING_PAWN = WHITE_PAWN;
             OPPOSING_PLAYERS = WHITE_PLAYERS;
-            START_COLOR = "BLACK";
+            START_COLOR = color;
         }
         else {
         headers = new String[]{"a", "b", "c", "b", "e", "f", "g", "h"};
@@ -43,8 +41,9 @@ public class DrawnChessBoard {
         drawHeaders(out, headers);
         drawBoard(out);
         drawHeaders(out, headers);
-        out.print(SET_BG_COLOR_BLUE);
-        out.print(SET_TEXT_COLOR_WHITE);
+//        out.print(RESET_BG_COLOR);
+//        out.print(RESET_TEXT_COLOR);
+//        out.print(RESET_TEXT_BOLD_FAINT);
     }
 
     private static void drawHeaders(PrintStream out, String[] headers) {
@@ -141,5 +140,10 @@ public class DrawnChessBoard {
     private static void setGray(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_LIGHT_GREY);
+    }
+
+    public static void main(String[] args) {
+        ChessBoard("WHITE");
+        // this is for testing purposes
     }
 }
