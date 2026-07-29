@@ -12,31 +12,31 @@ public class DrawnChessBoard {
             BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
     private static final String[] WHITE_PLAYERS = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN,
             WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
-    private static String[] START_PLAYERS;
-    private static String[] OPPOSING_PLAYERS;
-    private static String START_PAWN;
-    private static String OPPOSING_PAWN;
-    private static String START_COLOR = null;
+    private static String[] startPlayers;
+    private static String[] opposingPlayers;
+    private static String startPawn;
+    private static String opposingPawn;
+    private static String startColor = null;
 
 
-    public static void ChessBoard(String color) {
+    public static void chessBoard(String color) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         String[] headers = {};
         if ("BLACK".equals(color)) {
             headers = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
-            START_PLAYERS = BLACK_PLAYERS;
-            START_PAWN = BLACK_PAWN;
-            OPPOSING_PAWN = WHITE_PAWN;
-            OPPOSING_PLAYERS = WHITE_PLAYERS;
-            START_COLOR = color;
+            startPlayers = BLACK_PLAYERS;
+            startPawn = BLACK_PAWN;
+            opposingPawn = WHITE_PAWN;
+            opposingPlayers = WHITE_PLAYERS;
+            startColor = color;
         }
         else {
         headers = new String[]{"a", "b", "c", "b", "e", "f", "g", "h"};
-        START_PLAYERS = WHITE_PLAYERS;
-        OPPOSING_PLAYERS = BLACK_PLAYERS;
-        START_PAWN = WHITE_PAWN;
-        OPPOSING_PAWN = BLACK_PAWN;
+        startPlayers = WHITE_PLAYERS;
+        opposingPlayers = BLACK_PLAYERS;
+        startPawn = WHITE_PAWN;
+        opposingPawn = BLACK_PAWN;
         }
         drawHeaders(out, headers);
         drawBoard(out);
@@ -64,7 +64,7 @@ public class DrawnChessBoard {
     private static void drawSideHeader(PrintStream out, int rowNumber) {
         setGray(out);
         out.print(SET_TEXT_COLOR_BLACK);
-        if (START_COLOR != null) {
+        if (startColor != null) {
             out.print(" " + (9-rowNumber) + " ");
         }
         else{
@@ -84,19 +84,19 @@ public class DrawnChessBoard {
             drawSideHeader(out, 8-row);
             for (int col = 0; col < WIDTH; col++) {
                 if ((row + col) % 2 == 0) {
-                    if (START_COLOR != null) {
+                    if (startColor != null) {
                         setWhite(out);
                     } else {
                         setBlue(out);
                     }
                 } else {
-                    if (START_COLOR != null) {
+                    if (startColor != null) {
                         setBlue(out);
                     } else {
                         setWhite(out);
                     }
                 }
-                if (START_COLOR != null) {
+                if (startColor != null) {
                     playersColor(out, row, col, EscapeSequences.SET_TEXT_COLOR_MAGENTA, EscapeSequences.SET_TEXT_COLOR_BLACK);
                 }
                 else {
@@ -114,19 +114,19 @@ public class DrawnChessBoard {
         if (row == 0) {
             out.print(setTextColorBlack);
             out.print(SET_TEXT_BOLD);
-            out.print(OPPOSING_PLAYERS[col]);
+            out.print(opposingPlayers[col]);
         } else if (row == 1) {
             out.print(setTextColorBlack);
             out.print(SET_TEXT_BOLD);
-            out.print(OPPOSING_PAWN);
+            out.print(opposingPawn);
         } else if (row == 6) {
             out.print(setTextColorMagenta);
             out.print(SET_TEXT_BOLD);
-            out.print(START_PAWN);
+            out.print(startPawn);
         } else if (row == 7) {
             out.print(setTextColorMagenta);
             out.print(SET_TEXT_BOLD);
-            out.print(START_PLAYERS[col]);
+            out.print(startPlayers[col]);
         } else {
             out.print(EMPTY);
         }
@@ -148,7 +148,7 @@ public class DrawnChessBoard {
     }
 
     public static void main(String[] args) {
-        ChessBoard("WHITE");
+        chessBoard("WHITE");
         // this is for testing purposes
     }
 }

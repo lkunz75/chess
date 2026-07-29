@@ -122,7 +122,7 @@ public class ChessClient {
     }
 
     public String observe(String...params) throws Exception {
-        DrawnChessBoard.ChessBoard("WHITE");
+        DrawnChessBoard.chessBoard("WHITE");
         return String.format("Observing Game %s", params[0]);
     }
 
@@ -137,7 +137,7 @@ public class ChessClient {
             }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
-            DrawnChessBoard.ChessBoard(color);
+            DrawnChessBoard.chessBoard(color);
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
