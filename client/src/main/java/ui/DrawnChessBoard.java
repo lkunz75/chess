@@ -32,7 +32,7 @@ public class DrawnChessBoard {
             startColor = color;
         }
         else {
-        headers = new String[]{"a", "b", "c", "b", "e", "f", "g", "h"};
+        headers = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
         startPlayers = WHITE_PLAYERS;
         opposingPlayers = BLACK_PLAYERS;
         startPawn = WHITE_PAWN;
@@ -45,20 +45,26 @@ public class DrawnChessBoard {
 
     private static void drawHeaders(PrintStream out, String[] headers) {
         setGray(out);
-        out.print("   ");
+        out.print("  ");
         out.print(SET_TEXT_BOLD);
         for (int boardCol = 0; boardCol < WIDTH; ++boardCol) {
-            drawHeader(out, headers[boardCol]);
+            if (boardCol == 3) {
+                out.print(" ");
+                drawHeader(out, headers[boardCol]);
+            }
+            else {
+                out.print(" ");
+                drawHeader(out, headers[boardCol]);
+                out.print(" ");
+            }
         }
-        out.print(" ");
+        out.print("   ");
         out.print(RESET_BG_COLOR);
         out.println();
     }
 
     private static void drawHeader(PrintStream out, String headerText) {
-        out.print(" ");
         printHeaderText(out, headerText);
-        out.print("  ");
     }
 
     private static void drawSideHeader(PrintStream out, int rowNumber) {
@@ -73,6 +79,7 @@ public class DrawnChessBoard {
     }
 
     private static void printHeaderText(PrintStream out, String player) {
+        out.print(" ");
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(player);
@@ -87,11 +94,11 @@ public class DrawnChessBoard {
                     if (startColor != null) {
                         setWhite(out);
                     } else {
-                        setBlue(out);
+                        setDarkGray(out);
                     }
                 } else {
                     if (startColor != null) {
-                        setBlue(out);
+                        setDarkGray(out);
                     } else {
                         setWhite(out);
                     }
@@ -137,7 +144,7 @@ public class DrawnChessBoard {
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
-    private static void setBlue(PrintStream out) {
+    private static void setDarkGray(PrintStream out) {
         out.print(SET_BG_COLOR_DARK_GREY);
         out.print(SET_TEXT_COLOR_DARK_GREY);
     }
