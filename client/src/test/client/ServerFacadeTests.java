@@ -1,6 +1,5 @@
 package client;
 
-import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
 
 import server.Server;
@@ -29,7 +28,7 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
-    void clear() throws DataAccessException {
+    void clear() throws Exception {
         DeleteRequest delete = new DeleteRequest();
         DeleteUserRequest deleteUser = new DeleteUserRequest();
         facade.delete(delete, deleteUser);
@@ -44,7 +43,7 @@ public class ServerFacadeTests {
     // REGISTER
     @DisplayName("Positive RegisterTest")
     @Test
-    void registerPositive() throws DataAccessException {
+    void registerPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("player1", "password", "p1@email.com");
         var authData = facade.register(request);
         assertTrue(authData.authToken().length() > 10);
@@ -52,14 +51,14 @@ public class ServerFacadeTests {
 
     @DisplayName("Negative RegisterTest")
     @Test
-    void registerNegative() throws DataAccessException {
+    void registerNegative() throws Exception {
         RegisterRequest request = new RegisterRequest("player1", "password", "p1@email.com");
         var authData = facade.register(request);
         RegisterRequest requestNegative = new RegisterRequest("player1", "password", "p1@email.com");
         try {
             var authDataNegative = facade.register(requestNegative);
             fail("Allowing duplicate users");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             // System.out.println(e.getMessage());
             assertTrue(e.getMessage().contains("taken"));
         }
@@ -68,7 +67,7 @@ public class ServerFacadeTests {
     //LOGIN
     @DisplayName("Positive LoginTest")
     @Test
-    void loginPositive() throws DataAccessException {
+    void loginPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("player1", "password", "p1@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "password");
@@ -78,12 +77,12 @@ public class ServerFacadeTests {
 
     @DisplayName("Negative LoginTest")
     @Test
-    void loginNegative() throws DataAccessException {
+    void loginNegative() throws Exception {
         LoginRequest loginRequest = new LoginRequest("george", "password");
         try {
             var loginData = facade.login(loginRequest);
             fail("You are letting someone with invalid credentials login");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             // System.out.println(e.getMessage());
             assertTrue(e.getMessage().contains("Unauthorized"));
         }
@@ -92,7 +91,7 @@ public class ServerFacadeTests {
     // LOGOUT
     @DisplayName("Positive LogoutTest")
     @Test
-    void logoutPositive() throws DataAccessException {
+    void logoutPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("player1", "password", "p1@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "password");
@@ -104,12 +103,12 @@ public class ServerFacadeTests {
 
     @DisplayName("Negative LogoutTest")
     @Test
-    void logoutNegative() throws DataAccessException {
+    void logoutNegative() throws Exception {
         LogoutRequest logoutRequest = new LogoutRequest("12345gn");
         try {
             var logoutData = facade.logout(logoutRequest);
             fail("Letting someone with an invalid authToken logout");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("Unauthorized"));
         }
     }
@@ -117,7 +116,7 @@ public class ServerFacadeTests {
     // DELETE
     @DisplayName("Positive Delete")
     @Test
-    void deletePositive() throws DataAccessException {
+    void deletePositive() throws Exception {
         RegisterRequest request = new RegisterRequest("player1", "password", "p1@email.com");
         var authData = facade.register(request);
         DeleteRequest delete = new DeleteRequest();
@@ -127,7 +126,7 @@ public class ServerFacadeTests {
         try {
             var loginData = facade.login(loginRequest);
             fail("Not deleting data as it should");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("Unauthorized"));
         }
     }
@@ -135,7 +134,7 @@ public class ServerFacadeTests {
     //CREATE
     @DisplayName("Positive CreateTest")
     @Test
-    void createPositive() throws DataAccessException {
+    void createPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -148,7 +147,7 @@ public class ServerFacadeTests {
     //CREATE
     @DisplayName("Negative CreateTest")
     @Test
-    void createNegative() throws DataAccessException {
+    void createNegative() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -158,7 +157,7 @@ public class ServerFacadeTests {
         try {
             facade.create(createRequest);
             fail("Created an already created game");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("Bad"));
         }
     }
@@ -166,7 +165,7 @@ public class ServerFacadeTests {
     //LIST
     @DisplayName("Positive ListTest")
     @Test
-    void listPositive() throws DataAccessException {
+    void listPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -180,7 +179,7 @@ public class ServerFacadeTests {
 
     @DisplayName("Negative ListTest")
     @Test
-    void listNegative() throws DataAccessException {
+    void listNegative() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -191,7 +190,7 @@ public class ServerFacadeTests {
         try {
             facade.list(listRequest);
             fail("Invalid authToken, but still listed games!");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("Unauthorized"));
         }
     }
@@ -199,7 +198,7 @@ public class ServerFacadeTests {
     // Join
     @DisplayName("Positive JoinTest")
     @Test
-    void joinPositive() throws DataAccessException {
+    void joinPositive() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -214,7 +213,7 @@ public class ServerFacadeTests {
 
     @DisplayName("Negative JoinTest")
     @Test
-    void joinNegative() throws DataAccessException {
+    void joinNegative() throws Exception {
         RegisterRequest request = new RegisterRequest("Jane", "janey", "jane@email.com");
         var authData = facade.register(request);
         LoginRequest loginRequest = new LoginRequest(authData.username(), "janey");
@@ -231,7 +230,7 @@ public class ServerFacadeTests {
         try {
             facade.join(joinRequest2);
             fail("This color was already taken, but you are letting them join anyways!");
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             assertTrue(e.getMessage().contains("taken"));
         }
     }

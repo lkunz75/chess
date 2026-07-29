@@ -1,10 +1,8 @@
 package client; // needs to be moved, but not sure how to still access gamerequests
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import service.gamerequests.*;
 import service.userrequests.*;
-
 
 import java.net.URI;
 import java.net.http.HttpClient;
