@@ -8,10 +8,10 @@ import static ui.EscapeSequences.*;
 public class DrawnChessBoard {
     private static final int HEIGHT = 8;
     private static final int WIDTH = 8;
-    private static final String[] BLACK_PLAYERS = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN,
-            BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
-    private static final String[] WHITE_PLAYERS = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN,
-            WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
+    private static final String[] BLACK_PLAYERS = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP,
+            BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
+    private static final String[] WHITE_PLAYERS = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP,
+            WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
     private static String[] startPlayers;
     private static String[] opposingPlayers;
     private static String startPawn;
@@ -95,17 +95,10 @@ public class DrawnChessBoard {
             drawSideHeader(out, 8-row);
             for (int col = 0; col < WIDTH; col++) {
                 if ((row + col) % 2 == 0) {
-                    if (startColor != null) {
-                        setDarkGray(out);
-                    } else {
-                        setWhite(out);
-                    }
+                    setWhite(out);
+
                 } else {
-                    if (startColor != null) {
-                        setWhite(out);
-                    } else {
-                        setDarkGray(out);
-                    }
+                    setDarkGray(out);
                 }
                 if (startColor != null) {
                     playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);

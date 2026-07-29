@@ -134,9 +134,12 @@ public class ChessClient {
     }
 
     public String observe(String...params) throws Exception {
-        out.print(ERASE_SCREEN);
-        DrawnChessBoard.chessBoard("WHITE");
-        return String.format("Observing Game %s", params[0]);
+        if (params.length > 0) {
+            out.print(ERASE_SCREEN);
+            DrawnChessBoard.chessBoard("WHITE");
+            return String.format("Observing Game %s", params[0]);
+        }
+        throw new Exception("Expected: <gameID>");
     }
 
     public String join(String...params) throws Exception {
