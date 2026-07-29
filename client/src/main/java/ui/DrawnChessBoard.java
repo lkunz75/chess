@@ -18,12 +18,11 @@ public class DrawnChessBoard {
     private static String opposingPawn;
     private static String startColor = null;
 
-
     public static void chessBoard(String color) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         String[] headers = {};
-        if ("BLACK".equals(color)) {
+        if (color.equals("BLACK")) {
             headers = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
             startPlayers = BLACK_PLAYERS;
             startPawn = BLACK_PAWN;
@@ -31,16 +30,21 @@ public class DrawnChessBoard {
             opposingPlayers = WHITE_PLAYERS;
             startColor = color;
         }
-        else {
-        headers = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
-        startPlayers = WHITE_PLAYERS;
-        opposingPlayers = BLACK_PLAYERS;
-        startPawn = WHITE_PAWN;
-        opposingPawn = BLACK_PAWN;
+        if (color.equals("WHITE")) {
+            headers = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
+            startPlayers = WHITE_PLAYERS;
+            opposingPlayers = BLACK_PLAYERS;
+            startPawn = WHITE_PAWN;
+            opposingPawn = BLACK_PAWN;
+            startColor = null;
         }
         drawHeaders(out, headers);
         drawBoard(out);
         drawHeaders(out, headers);
+        startPlayers = null;
+        opposingPlayers = null;
+        startPawn = null;
+        opposingPawn = null;
     }
 
     private static void drawHeaders(PrintStream out, String[] headers) {
@@ -92,19 +96,19 @@ public class DrawnChessBoard {
             for (int col = 0; col < WIDTH; col++) {
                 if ((row + col) % 2 == 0) {
                     if (startColor != null) {
-                        setWhite(out);
-                    } else {
                         setDarkGray(out);
+                    } else {
+                        setWhite(out);
                     }
                 } else {
                     if (startColor != null) {
-                        setDarkGray(out);
-                    } else {
                         setWhite(out);
+                    } else {
+                        setDarkGray(out);
                     }
                 }
                 if (startColor != null) {
-                    playersColor(out, row, col, EscapeSequences.SET_TEXT_COLOR_MAGENTA, EscapeSequences.SET_TEXT_COLOR_BLACK);
+                    playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
                 }
                 else {
                     playersColor(out, row, col, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
@@ -117,21 +121,21 @@ public class DrawnChessBoard {
         }
     }
 
-    private static void playersColor(PrintStream out, int row, int col, String setTextColorBlack, String setTextColorMagenta) {
+    private static void playersColor(PrintStream out, int row, int col, String opposingColor, String homeColor) {
         if (row == 0) {
-            out.print(setTextColorBlack);
+            out.print(opposingColor);
             out.print(SET_TEXT_BOLD);
             out.print(opposingPlayers[col]);
         } else if (row == 1) {
-            out.print(setTextColorBlack);
+            out.print(opposingColor);
             out.print(SET_TEXT_BOLD);
             out.print(opposingPawn);
         } else if (row == 6) {
-            out.print(setTextColorMagenta);
+            out.print(homeColor);
             out.print(SET_TEXT_BOLD);
             out.print(startPawn);
         } else if (row == 7) {
-            out.print(setTextColorMagenta);
+            out.print(homeColor);
             out.print(SET_TEXT_BOLD);
             out.print(startPlayers[col]);
         } else {
@@ -152,10 +156,5 @@ public class DrawnChessBoard {
     private static void setGray(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_LIGHT_GREY);
-    }
-
-    public static void main(String[] args) {
-        chessBoard("WHITE");
-        // this is for testing purposes
     }
 }

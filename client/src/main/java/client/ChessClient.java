@@ -9,6 +9,7 @@ import ui.DrawnChessBoard;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import static java.lang.System.out;
 import static ui.EscapeSequences.*;
 
 // DO I NEED TO HAVE A DELETE DATA? They shouldn't have access to that right?
@@ -24,7 +25,7 @@ public class ChessClient {
     }
 
     public void run() {
-        System.out.println("♕ Welcome to 240 Chess. Type help to get started. ♕");
+        out.println("♕ Welcome to 240 Chess. Type help to get started. ♕");
         Scanner scanner = new Scanner(System.in);
         var result = " ";
         while (!"quit".equals(result)) {
@@ -32,16 +33,16 @@ public class ChessClient {
             String line = scanner.nextLine();
             try {
                 result = eval(line);
-                System.out.print(SET_TEXT_COLOR_MAGENTA  + result);
+                out.print(SET_TEXT_COLOR_MAGENTA  + result);
             } catch (Exception e) {
                 var message = e.toString();
-                System.out.print(message);
+                out.print(message);
             }
         }
         username = null;
         state = State.SIGNEDOUT;
         authToken = null;
-        System.out.println();
+        out.println();
     }
 
     public String eval(String input) {
@@ -67,7 +68,7 @@ public class ChessClient {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     public String register(String...params) throws Exception {
@@ -116,12 +117,24 @@ public class ChessClient {
         var result = new StringBuilder();
         var gson = new Gson();
         for (GameInfo game : games.games()) {
-            result.append(gson.toJson(game)).append('\n');
+            String blackUsername = "blackUsername: " + game.blackUsername();
+            String whiteUsername = "whiteUsername: " + game.whiteUsername();
+            if (blackUsername.contains("null")) {
+                blackUsername = "blackUsername: available";
+            }
+            if (whiteUsername.contains("null")) {
+                whiteUsername = "whiteUsername: available";
+            }
+            String gameID = "gameID: " + game.gameID();
+            String gameName = "gameName: " + game.gameName();
+            String prettyGames = "[" + gameID + ", " + blackUsername + ", " + whiteUsername + ", " + gameName + "]\n";
+            result.append(prettyGames);
         }
         return result.toString();
     }
 
     public String observe(String...params) throws Exception {
+        out.print(ERASE_SCREEN);
         DrawnChessBoard.chessBoard("WHITE");
         return String.format("Observing Game %s", params[0]);
     }
@@ -138,6 +151,7 @@ public class ChessClient {
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
             DrawnChessBoard.chessBoard(color);
+            out.print(ERASE_SCREEN);
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
