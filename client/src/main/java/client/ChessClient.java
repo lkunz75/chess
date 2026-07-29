@@ -133,8 +133,13 @@ public class ChessClient {
 
     public String join(String...params) throws DataAccessException {
         assertSignedIn();
+        int gameID = 0;
         if (params.length >= 2) {
-            int gameID = Integer.parseInt(params[0]);
+            try {
+                gameID = Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                throw new DataAccessException("Error: gameID must be an integer!");
+            }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
             DrawnChessBoard.ChessBoard(color);
