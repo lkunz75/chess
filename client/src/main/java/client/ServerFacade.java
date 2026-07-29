@@ -1,7 +1,6 @@
 package client; // needs to be moved, but not sure how to still access gamerequests
 
 import com.google.gson.Gson;
-
 import dataaccess.DataAccessException;
 import service.gamerequests.*;
 import service.userrequests.*;
@@ -11,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.HashMap;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -21,26 +21,26 @@ public class ServerFacade {
     }
 
 
-    public RegisterResult register(RegisterRequest registerRequest) throws DataAccessException {
+    public RegisterResult register(RegisterRequest registerRequest) throws Exception {
         var request = buildRequest("POST", "/user", registerRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
-    public LoginResult login(LoginRequest loginRequest) throws DataAccessException {
+    public LoginResult login(LoginRequest loginRequest) throws Exception {
         var request = buildRequest("POST", "/session", loginRequest, null);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
-    public LogoutResult logout(LogoutRequest logoutRequest) throws DataAccessException {
+    public LogoutResult logout(LogoutRequest logoutRequest) throws Exception {
         var request = buildRequest("DELETE", "/session", logoutRequest, logoutRequest.authToken());
         // uses authorization header!!
         var response = sendRequest(request);
         return handleResponse(response, LogoutResult.class);
     }
 
-    public void delete(DeleteRequest deleteRequest, DeleteUserRequest deleteUserRequest) throws DataAccessException {
+    public void delete(DeleteRequest deleteRequest, DeleteUserRequest deleteUserRequest) throws Exception {
         var request = buildRequest("DELETE", "/db", deleteRequest, null);
         var response = sendRequest(request);
         handleResponse(response, DeleteResult.class);
@@ -49,19 +49,19 @@ public class ServerFacade {
         handleResponse(response, DeleteUserResult.class);
     }
 
-    public CreateResult create(CreateRequest createRequest) throws DataAccessException {
+    public CreateResult create(CreateRequest createRequest) throws Exception {
         var request = buildRequest("POST", "/game", createRequest, createRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, CreateResult.class);
     }
 
-    public ListResult list(ListRequest listRequest) throws DataAccessException {
+    public ListResult list(ListRequest listRequest) throws Exception {
         var request = buildRequest("GET", "/game", listRequest, listRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, ListResult.class);
     }
 
-    public JoinResult join(JoinRequest joinRequest) throws DataAccessException {
+    public JoinResult join(JoinRequest joinRequest) throws Exception {
         var request = buildRequest("PUT", "/game", joinRequest, joinRequest.authToken());
         var response = sendRequest(request);
         return handleResponse(response, JoinResult.class);
@@ -89,22 +89,24 @@ public class ServerFacade {
         return HttpRequest.BodyPublishers.noBody();
     }
     
-    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws DataAccessException {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
         var status = response.statusCode();
         if (!isSuccessful(status)) {
             var body = response.body();
             if (body!= null) {
-                throw DataAccessException.fromJson(body);
+                var map = new Gson().fromJson(body, HashMap.class);
+                String message = map.get("message").toString();
+                throw new Exception(message.substring(3));
             }
-            throw new DataAccessException(String.valueOf(status)); // to make it a string
+            throw new Exception(String.valueOf(status)); // to make it a string
         }
         if (responseClass != null) {
             return new Gson().fromJson(response.body(), responseClass);
