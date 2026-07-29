@@ -1,12 +1,10 @@
 package service;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import dataaccess.MemoryDataAccess;
-import dataaccess.UserDataAccess;
 import model.AuthData;
 import model.UserData;
-import org.mindrot.jbcrypt.BCrypt;
 import service.userrequests.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     DataAccess dataAccess;

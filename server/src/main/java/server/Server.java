@@ -3,12 +3,12 @@ package server;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import dataaccess.*;
+import service.gamerequests.*;
+import service.userrequests.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import model.UserData;
 import service.*;
-import service.gamerequests.*;
-import service.userrequests.*;
 
 public class Server {
 

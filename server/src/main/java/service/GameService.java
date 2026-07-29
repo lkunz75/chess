@@ -2,11 +2,10 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import dataaccess.UserDataAccess;
+import service.gamerequests.*;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
-import service.gamerequests.*;
 
 import java.util.List;
 

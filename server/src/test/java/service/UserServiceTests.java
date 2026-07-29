@@ -1,12 +1,12 @@
 package service;
 
+import service.userrequests.*;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.userrequests.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

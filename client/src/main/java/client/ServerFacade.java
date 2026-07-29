@@ -1,4 +1,4 @@
-package server; // needs to be moved, but not sure how to still access gamerequests
+package client; // needs to be moved, but not sure how to still access gamerequests
 
 import com.google.gson.Gson;
 

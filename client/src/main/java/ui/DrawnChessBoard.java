@@ -87,9 +87,17 @@ public class DrawnChessBoard {
             drawSideHeader(out, 8-row);
             for (int col = 0; col < WIDTH; col++) {
                 if ((row + col) % 2 == 0) {
-                    setWhite(out);
+                    if (START_COLOR != null) {
+                        setWhite(out);
+                    } else {
+                        setBlue(out);
+                    }
                 } else {
-                    setBlue(out);
+                    if (START_COLOR != null) {
+                        setBlue(out);
+                    } else {
+                        setWhite(out);
+                    }
                 }
                 if (START_COLOR != null) {
                     playersColor(out, row, col, EscapeSequences.SET_TEXT_COLOR_MAGENTA, EscapeSequences.SET_TEXT_COLOR_BLACK);

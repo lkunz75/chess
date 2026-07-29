@@ -2,11 +2,10 @@ package client;
 
 import dataaccess.DataAccessException;
 import org.junit.jupiter.api.*;
-import server.Server;
-import server.ServerFacade;
-import service.gamerequests.*;
-import service.userrequests.*;
 
+import server.Server;
+import service.userrequests.*;
+import service.gamerequests.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 

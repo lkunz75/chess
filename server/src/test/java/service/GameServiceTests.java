@@ -1,14 +1,13 @@
 package service;
 
+import service.gamerequests.*;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryDataAccess;
-import dataaccess.UserDataAccess;
 import model.GameInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import service.gamerequests.*;
 import service.userrequests.DeleteUserRequest;
 import service.userrequests.DeleteUserResult;
 import service.userrequests.RegisterRequest;

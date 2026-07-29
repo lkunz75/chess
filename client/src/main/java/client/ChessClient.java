@@ -3,11 +3,7 @@ package client;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.GameInfo;
-import server.ServerFacade;
-import service.gamerequests.CreateRequest;
-import service.gamerequests.JoinRequest;
-import service.gamerequests.ListRequest;
-import service.gamerequests.ListResult;
+import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
 
