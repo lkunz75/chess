@@ -1,7 +1,6 @@
 package client;
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import model.GameInfo;
 import service.gamerequests.*;
 import service.userrequests.*;
@@ -62,7 +61,7 @@ public class ChessClient {
                 case "quit" -> "quit";
                 default -> help();
             };
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             return e.getMessage();
         }
     }
@@ -71,7 +70,7 @@ public class ChessClient {
         System.out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
-    public String register(String...params) throws DataAccessException {
+    public String register(String...params) throws Exception {
         if (params.length >= 3) {
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
             RegisterResult registerResult = server.register(registerRequest);
@@ -80,10 +79,10 @@ public class ChessClient {
             authToken = registerResult.authToken();
             return String.format("You signed in as %s", username);
         }
-        throw new DataAccessException("Expected: <username>, <password>, <email>");
+        throw new Exception("Expected: <username>, <password>, <email>");
     }
 
-    public String login(String...params) throws DataAccessException {
+    public String login(String...params) throws Exception {
         if (params.length >= 2) {
             LoginResult loginResult = server.login(new LoginRequest(params[0], params[1]));
             authToken = loginResult.authToken();
@@ -92,26 +91,26 @@ public class ChessClient {
             // Do I need ws here?
             return String.format("You signed in as %s", username);
         }
-        throw new DataAccessException("Expected: <username>, <password>");
+        throw new Exception("Expected: <username>, <password>");
     }
 
-    public String logout() throws DataAccessException {
+    public String logout() throws Exception {
         state = State.SIGNEDOUT;
         username = null;
         server.logout(new LogoutRequest(authToken));
         return "You are now signed out.";
     }
 
-    public String create(String...params) throws DataAccessException {
+    public String create(String...params) throws Exception {
         assertSignedIn();
         if (params.length >= 1) {
             server.create(new CreateRequest(authToken, params[0]));
             return String.format("Game created %s", params[0]);
         }
-        throw new DataAccessException("Expected <gameName>");
+        throw new Exception("Expected <gameName>");
     }
 
-    public String list() throws DataAccessException {
+    public String list() throws Exception {
         assertSignedIn();
         ListResult games = server.list(new ListRequest(authToken));
         var result = new StringBuilder();
@@ -122,26 +121,26 @@ public class ChessClient {
         return result.toString();
     }
 
-    public String observe(String...params) throws DataAccessException {
+    public String observe(String...params) throws Exception {
         DrawnChessBoard.ChessBoard("WHITE");
         return String.format("Observing Game %s", params[0]);
     }
 
-    public String join(String...params) throws DataAccessException {
+    public String join(String...params) throws Exception {
         assertSignedIn();
         int gameID = 0;
         if (params.length >= 2) {
             try {
                 gameID = Integer.parseInt(params[0]);
             } catch (NumberFormatException e) {
-                throw new DataAccessException("Error: gameID must be an integer!");
+                throw new Exception("Error: gameID must be an integer!");
             }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
             DrawnChessBoard.ChessBoard(color);
             return String.format("Joined game %s, as %s", gameID, color);
         }
-        throw new DataAccessException("Expected: <gameID>, <WHITE|BLACK>");
+        throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
 
     public String help() {
@@ -164,9 +163,9 @@ public class ChessClient {
                 """;
     }
 
-    private void assertSignedIn() throws DataAccessException {
+    private void assertSignedIn() throws Exception {
         if (state == State.SIGNEDOUT) {
-            throw new DataAccessException("You must sign in.");
+            throw new Exception("You must sign in.");
         }
     }
 }
