@@ -17,8 +17,20 @@ public class ServerMessage {
         NOTIFICATION
     }
 
+    // have another class that has extends ServerMessage because different messages will need different things
+    // make one for load_game, one for error, and one for notification
+
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
+        if (type == ServerMessageType.LOAD_GAME) {
+            // have another class that handles load_game notification
+        }
+        else if (type == ServerMessageType.ERROR) {
+
+        }
+        else if (type == ServerMessageType.NOTIFICATION) {
+
+        }
     }
 
     public ServerMessageType getServerMessageType() {
