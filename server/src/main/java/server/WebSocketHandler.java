@@ -58,15 +58,15 @@ public class WebSocketHandler {
         // make sure that the person is authorized (make a function for that)
         connections.add(gameID, session);
         var message = String.format("%s joined the game", username); // determine which side
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "connect", username);
     }
 
     public void leaveGame(Session session, String username, String authToken, Integer gameID) throws IOException {
         var message = String.format("%s has left the game", username);
-        var notification = new UserGameCommand(session, UserGameCommand.CommandType.RESIGN, authToken, gameID);
-        //notification here needs to be a ServerMessage and right now it's a UserGameCommand
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        var updatedNotification = notification.message( ServerMessage.ServerMessageType.LOAD_GAME, "leave", username);
         connections.broadcast(session, notification);
-        connections.remove(session);
+        connections.remove(gameID, session);
     }
 
 

@@ -15,19 +15,25 @@ public class ConnectionManager {
 
     public void add(Integer gameID, Session session) {
         // come back and figure out how to put session into your list
-        connections.put(gameID, session);
+        List<Session> sessions = connections.get(gameID);
+        sessions.add(session);
+        connections.put(gameID, sessions);
     }
 
-    public void remove(Session session) {
-        connections.remove(session);
+    public void remove(Integer gameID, Session session) {
+        List<Session> sessions = connections.get(gameID);
+        sessions.remove(session);
+        connections.put(gameID, sessions); // putting the new one in
     }
 
     // figure out how to serialize it in this
 
     public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
-        for (Session s: connections.values()) {
-            if (s.isOpen() && !s.equals(excludeSession)) {
-                s.getRemote().sendString(notification);
+        for (List s: connections.values()) {
+            for (Object session : s) {
+                if (session.isOpen() && !session.equals(excludeSession)) {
+                    session.getRemote().sendString(notification);
+                }
             }
         }
     }

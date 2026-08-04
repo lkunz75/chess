@@ -22,13 +22,17 @@ public class ServerMessage {
 
     public ServerMessage(ServerMessageType type) {
         this.serverMessageType = type;
-        if (type == ServerMessageType.LOAD_GAME) {
-            // have another class that handles load_game notification
-        }
-        else if (type == ServerMessageType.ERROR) {
+    }
+
+    public ServerMessage message(ServerMessageType type, String function, String username) {
+        if (type.equals(ServerMessageType.LOAD_GAME)) {
+            return LoadGameMessage.loadGameMessage(function, username);
 
         }
-        else if (type == ServerMessageType.NOTIFICATION) {
+        else if (type.equals(ServerMessageType.ERROR)) {
+
+        }
+        else if (serverMessageType == ServerMessageType.NOTIFICATION) {
 
         }
     }
