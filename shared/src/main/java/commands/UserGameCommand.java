@@ -45,18 +45,6 @@ public class UserGameCommand {
     /* CONNECT
     * used for a user to make a WebSocket connection
     * as a player or observer*/
-    public String connect() {
-        // get something to check if its even valid
-        if (getAuthToken() != null && getGameID() > 0) {
-            // connect to WebSocket
-
-        }
-    }
-
-    /* LEAVE
-     * tells the server you are leaving the game
-     * so notifications stop
-     */
 
     /* RESIGN
     * forfeits the match and ends the game

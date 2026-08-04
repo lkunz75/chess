@@ -1,5 +1,8 @@
 package messages;
 
+import chess.ChessGame;
+import model.GameData;
+
 import java.util.Objects;
 
 /**
@@ -24,14 +27,15 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public String message(ServerMessageType type, String function, String username) {
+    public String message(ServerMessageType type, String function, String username, String playerColor, ChessGame gameData) throws Exception {
         if (type.equals(ServerMessageType.LOAD_GAME)) {
-            return LoadGameMessage.loadGameMessage(function, username);
+            return LoadGameMessage.loadGame(playerColor, gameData);
         }
         else if (type.equals(ServerMessageType.ERROR)) {
 
         }
         else if (serverMessageType == ServerMessageType.NOTIFICATION) {
+            return NotificationMessage.notificationMessage(function, username, playerColor);
 
         }
     }
