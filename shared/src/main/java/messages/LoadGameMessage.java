@@ -5,12 +5,12 @@ public class LoadGameMessage extends ServerMessage {
         super(type);
     }
 
-    public static ServerMessage loadGameMessage(String function, String username) {
+    public static String loadGameMessage(String function, String username) {
         if (function.equals("connect")) {
-            return new ServerMessage("%s has joined the game.", username);
+            return String.format("%s has joined the game.", username);
         }
         if (function.equals("leave")) {
-            return new ServerMessage("%s has left the game.", username);
+            return String.format("%s has left the game.", username);
         }
         return "Error: Invalid";
     }

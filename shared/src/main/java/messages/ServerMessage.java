@@ -24,10 +24,9 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public ServerMessage message(ServerMessageType type, String function, String username) {
+    public String message(ServerMessageType type, String function, String username) {
         if (type.equals(ServerMessageType.LOAD_GAME)) {
             return LoadGameMessage.loadGameMessage(function, username);
-
         }
         else if (type.equals(ServerMessageType.ERROR)) {
 

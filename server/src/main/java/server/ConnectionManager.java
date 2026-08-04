@@ -2,7 +2,6 @@ package server;
 
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
-import messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,12 +27,12 @@ public class ConnectionManager {
 
     // figure out how to serialize it in this
 
-    public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
-        for (List s: connections.values()) {
-            for (Object session : s) {
-                if (session.isOpen() && !session.equals(excludeSession)) {
-                    session.getRemote().sendString(notification);
-                }
+    public void broadcast(Session excludeSession, Integer gameID, String notification) throws IOException {
+        List<Session> myConnections = connections.get(gameID);
+        // we can just go straight to the ones we want to deal with
+        for (Session connection: myConnections) {
+            if (connection.isOpen() && !connection.equals(excludeSession)) {
+                connection.getRemote().sendString(notification);
             }
         }
     }

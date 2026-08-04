@@ -2,18 +2,29 @@ package server;
 
 import com.google.gson.Gson;
 import commands.UserGameCommand;
+import dataaccess.DataAccess;
+import dataaccess.DataAccessException;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsMessageContext;
 import messages.ServerMessage;
+import model.AuthData;
+import model.GameData;
+import model.GameInfo;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import service.ErrorMessage;
 
 import java.io.IOException;
 import java.net.http.WebSocket;
+import java.util.List;
 
 public class WebSocketHandler {
     private final ConnectionManager connections = new ConnectionManager();
+    private final DataAccess dataAccess;
+
+    public WebSocketHandler(DataAccess dataAccess) {
+        this.dataAccess = dataAccess;
+    }
 
     @Override
     public void handleConnect(WsConnectContext context) {
@@ -46,28 +57,50 @@ public class WebSocketHandler {
         }
     }
 
-    private void saveSession(int gameId, Session session) {
+    private void saveSession(int gameID, Session session) {
         // figure out how to saveSession
+        connections.add(gameID, session);
     }
 
-    private String getUsername(String authToken) {
-        // figure out how to get username
+    private String getUsername(String authToken) throws DataAccessException {
+        try {
+            AuthData.AuthRecord authData = dataAccess.getAuthData(authToken);
+            return authData.username();
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
-    public void connect(Session session, String username, String authToken, Integer gameID) throws IOException {
+    private String getPlayerColor(String username, Integer gameID) throws DataAccessException {
+        List<GameInfo> gameData = dataAccess.listGames();
+        for (GameInfo info : gameData) {
+            if (info.gameID() == gameID) {
+                if (info.whiteUsername().equals(username)) {
+                    return "WHITE";
+                }
+                if (info.blackUsername().equals(username)) {
+                    return "BLACK";
+                }
+                throw new DataAccessException("Error: Player not a part of game");
+            }
+        }
+        throw new DataAccessException("Error: Invalid");
+    }
+
+    public void connect(Session session, String username, String authToken, Integer gameID) throws IOException, DataAccessException {
         // make sure that the person is authorized (make a function for that)
         connections.add(gameID, session);
-        var message = String.format("%s joined the game", username); // determine which side
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, "connect", username);
+        var message = String.format("%s joined the game as %s", username, getPlayerColor(username, gameID)); // determine which side
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        var updatedNotification = notification.message(ServerMessage.ServerMessageType.LOAD_GAME, "connect", username);
+        connections.broadcast(null, gameID, updatedNotification);
     }
 
     public void leaveGame(Session session, String username, String authToken, Integer gameID) throws IOException {
         var message = String.format("%s has left the game", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        var updatedNotification = notification.message( ServerMessage.ServerMessageType.LOAD_GAME, "leave", username);
-        connections.broadcast(session, notification);
+        var updatedNotification = notification.message(ServerMessage.ServerMessageType.LOAD_GAME, "leave", username);
+        connections.broadcast(null, gameID, updatedNotification);
         connections.remove(gameID, session);
     }
-
-
 }
