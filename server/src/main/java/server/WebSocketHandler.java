@@ -38,7 +38,7 @@ public class WebSocketHandler {
             String username = getUsername(command.getAuthToken());
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, command.getAuthToken(), command.getGameID());
-                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
+                case MAKE_MOVE -> makeMove(session, username, command.getAuthToken(), command.getGameID());
                 case LEAVE -> leaveGame(session, username, command.getAuthToken(), command.getGameID());
                 case RESIGN -> resign(session, username, command.getAuthToken(), command.getGameID());
             }
@@ -76,6 +76,7 @@ public class WebSocketHandler {
                 return "OBSERVER";
             }
         }
+        // this should probably be an error message from Notification Message instead
         throw new DataAccessException("Error: Invalid");
     }
 
@@ -83,13 +84,7 @@ public class WebSocketHandler {
         dataAccess.getAuthData(authToken);
     }
 
-    public void connect(Session session, String username, String authToken, Integer gameID) throws Exception {
-        checkAuth(authToken); // will throw an error if not there
-        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null, null);
-        saveSession(gameID, session);
-        connections.broadcast(session, gameID, updatedNotification);
-    }
-
+    // Just moved it
     public GameData getGameData (Integer gameID) throws DataAccessException {
         List<GameInfo> gameInfos = dataAccess.listGames();
         for (GameInfo info : gameInfos) {
@@ -100,12 +95,19 @@ public class WebSocketHandler {
         return null;
     }
 
+    public void connect(Session session, String username, String authToken, Integer gameID) throws Exception {
+        checkAuth(authToken); // will throw an error if not there
+        var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
+        saveSession(gameID, session);
+        connections.broadcast(session, gameID, updatedNotification);
+    }
+
     public void leaveGame(Session session, String username, String authToken, Integer gameID) throws Exception {
         checkAuth(authToken);
-        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, null, getGameData(gameID).game(), null);
+        var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, getPlayerColor(username, gameID), null);
         connections.broadcast(session, gameID, updatedNotification);
         connections.remove(gameID, session);
-        var sendGame = ServerMessage.message(ServerMessage.ServerMessageType.LOAD_GAME, "leave", username, null, getGameData(gameID).game(), null);
+        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
         session.getRemote().sendString(sendGame);
     }
 
@@ -120,12 +122,12 @@ public class WebSocketHandler {
         else {
             opposingUsername = gameData.whiteUsername();
         }
-        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), null, opposingUsername);
+        var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
         connections.broadcast(session, gameID, updatedNotification);
         connections.remove(gameID, session);
     }
 
-    public String sendMessage(Session session, Integer gameID, DataAccessException ex) {
-        return String.format("Error: %s for %s session for %d", ex.getMessage(), session, gameID);
+    public void makeMove(Session session, String username, String authToken, Integer gameID) {
+        // still working on the details
     }
 }

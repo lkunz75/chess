@@ -27,17 +27,18 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public static String message(ServerMessageType type, String function, String username, String playerColor, ChessGame gameData, String opposingPlayer) throws Exception {
+    public static String callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) throws Exception {
+        if (type.equals(ServerMessageType.NOTIFICATION)) {
+            return NotificationMessage.notificationMessage(function, username, playerColor, opposingPlayer);
+        }
+        throw new Exception("Error: Invalid");
+    }
+
+    public static String callLoadGameMessage(ServerMessageType type, String playerColor, ChessGame gameData) throws Exception {
         if (type.equals(ServerMessageType.LOAD_GAME)) {
             return LoadGameMessage.loadGame(playerColor, gameData);
         }
-        else if (type.equals(ServerMessageType.ERROR)) {
-
-        }
-        else if (type.equals(ServerMessageType.NOTIFICATION)) {
-            return NotificationMessage.notificationMessage(function, username, playerColor, opposingPlayer);
-
-        }
+        throw new Exception("Error: Invalid");
     }
 
     public ServerMessageType getServerMessageType() {
