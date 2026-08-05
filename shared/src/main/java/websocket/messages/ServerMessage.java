@@ -26,9 +26,19 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public static String callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) throws Exception {
+    public static NotificationMessage callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) throws Exception {
         if (type.equals(ServerMessageType.NOTIFICATION)) {
-            return NotificationMessage.notificationMessage(function, username, playerColor, opposingPlayer);
+            if (function.equals("connect")) {
+                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has joined the game as %s", username, playerColor));
+            }
+            else if (function.equals("leave")) {
+                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has left the game.", username));
+            }
+            else if (function.equals("resign")) {
+                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s resigns. %s wins the game!", username, opposingPlayer));
+
+            }
+
         }
         throw new Exception("Error: Invalid");
     }

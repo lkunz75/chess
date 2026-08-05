@@ -113,13 +113,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
         saveSession(gameID, session); // has nullptr
         session.getRemote().sendString(new Gson().toJson(sendGame));
-        connections.broadcast(session, gameID, updatedNotification);
+        connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
     }
 
     public void leaveGame(Session session, String username, String authToken, Integer gameID) throws Exception {
         checkAuth(authToken);
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, getPlayerColor(username, gameID), null);
-        connections.broadcast(session, gameID, updatedNotification);
+        connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
         session.getRemote().sendString(new Gson().toJson(sendGame));
@@ -137,7 +137,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opposingUsername = gameData.whiteUsername();
         }
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
-        connections.broadcast(session, gameID, updatedNotification);
+        connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
     }
 

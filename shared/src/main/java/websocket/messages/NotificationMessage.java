@@ -1,17 +1,17 @@
 package websocket.messages;
 
-public class NotificationMessage {
-    public static String notificationMessage(String function, String username, String playerColor, String opposing) {
-        if (function.equals("connect")) {
-            return String.format("%s has joined the game as %s", username, playerColor);
-        }
-        if (function.equals("leave")) {
-            return String.format("%s has left the game.", username);
-        }
-        if (function.equals("resign")) {
+import chess.ChessGame;
 
-            return String.format("%s has resigned. %s wins the game!", username, opposing);
-        }
-        return "Error: Invalid";
+public class NotificationMessage extends ServerMessage {
+    private final String message;
+
+
+    public NotificationMessage(ServerMessageType type, String message) {
+        super(type);
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }
