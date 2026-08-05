@@ -40,13 +40,15 @@ public class WebSocketHandler {
                 case CONNECT -> connect(session, username, command.getAuthToken(), command.getGameID());
                 case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
                 case LEAVE -> leaveGame(session, username, command.getAuthToken(), command.getGameID());
-                case RESIGN -> resign(session, username, (ResignCommand) command);
+                case RESIGN -> resign(session, username, command.getAuthToken(), command.getGameID());
             }
-        } catch (DataAccessException ex) {
-            sendMessage(session, gameID, new DataAccessException("Error: unauthorized"));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            sendMessage(session, gameID, new DataAccessException("Error: " + ex.getMessage()));
+        } catch(DataAccessException ex) {
+            var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.ERROR, null, null, null, null, null);
+            session.getRemote().sendString(updatedNotification);
+        }
+        catch (Exception ex) {
+            var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.ERROR, null, null, null, null, null);
+            connections.broadcast(session, gameID, updatedNotification);
         }
     }
 
@@ -83,18 +85,16 @@ public class WebSocketHandler {
 
     public void connect(Session session, String username, String authToken, Integer gameID) throws Exception {
         checkAuth(authToken); // will throw an error if not there
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        var updatedNotification = notification.message(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
+        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null, null);
         saveSession(gameID, session);
         connections.broadcast(session, gameID, updatedNotification);
     }
 
-    public ChessGame getGameData (Integer gameID) throws DataAccessException {
+    public GameData getGameData (Integer gameID) throws DataAccessException {
         List<GameInfo> gameInfos = dataAccess.listGames();
         for (GameInfo info : gameInfos) {
             if (info.gameID() == gameID) {
-                GameData gameData = dataAccess.getGame(info.gameName());
-                return gameData.game();
+                return dataAccess.getGame(info.gameName());
             }
         }
         return null;
@@ -102,18 +102,25 @@ public class WebSocketHandler {
 
     public void leaveGame(Session session, String username, String authToken, Integer gameID) throws Exception {
         checkAuth(authToken);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        var updatedNotification = notification.message(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, null, getGameData(gameID));
+        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, null, getGameData(gameID).game(), null);
         connections.broadcast(session, gameID, updatedNotification);
         connections.remove(gameID, session);
-        var sendGame = notification.message(ServerMessage.ServerMessageType.LOAD_GAME, "leave", username, null, getGameData(gameID));
+        var sendGame = ServerMessage.message(ServerMessage.ServerMessageType.LOAD_GAME, "leave", username, null, getGameData(gameID).game(), null);
         session.getRemote().sendString(sendGame);
     }
 
     public void resign(Session session, String username, String authToken, Integer gameID) throws Exception {
         checkAuth(authToken);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        var updatedNotification = notification.message(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), null);
+        GameData gameData = getGameData(gameID);
+        String playerColor = getPlayerColor(username, gameID);
+        String opposingUsername;
+        if (playerColor.equals("WHITE")) {
+            opposingUsername = gameData.blackUsername();
+        }
+        else {
+            opposingUsername = gameData.whiteUsername();
+        }
+        var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), null, opposingUsername);
         connections.broadcast(session, gameID, updatedNotification);
         connections.remove(gameID, session);
     }

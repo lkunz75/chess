@@ -27,15 +27,15 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public String message(ServerMessageType type, String function, String username, String playerColor, ChessGame gameData) throws Exception {
+    public static String message(ServerMessageType type, String function, String username, String playerColor, ChessGame gameData, String opposingPlayer) throws Exception {
         if (type.equals(ServerMessageType.LOAD_GAME)) {
             return LoadGameMessage.loadGame(playerColor, gameData);
         }
         else if (type.equals(ServerMessageType.ERROR)) {
 
         }
-        else if (serverMessageType == ServerMessageType.NOTIFICATION) {
-            return NotificationMessage.notificationMessage(function, username, playerColor);
+        else if (type.equals(ServerMessageType.NOTIFICATION)) {
+            return NotificationMessage.notificationMessage(function, username, playerColor, opposingPlayer);
 
         }
     }
