@@ -111,8 +111,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         // System.out.println(getGameData(gameID).game());
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
-        saveSession(gameID, session); // hass nullptr
-        System.out.println(sendGame);
+        saveSession(gameID, session); // has nullptr
         session.getRemote().sendString(new Gson().toJson(sendGame));
         connections.broadcast(session, gameID, updatedNotification);
     }

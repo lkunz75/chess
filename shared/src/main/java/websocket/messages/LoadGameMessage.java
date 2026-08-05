@@ -4,13 +4,13 @@ import chess.ChessGame;
 
 public class LoadGameMessage extends ServerMessage {
     private final String playerColor;
-    private final ChessGame chessGame;
+    private final ChessGame game;
 
 
-    public LoadGameMessage(ServerMessageType type, String playerColor, ChessGame chessGame) {
+    public LoadGameMessage(ServerMessageType type, String playerColor, ChessGame game) {
         super(type);
         this.playerColor = playerColor;
-        this.chessGame = chessGame;
+        this.game = game;
     }
 
     public String getPlayerColor() {
@@ -18,7 +18,7 @@ public class LoadGameMessage extends ServerMessage {
     }
 
     public ChessGame getChessGame() {
-        return chessGame;
+        return game;
     }
 }
 
