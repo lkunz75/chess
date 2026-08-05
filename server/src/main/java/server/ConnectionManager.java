@@ -4,6 +4,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,10 +14,17 @@ public class ConnectionManager {
     public final ConcurrentHashMap<Integer, List<Session>> connections = new ConcurrentHashMap<>();
 
     public void add(Integer gameID, Session session) {
-        // come back and figure out how to put session into your list
         List<Session> sessions = connections.get(gameID);
-        sessions.add(session);
-        connections.put(gameID, sessions);
+        // had a nullptr exception
+        if (sessions == null) {
+            List<Session> newList = new ArrayList<>();
+            newList.add(session);
+            connections.put(gameID, newList);
+        }
+        if (sessions != null) {
+            sessions.add(session);
+            connections.put(gameID, sessions);
+        }
     }
 
     public void remove(Integer gameID, Session session) {
@@ -29,10 +37,11 @@ public class ConnectionManager {
 
     public void broadcast(Session excludeSession, Integer gameID, String notification) throws IOException {
         List<Session> myConnections = connections.get(gameID);
-        // we can just go straight to the ones we want to deal with
-        for (Session connection: myConnections) {
-            if (connection.isOpen() && !connection.equals(excludeSession)) {
-                connection.getRemote().sendString(notification);
+        if (myConnections != null) {
+            for (Session connection : myConnections) {
+                if (connection.isOpen() && !connection.equals(excludeSession)) {
+                    connection.getRemote().sendString(notification);
+                }
             }
         }
     }

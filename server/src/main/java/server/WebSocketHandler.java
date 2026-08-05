@@ -2,20 +2,20 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import commands.UserGameCommand;
+import io.javalin.websocket.*;
+import websocket.commands.UserGameCommand;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import io.javalin.websocket.WsConnectContext;
-import io.javalin.websocket.WsMessageContext;
-import messages.ServerMessage;
+import websocket.messages.ServerMessage;
 import model.AuthData;
 import model.GameData;
 import model.GameInfo;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
 import java.util.List;
+import java.util.Objects;
 
-public class WebSocketHandler {
+public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
 
@@ -23,11 +23,13 @@ public class WebSocketHandler {
         this.dataAccess = dataAccess;
     }
 
+    @Override
     public void handleConnect(WsConnectContext context) {
         System.out.println("Websocket connected");
         context.enableAutomaticPings();
     }
 
+    @Override
     public void handleMessage(@NotNull WsMessageContext wsMessageContext) throws Exception {
         int gameID = -1;
         Session session = wsMessageContext.session;
@@ -43,17 +45,21 @@ public class WebSocketHandler {
                 case RESIGN -> resign(session, username, command.getAuthToken(), command.getGameID());
             }
         } catch(DataAccessException ex) {
-            var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.ERROR, null, null, null, null, null);
+            var updatedNotification = ServerMessage.errorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
             session.getRemote().sendString(updatedNotification);
         }
         catch (Exception ex) {
-            var updatedNotification = ServerMessage.message(ServerMessage.ServerMessageType.ERROR, null, null, null, null, null);
-            connections.broadcast(session, gameID, updatedNotification);
+            var updatedNotification = ServerMessage.errorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+            connections.broadcast(null, gameID, updatedNotification);
         }
     }
 
+    @Override
+    public void handleClose(@NotNull WsCloseContext wsCloseContext) throws Exception {
+        System.out.println("Websocket closed");
+    }
+
     private void saveSession(int gameID, Session session) {
-        // figure out how to saveSession
         connections.add(gameID, session);
     }
 
@@ -88,7 +94,7 @@ public class WebSocketHandler {
     public GameData getGameData (Integer gameID) throws DataAccessException {
         List<GameInfo> gameInfos = dataAccess.listGames();
         for (GameInfo info : gameInfos) {
-            if (info.gameID() == gameID) {
+            if (Objects.equals(info.gameID(), gameID)) {
                 return dataAccess.getGame(info.gameName());
             }
         }
@@ -96,9 +102,18 @@ public class WebSocketHandler {
     }
 
     public void connect(Session session, String username, String authToken, Integer gameID) throws Exception {
+        //might have to deserialze twice
         checkAuth(authToken); // will throw an error if not there
+        // System.out.println(getPlayerColor(username, gameID));
+        // System.out.println(authToken);
+        // System.out.println(username);
+        // System.out.println(gameID);
+        // System.out.println(getGameData(gameID).game());
+        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
-        saveSession(gameID, session);
+        saveSession(gameID, session); // hass nullptr
+        System.out.println(sendGame);
+        session.getRemote().sendString(new Gson().toJson(sendGame));
         connections.broadcast(session, gameID, updatedNotification);
     }
 
@@ -108,7 +123,7 @@ public class WebSocketHandler {
         connections.broadcast(session, gameID, updatedNotification);
         connections.remove(gameID, session);
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
-        session.getRemote().sendString(sendGame);
+        session.getRemote().sendString(new Gson().toJson(sendGame));
     }
 
     public void resign(Session session, String username, String authToken, Integer gameID) throws Exception {

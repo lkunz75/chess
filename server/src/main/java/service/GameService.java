@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import service.gamerequests.*;
@@ -42,7 +43,7 @@ public class GameService {
         else {
             if (service.dataAccess.getGame(createRequest.gameName()) == null) {
                 int newID = service.dataAccess.newGameID();
-                GameData game = new GameData(newID, null, null, createRequest.gameName(), null);
+                GameData game = new GameData(newID, null, null, createRequest.gameName(), new ChessGame());
                 service.dataAccess.createGame(game);
                 return new CreateResult(newID);
             }

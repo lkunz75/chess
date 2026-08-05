@@ -15,6 +15,7 @@ public class Server {
     private final Javalin javalin;
     private final UserService userService;
     private final GameService gameService;
+    private final WebSocketHandler webSocketHandler;
     DataAccess dataAccess;
 
     public Server() {
@@ -26,6 +27,7 @@ public class Server {
         }
         this.userService = new UserService(dataAccess);
         this.gameService = new GameService(dataAccess);
+        this.webSocketHandler = new WebSocketHandler(dataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
@@ -36,7 +38,11 @@ public class Server {
         javalin.post("/game", this::createHandler);
         javalin.get("/game", this::listHandler);
         javalin.put("/game", this::joinHandler);
-
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
+            });
     }
 
     public int run(int desiredPort) {

@@ -1,7 +1,6 @@
-package messages;
+package websocket.messages;
 
 import chess.ChessGame;
-import model.GameData;
 
 import java.util.Objects;
 
@@ -34,9 +33,16 @@ public class ServerMessage {
         throw new Exception("Error: Invalid");
     }
 
-    public static String callLoadGameMessage(ServerMessageType type, String playerColor, ChessGame gameData) throws Exception {
+    public static String errorMessage(ServerMessageType type, String message) throws Exception {
+        if (type.equals(ServerMessageType.ERROR)) {
+            return String.format(message);
+        }
+        throw new Exception("Error: Invalid");
+    }
+
+    public static LoadGameMessage callLoadGameMessage(ServerMessageType type, String playerColor, ChessGame gameData) throws Exception {
         if (type.equals(ServerMessageType.LOAD_GAME)) {
-            return LoadGameMessage.loadGame(playerColor, gameData);
+            return new LoadGameMessage(ServerMessageType.LOAD_GAME, playerColor, gameData);
         }
         throw new Exception("Error: Invalid");
     }

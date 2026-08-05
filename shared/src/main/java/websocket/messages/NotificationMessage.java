@@ -1,4 +1,4 @@
-package messages;
+package websocket.messages;
 
 public class NotificationMessage {
     public static String notificationMessage(String function, String username, String playerColor, String opposing) {

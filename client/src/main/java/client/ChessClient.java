@@ -19,6 +19,8 @@ public class ChessClient {
     private final ServerFacade server;
     private String authToken;
     private String username;
+    private Integer currentGameID;
+    private String currentColor;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -137,6 +139,7 @@ public class ChessClient {
         if (params.length > 0) {
             out.print(ERASE_SCREEN);
             DrawnChessBoard.chessBoard("WHITE");
+            state = State.OBSERVING;
             return String.format("Observing Game %s", params[0]);
         }
         throw new Exception("Expected: <gameID>");
@@ -155,10 +158,25 @@ public class ChessClient {
             server.join(new JoinRequest(authToken, color, gameID));
             DrawnChessBoard.chessBoard(color);
             out.print(ERASE_SCREEN);
+            state = State.JOINEDGAME;
+            currentGameID = gameID;
+            currentColor = color;
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
+
+    public String leave(String...params) throws Exception {
+        state = State.SIGNEDOUT;
+        // have to remove user from game if they were not just an observer
+        // have to send out a message to all
+        currentGameID = null;
+        currentColor = null;
+
+    }
+
+
+
 
     public String help() {
         if (state == State.SIGNEDOUT) {
@@ -169,15 +187,32 @@ public class ChessClient {
                     help - with possible commands
                     """;
         }
-        return """
-                create <NAME> - a game
-                list - games
-                join <ID> [WHITE|BLACK] - a game
-                observe <ID> - a game
-                logout - when you are done
-                quit - playing chess
-                help - with possible commands
-                """;
+        else if (state == State.JOINEDGAME) {
+            return """
+                    redraw - redraws chess board
+                    leave - leaves the game
+                    move <CURRENT POSITION> <MOVE POSITION> - make the move user wants
+                    resign - forfeits the game
+                    highlight <PIECE POSITION> - highlights egal moves
+                    """;
+        }
+        else if (state == State.OBSERVING) {
+            return """
+                    redraw - redraws chess board
+                    leave - leaves the game
+                    """;
+        }
+        else {
+            return """
+                    create <NAME> - a game
+                    list - games
+                    join <ID> [WHITE|BLACK] - a game
+                    observe <ID> - a game
+                    logout - when you are done
+                    quit - playing chess
+                    help - with possible commands
+                    """;
+        }
     }
 
     private void assertSignedIn() throws Exception {
