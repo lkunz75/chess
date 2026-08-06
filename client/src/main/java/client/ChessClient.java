@@ -87,12 +87,13 @@ public class ChessClient implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        System.out.println(SET_BG_COLOR_RED + notification);
+        System.out.println(SET_BG_COLOR_RED + new Gson().toJson(notification));
         if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
             game = loadGameMessage.getChessGame();
         }
         printPrompt();
+        System.out.println(RESET_BG_COLOR);
     }
 
     public String register(String...params) throws Exception {
@@ -187,12 +188,12 @@ public class ChessClient implements NotificationHandler {
             }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
+            state = State.JOINEDGAME;
             ws.connect(authToken, gameID, null, game);
             currentColor = color;
             notify();
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
             out.print(ERASE_SCREEN);
-            state = State.JOINEDGAME;
             currentID = gameID;
             return String.format("Joined game %s, as %s", gameID, color);
         }
