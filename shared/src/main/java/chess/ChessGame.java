@@ -50,7 +50,7 @@ public class ChessGame {
     // and do Arrays.copyOf to copy the chess board row by row
     // then finally putting the 2d array into the cloned ChessBoard.
     public static class CloneCopy implements Cloneable {
-        ChessPiece[][] data;
+        public ChessPiece[][] data;
 
         public CloneCopy() {
             data = new ChessPiece[8][8];
