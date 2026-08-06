@@ -1,6 +1,7 @@
 package websocket.messages;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 
 import java.util.Objects;
 
@@ -37,6 +38,9 @@ public class ServerMessage {
             }
             case "resign" -> {
                 return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s resigns. %s wins the game!", username, opposingPlayer));
+            }
+            case "move" -> {
+                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s moved to %s", playerColor, opposingPlayer));
             }
         }
         return new NotificationMessage(ServerMessageType.NOTIFICATION, "Error: Invalid");

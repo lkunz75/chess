@@ -1,6 +1,9 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import io.javalin.websocket.*;
 import websocket.commands.UserGameCommand;
@@ -48,7 +51,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = getUsername(command.getAuthToken());
             switch (command.getCommandType()) {
                 case CONNECT -> connect(session, username, gameID);
-                case MAKE_MOVE -> makeMove(session, username, authToken, gameID);
+                case MAKE_MOVE -> makeMove(session, username, gameID, command.getMove());
                 case LEAVE -> leaveGame(session, username, gameID);
                 case RESIGN -> resign(session, username, gameID);
             }
@@ -177,7 +180,24 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(gameID, session);
     }
 
-    public void makeMove(Session session, String username, String authToken, Integer gameID) {
+    public void updateGame(ChessMove move, GameData gameData) throws InvalidMoveException {
+        ChessGame game = gameData.game();
+        game.makeMove(move);
+    }
 
+
+    public void makeMove(Session session, String username, Integer gameID, ChessMove move) throws Exception {
+        String color = getPlayerColor(username, gameID);
+        GameData gameData = getGameData(gameID);
+        if (!color.equals(gameData.game().getTeamTurn())) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Not your turn.");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
+        updateGame(move, getGameData(gameID));
+        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
+        connections.broadcast(null, gameID, new Gson().toJson(sendGame));
+        var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "move", username, null, null);
+        connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
     }
 }
