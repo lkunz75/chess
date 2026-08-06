@@ -20,8 +20,6 @@ public class LoadGameMessage extends ServerMessage {
     public ChessGame getChessGame() {
         return game;
     }
-
-
 }
 
 

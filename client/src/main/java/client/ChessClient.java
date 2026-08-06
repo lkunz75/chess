@@ -7,10 +7,12 @@ import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
 import websocket.commands.UserGameCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.*;
 
+import static java.lang.System.load;
 import static java.lang.System.out;
 import static ui.EscapeSequences.*;
 
@@ -83,9 +85,13 @@ public class ChessClient implements NotificationHandler {
         out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
-    public void notify(UserGameCommand notification) {
+    @Override
+    public void notify(ServerMessage notification) {
         System.out.println(SET_BG_COLOR_RED + notification);
-        game = notification.returnGame();
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
+            game = loadGameMessage.getChessGame();
+        }
         printPrompt();
     }
 
@@ -160,7 +166,7 @@ public class ChessClient implements NotificationHandler {
             } catch (NumberFormatException e) {
                 throw new Exception("Error: gameID must be an integer!");
             }
-            notify();
+            // notify();
             ws.connect(authToken, gameID, null, game);
             out.print(ERASE_SCREEN);
             DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
@@ -233,7 +239,7 @@ public class ChessClient implements NotificationHandler {
             if (colStart > 8 || colEnd > 8 || rowStart > 8 || rowEnd > 8) {
                 return "Error! Must be a valid move.";
             }
-            notify();
+            // notify();
             ChessPosition chessStartPosition = new ChessPosition(rowStart, colStart);
             ChessPosition chessEndPosition = new ChessPosition(rowEnd, colEnd);
             ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
@@ -245,7 +251,7 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String resign() throws Exception {
-        notify();
+        // notify();
         ws.resign(authToken, currentID, null, game);
         return String.format("%s has resigned.", username);
     }
@@ -265,8 +271,6 @@ public class ChessClient implements NotificationHandler {
             default -> null;
         };
     }
-
-
 
     public String help() {
         if (state == State.SIGNEDOUT) {
@@ -309,9 +313,5 @@ public class ChessClient implements NotificationHandler {
         if (state == State.SIGNEDOUT) {
             throw new Exception("You must sign in.");
         }
-    }
-
-    @Override
-    public void notify(ServerMessage notification) {
     }
 }
