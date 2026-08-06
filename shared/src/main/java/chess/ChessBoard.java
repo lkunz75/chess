@@ -11,7 +11,7 @@ import java.util.*;
 public class ChessBoard {
 
     // zero indexed
-    ChessPiece[][] squares = new ChessPiece[8][8];
+    public ChessPiece[][] squares = new ChessPiece[8][8];
     List<List<Integer>> whiteKing = new ArrayList<>();
     List<List<Integer>> blackKing = new ArrayList<>();
     public ChessBoard() {

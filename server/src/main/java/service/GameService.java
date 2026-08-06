@@ -64,13 +64,6 @@ public class GameService {
                 service.dataAccess.joinGame(authData.username(), joinRequest.playerColor(), joinRequest.gameID());
                 return new JoinResult();
             }
-//            List<GameInfo> games = dataAccess.listGames();
-//            for (GameInfo game:games) {
-//                if (authData.username().equals(game.blackUsername()) || authData.username().equals(game.whiteUsername())) {
-//                    service.dataAccess.joinGame(authData.username(), joinRequest.playerColor(), joinRequest.gameID());
-//                    return new JoinResult();
-//                }
-//            }
             throw new DataAccessException("403 Error: already taken");
         }
         throw new DataAccessException("400 Error: bad request");

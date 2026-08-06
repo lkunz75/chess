@@ -1,50 +1,40 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 import static ui.EscapeSequences.*;
+import static ui.EscapeSequences.WHITE_KING;
+import static ui.EscapeSequences.WHITE_PAWN;
 
 public class DrawnChessBoard {
     private static final int HEIGHT = 8;
     private static final int WIDTH = 8;
-    private static final String[] BLACK_PLAYERS = {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP,
-            BLACK_QUEEN, BLACK_KING, BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK};
-    private static final String[] WHITE_PLAYERS = {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP,
-            WHITE_QUEEN, WHITE_KING, WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK};
-    private static String[] startPlayers;
-    private static String[] opposingPlayers;
-    private static String startPawn;
-    private static String opposingPawn;
     private static String startColor = null;
+    private static ChessBoard game = null;
 
-    public static void chessBoard(String color) {
+
+    // ChessPiece[][] squares = new ChessPiece[8][8]; is game
+    public static void chessBoard(String color, ChessBoard chessGame) {
+        game = chessGame;
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         out.print(ERASE_SCREEN);
         String[] headers = {};
         if (color.equals("BLACK")) {
             headers = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
-            startPlayers = BLACK_PLAYERS;
-            startPawn = BLACK_PAWN;
-            opposingPawn = WHITE_PAWN;
-            opposingPlayers = WHITE_PLAYERS;
             startColor = color;
         }
         if (color.equals("WHITE")) {
             headers = new String[]{"a", "b", "c", "d", "e", "f", "g", "h"};
-            startPlayers = WHITE_PLAYERS;
-            opposingPlayers = BLACK_PLAYERS;
-            startPawn = WHITE_PAWN;
-            opposingPawn = BLACK_PAWN;
-            startColor = null;
+            startColor = color;
         }
         drawHeaders(out, headers);
         drawBoard(out);
         drawHeaders(out, headers);
-        startPlayers = null;
-        opposingPlayers = null;
-        startPawn = null;
-        opposingPawn = null;
     }
 
     private static void drawHeaders(PrintStream out, String[] headers) {
@@ -74,7 +64,7 @@ public class DrawnChessBoard {
     private static void drawSideHeader(PrintStream out, int rowNumber) {
         setGray(out);
         out.print(SET_TEXT_COLOR_BLACK);
-        if (startColor != null) {
+        if (startColor.equals("BLACK")) {
             out.print(" " + (9-rowNumber) + " ");
         }
         else{
@@ -100,7 +90,7 @@ public class DrawnChessBoard {
                 } else {
                     setDarkGray(out);
                 }
-                if (startColor != null) {
+                if (startColor.equals("BLACK")) {
                     playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
                 }
                 else {
@@ -114,25 +104,58 @@ public class DrawnChessBoard {
         }
     }
 
+    public static String pieceType(ChessPiece piece) {
+        if (piece == null) {
+            return EMPTY;
+        }
+        else if (piece.getTeamColor().equals(ChessGame.TeamColor.BLACK)) {
+            return settingPieces(piece, BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_KING, BLACK_QUEEN, BLACK_PAWN);
+        }
+        else if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+            return settingPieces(piece, WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_KING, WHITE_QUEEN, WHITE_PAWN);
+        }
+        return EMPTY;
+    }
+
+    private static String settingPieces(ChessPiece piece, String rook, String knight, String bishop, String king, String queen, String pawn) {
+        if (piece.getPieceType().equals(ChessPiece.PieceType.ROOK)) {
+            return rook;
+        }
+        if (piece.getPieceType().equals(ChessPiece.PieceType.KNIGHT)) {
+            return knight;
+        }
+        if (piece.getPieceType().equals(ChessPiece.PieceType.BISHOP)) {
+            return bishop;
+        }
+        if (piece.getPieceType().equals(ChessPiece.PieceType.QUEEN)) {
+            return queen;
+        }
+        if (piece.getPieceType().equals(ChessPiece.PieceType.KING)) {
+            return king;
+        }
+        if (piece.getPieceType().equals(ChessPiece.PieceType.PAWN)) {
+            return pawn;
+        }
+        return EMPTY;
+    }
+
     private static void playersColor(PrintStream out, int row, int col, String opposingColor, String homeColor) {
-        if (row == 0) {
-            out.print(opposingColor);
-            out.print(SET_TEXT_BOLD);
-            out.print(opposingPlayers[col]);
-        } else if (row == 1) {
-            out.print(opposingColor);
-            out.print(SET_TEXT_BOLD);
-            out.print(opposingPawn);
-        } else if (row == 6) {
-            out.print(homeColor);
-            out.print(SET_TEXT_BOLD);
-            out.print(startPawn);
-        } else if (row == 7) {
-            out.print(homeColor);
-            out.print(SET_TEXT_BOLD);
-            out.print(startPlayers[col]);
-        } else {
+        if (startColor.equals("BLACK")) {
+            row = 7 - row; // zero indexed!
+            col = 7 - col;
+        }
+        String piece = pieceType(game.squares[row][col]);
+        if (piece.equals(EMPTY)) {
             out.print(EMPTY);
+        } else if ((game.squares[row][col].getTeamColor().equals(ChessGame.TeamColor.WHITE) && startColor.equals("WHITE")) ||
+                (game.squares[row][col].getTeamColor().equals(ChessGame.TeamColor.BLACK) && startColor.equals("BLACK"))) {
+            out.print(homeColor);
+            out.print(SET_TEXT_BOLD);
+            out.print(piece);
+        } else {
+            out.print(opposingColor);
+            out.print(SET_TEXT_BOLD);
+            out.print(piece);
         }
     }
 

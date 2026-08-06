@@ -239,7 +239,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "The game is in stalemate.");
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
-        System.out.println(new Gson().toJson(game));
+        // System.out.println(new Gson().toJson(game));
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
         connections.broadcast(null, gameID, new Gson().toJson(sendGame));
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "move", username, null, null);

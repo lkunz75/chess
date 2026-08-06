@@ -1,10 +1,14 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.GameInfo;
+import server.WebSocketHandler;
+import service.GameService;
 import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -14,13 +18,14 @@ import static ui.EscapeSequences.*;
 
 // DO I NEED TO HAVE A DELETE DATA? They shouldn't have access to that right?
 
-public class ChessClient {
+public class ChessClient implements ServerMessage{
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
     private String authToken;
     private String username;
     private Integer currentGameID;
     private String currentColor;
+    private ChessGame game;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -61,6 +66,7 @@ public class ChessClient {
                 case "list" -> list();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
+                case "redraw" -> redraw();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -136,7 +142,13 @@ public class ChessClient {
     }
 
     public String observe(String...params) throws Exception {
+        int gameID = 0;
         if (params.length > 0) {
+            try {
+                gameID = Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                throw new Exception("Error: gameID must be an integer!");
+            }
             out.print(ERASE_SCREEN);
             DrawnChessBoard.chessBoard("WHITE");
             state = State.OBSERVING;
@@ -161,22 +173,17 @@ public class ChessClient {
             state = State.JOINEDGAME;
             currentGameID = gameID;
             currentColor = color;
+            // add current game
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
 
-    public String leave(String...params) throws Exception {
-        state = State.SIGNEDOUT;
-        // have to remove user from game if they were not just an observer
-        // have to send out a message to all
-        currentGameID = null;
-        currentColor = null;
-
+    public String redraw() throws Exception {
+        if (currentColor.equals("BLACK")) {
+            DrawnChessBoard.chessBoard(currentColor, game);
+        }
     }
-
-
-
 
     public String help() {
         if (state == State.SIGNEDOUT) {
