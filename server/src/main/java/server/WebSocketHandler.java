@@ -142,8 +142,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, getPlayerColor(username, gameID), null);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
-        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
-        session.getRemote().sendString(new Gson().toJson(sendGame));
+        if (Objects.equals(getPlayerColor(username, gameID), "WHITE")) {
+            updateGameData(getGameData(gameID), gameID,null, getGameData(gameID).blackUsername());
+        }
+        else if (Objects.equals(getPlayerColor(username, gameID), "BLACK")) {
+            updateGameData(getGameData(gameID), gameID, getGameData(gameID).whiteUsername(), null);
+        }
     }
 
     public void resign(Session session, String username, Integer gameID) throws Exception {
@@ -174,6 +178,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void makeMove(Session session, String username, String authToken, Integer gameID) {
-        // still working on the details
+
     }
 }
