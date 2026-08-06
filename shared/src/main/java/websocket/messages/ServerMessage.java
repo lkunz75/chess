@@ -1,7 +1,6 @@
 package websocket.messages;
 
 import chess.ChessGame;
-import chess.ChessPosition;
 
 import java.util.Objects;
 

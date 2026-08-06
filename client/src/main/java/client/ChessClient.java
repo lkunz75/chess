@@ -1,14 +1,13 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.Gson;
 import model.GameInfo;
 import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
+import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ import static ui.EscapeSequences.*;
 
 // DO I NEED TO HAVE A DELETE DATA? They shouldn't have access to that right?
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler {
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
     private String authToken;
@@ -25,6 +24,7 @@ public class ChessClient {
     private String currentColor;
     private final WebSocketFacade ws;
     private Integer currentID;
+    private ChessGame game;
 
     public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
@@ -83,6 +83,12 @@ public class ChessClient {
         out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
+    public void notify(UserGameCommand notification) {
+        System.out.println(SET_BG_COLOR_RED + notification);
+        game = notification.returnGame();
+        printPrompt();
+    }
+
     public String register(String...params) throws Exception {
         if (params.length >= 3) {
             RegisterRequest registerRequest = new RegisterRequest(params[0], params[1], params[2]);
@@ -111,6 +117,7 @@ public class ChessClient {
         state = State.SIGNEDOUT;
         username = null;
         server.logout(new LogoutRequest(authToken));
+        authToken = null;
         return "You are now signed out.";
     }
 
@@ -153,8 +160,10 @@ public class ChessClient {
             } catch (NumberFormatException e) {
                 throw new Exception("Error: gameID must be an integer!");
             }
+            notify();
+            ws.connect(authToken, gameID, null, game);
             out.print(ERASE_SCREEN);
-            DrawnChessBoard.chessBoard("WHITE", game, new ArrayList<>());
+            DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
             state = State.OBSERVING;
             return String.format("Observing Game %s", params[0]);
         }
@@ -173,45 +182,49 @@ public class ChessClient {
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
             ws.connect(authToken, gameID, null, game);
-            DrawnChessBoard.chessBoard(currentColor, game, new ArrayList<>());
+            currentColor = color;
+            notify();
+            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
             out.print(ERASE_SCREEN);
             state = State.JOINEDGAME;
             currentID = gameID;
-            currentColor = color;
-            // add current game
             return String.format("Joined game %s, as %s", gameID, color);
         }
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
 
     public String redraw() throws Exception {
+        notify();
         if (currentColor.equals("BLACK")) {
-            DrawnChessBoard.chessBoard(currentColor, game, new ArrayList<>());
+            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
         }
         else {
-            DrawnChessBoard.chessBoard("WHITE", game, new ArrayList<>());
+            DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
         }
         return "Redrawn board";
     }
 
     public String highlight(String...params) {
+        notify();
         if (params.length > 0) {
             int rowStart = convertPosition(params[0]);
             int colStart = params[0].charAt(1) - '0';
             Collection<ChessMove> moves = game.validMoves(new ChessPosition(rowStart, colStart)); // will need to be a ChessGame to call that
-            DrawnChessBoard.chessBoard(currentColor, game, moves);
+            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), moves);
             return "Valid moves have been highlighted";
         }
         return "Error: Expected <CHESS POSITION> like <e7>";
     }
 
-    public String leave(String...params) {
+    public String leave(String...params) throws Exception {
         ws.leave(authToken, currentID, null, game);
+        currentID = null;
+        currentColor = null;
         return "You left the game.";
     }
 
-    public String move(String...params) {
-        if (params.length >= 2) {
+    public String move(String...params) throws Exception {
+        if (params.length >= 3) {
             int rowStart = convertPosition(params[0]);
             int rowEnd = convertPosition(params[1]);
             // quickly converts into an integer
@@ -220,18 +233,20 @@ public class ChessClient {
             if (colStart > 8 || colEnd > 8 || rowStart > 8 || rowEnd > 8) {
                 return "Error! Must be a valid move.";
             }
+            notify();
             ChessPosition chessStartPosition = new ChessPosition(rowStart, colStart);
             ChessPosition chessEndPosition = new ChessPosition(rowEnd, colEnd);
             ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
-            ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game);
-            DrawnChessBoard.chessBoard(currentColor, game, null);
+            ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game); // sends updated move
+            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), null);
             return String.format("%s moved %s to %s", username, params[0], params[1]);
         }
         return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is for pawns when they reach the end).";
     }
 
     public String resign() throws Exception {
-        ws.resign(authToken, currentID, null, null);
+        notify();
+        ws.resign(authToken, currentID, null, game);
         return String.format("%s has resigned.", username);
     }
 
@@ -294,5 +309,9 @@ public class ChessClient {
         if (state == State.SIGNEDOUT) {
             throw new Exception("You must sign in.");
         }
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
     }
 }

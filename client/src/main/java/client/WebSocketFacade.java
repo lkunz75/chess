@@ -4,32 +4,21 @@ import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import io.javalin.websocket.WsMessageContext;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ErrorMessages;
-import websocket.messages.LoadGameMessage;
-import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.net.URI;
 
 public class WebSocketFacade extends Endpoint {
-
     Session session;
-    WsMessageContext context;
-    private final NotificationMessage notificationMessage;
-    private final ErrorMessages errorMessages;
-    private final LoadGameMessage loadGameMessage;
+    NotificationHandler notificationHandler;
 
-    public WebSocketFacade(String url, WsMessageContext context, NotificationMessage notificationMessage, ErrorMessages errorMessages, LoadGameMessage loadGameMessage) throws Exception {
-        this.notificationMessage = notificationMessage;
-        this.errorMessages = errorMessages;
-        this.loadGameMessage = loadGameMessage;
+    public WebSocketFacade(String url, NotificationHandler notificationHandler) throws Exception {
         try {
             url = url.replace("http", "ws");
             URI socketURI = new URI(url + "/ws");
-            this.context = context;
+            this.notificationHandler = notificationHandler;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketURI);
@@ -39,13 +28,13 @@ public class WebSocketFacade extends Endpoint {
                 public void onMessage(String message) {
                     ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
                     if (serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
-                        loadGameMessage.notify(serverMessage);
+                        notificationHandler.notify(serverMessage); // will notify chess client / send info
                     }
                     else if (serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
-                        notificationMessage.notify(serverMessage);
+                        notificationHandler.notify(serverMessage);
                     }
                     else {
-                        errorMessages.notify(serverMessage);
+                        notificationHandler.notify(serverMessage);
                     }
 
                 }
