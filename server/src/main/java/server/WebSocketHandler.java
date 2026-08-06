@@ -2,7 +2,6 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import io.javalin.websocket.*;
 import websocket.commands.UserGameCommand;
@@ -16,8 +15,6 @@ import model.GameData;
 import model.GameInfo;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -158,13 +155,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         GameData gameData = getGameData(gameID);
         String playerColor = getPlayerColor(username, gameID);
         String opposingUsername;
-        if (playerColor != null && playerColor.equals("OBSERVER")) {
-            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can't resign.");
+        if (gameData.game().checkGameOver()) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game was already forfeited. You win!");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-        if (gameData.blackUsername() == null || gameData.whiteUsername() == null){
-            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game was already forfeited. You win!");
+        if (playerColor != null && playerColor.equals("OBSERVER")) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can't resign.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
@@ -178,17 +175,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
         connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
-        // connections.remove(gameID, session); have the user manually remove themselves
-        // change boolean
+        // this boolean makes it so once the game is over or they resign it's done!
+        gameData.game().updateGameOver();
+        updateGameData(gameData, gameData.game(), gameID, gameData.whiteUsername(), gameData.blackUsername());
     }
 
     public void updateGame(ChessMove move, ChessGame game, Session session) throws Exception {
-        try {
-            game.makeMove(move);
-        } catch (Exception e) {
-            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Invalid move");
-            session.getRemote().sendString(new Gson().toJson(updatedNotification));
-        }
+        game.makeMove(move);
     }
 
 
@@ -224,6 +217,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
+
         try {
             updateGame(move, game, session);
             updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
@@ -232,20 +226,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
+
         if (getGameData(gameID).game().isInCheckmate(opposingColor)) {
-            // change username
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", username));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", opposingColor));
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         else if (getGameData(gameID).game().isInCheck(opposingColor)) {
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in check", username));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in check", opposingColor));
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         else if (getGameData(gameID).game().isInStalemate(opposingColor)) {
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in stalemate.", username));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "The game is in stalemate.");
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
-
+        System.out.println(new Gson().toJson(game));
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
         connections.broadcast(null, gameID, new Gson().toJson(sendGame));
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "move", username, null, null);

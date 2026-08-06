@@ -284,6 +284,11 @@ public class ChessGame {
         return new ChessPosition(k_row + 1, k_col + 1);
     }
 
+    public void updateGameOver() {
+        // for resign
+        gameOver = true;
+    }
+
     /**
      * Determines if the given team is in stalemate, which here is defined as having
      * no valid moves while not in check.
