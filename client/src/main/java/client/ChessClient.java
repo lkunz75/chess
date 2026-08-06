@@ -1,17 +1,16 @@
 package client;
 
-import chess.ChessGame;
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import model.GameInfo;
-import server.WebSocketHandler;
-import service.GameService;
 import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
-import websocket.messages.ServerMessage;
 
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 import static java.lang.System.out;
 import static ui.EscapeSequences.*;
@@ -23,12 +22,13 @@ public class ChessClient {
     private final ServerFacade server;
     private String authToken;
     private String username;
-    private Integer currentGameID;
     private String currentColor;
-    private ChessGame game;
+    private final WebSocketFacade ws;
+    private Integer currentID;
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() {
@@ -66,7 +66,11 @@ public class ChessClient {
                 case "list" -> list();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
-                // case "redraw" -> redraw();
+                case "redraw" -> redraw();
+                case "highlight" -> highlight(params);
+                case "move" -> move(params);
+                case "leave" -> leave(params);
+                case "resign" -> resign();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -150,7 +154,7 @@ public class ChessClient {
                 throw new Exception("Error: gameID must be an integer!");
             }
             out.print(ERASE_SCREEN);
-            // DrawnChessBoard.chessBoard("WHITE");
+            DrawnChessBoard.chessBoard("WHITE", game, new ArrayList<>());
             state = State.OBSERVING;
             return String.format("Observing Game %s", params[0]);
         }
@@ -168,10 +172,11 @@ public class ChessClient {
             }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
-            // DrawnChessBoard.chessBoard(color);
+            ws.connect(authToken, gameID, null, game);
+            DrawnChessBoard.chessBoard(currentColor, game, new ArrayList<>());
             out.print(ERASE_SCREEN);
             state = State.JOINEDGAME;
-            currentGameID = gameID;
+            currentID = gameID;
             currentColor = color;
             // add current game
             return String.format("Joined game %s, as %s", gameID, color);
@@ -179,11 +184,74 @@ public class ChessClient {
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
 
-//    public String redraw() throws Exception {
-//        if (currentColor.equals("BLACK")) {
-//            DrawnChessBoard.chessBoard(currentColor, game);
-//        }
-//    }
+    public String redraw() throws Exception {
+        if (currentColor.equals("BLACK")) {
+            DrawnChessBoard.chessBoard(currentColor, game, new ArrayList<>());
+        }
+        else {
+            DrawnChessBoard.chessBoard("WHITE", game, new ArrayList<>());
+        }
+        return "Redrawn board";
+    }
+
+    public String highlight(String...params) {
+        if (params.length > 0) {
+            int rowStart = convertPosition(params[0]);
+            int colStart = params[0].charAt(1) - '0';
+            Collection<ChessMove> moves = game.validMoves(new ChessPosition(rowStart, colStart)); // will need to be a ChessGame to call that
+            DrawnChessBoard.chessBoard(currentColor, game, moves);
+            return "Valid moves have been highlighted";
+        }
+        return "Error: Expected <CHESS POSITION> like <e7>";
+    }
+
+    public String leave(String...params) {
+        ws.leave(authToken, currentID, null, game);
+        return "You left the game.";
+    }
+
+    public String move(String...params) {
+        if (params.length >= 2) {
+            int rowStart = convertPosition(params[0]);
+            int rowEnd = convertPosition(params[1]);
+            // quickly converts into an integer
+            int colStart = params[0].charAt(1) - '0';
+            int colEnd = params[1].charAt(1) - '0';
+            if (colStart > 8 || colEnd > 8 || rowStart > 8 || rowEnd > 8) {
+                return "Error! Must be a valid move.";
+            }
+            ChessPosition chessStartPosition = new ChessPosition(rowStart, colStart);
+            ChessPosition chessEndPosition = new ChessPosition(rowEnd, colEnd);
+            ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
+            ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game);
+            DrawnChessBoard.chessBoard(currentColor, game, null);
+            return String.format("%s moved %s to %s", username, params[0], params[1]);
+        }
+        return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is for pawns when they reach the end).";
+    }
+
+    public String resign() throws Exception {
+        ws.resign(authToken, currentID, null, null);
+        return String.format("%s has resigned.", username);
+    }
+
+    private Integer convertPosition(String move) {
+        char row = move.charAt(0);
+        // looked up an easy way to convert letters to numbers
+        return row - 'a' + 1;
+    }
+
+    private ChessPiece.PieceType convertPromotion(String piece) {
+        return switch (piece) {
+            case "QUEEN" -> ChessPiece.PieceType.QUEEN;
+            case "ROOK" -> ChessPiece.PieceType.ROOK;
+            case "KNIGHT" -> ChessPiece.PieceType.KNIGHT;
+            case "BISHOP" -> ChessPiece.PieceType.BISHOP;
+            default -> null;
+        };
+    }
+
+
 
     public String help() {
         if (state == State.SIGNEDOUT) {
