@@ -10,6 +10,7 @@ import websocket.commands.UserGameCommand;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
 import websocket.messages.ErrorMessages;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 import model.AuthData;
 import model.GameData;
@@ -209,8 +210,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             return;
         }
         if (gameData.game().isInCheck(currentColor)) {
-            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game over.");
-            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.ERROR, "Game over.");
+            connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
             return;
         }
         updateGame(move, getGameData(gameID));
