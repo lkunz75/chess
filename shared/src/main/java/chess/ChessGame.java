@@ -173,7 +173,7 @@ public class ChessGame {
                 }
                 board.squares[endposition.getRow() - 1][endposition.getColumn() - 1] = piece;
                 board.squares[start_row][start_col] = null;
-                if (color == TeamColor.WHITE) {
+                if (color.equals(TeamColor.WHITE)) {
                     currentTurn = TeamColor.BLACK;
                 }
                 else {

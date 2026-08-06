@@ -2,7 +2,6 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
-import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import io.javalin.websocket.*;
@@ -123,8 +122,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return false;
     }
 
-    public void updateGameData (GameData gameData, Integer gameID, String whiteUsername, String blackUsername) throws DataAccessException {
-        ChessGame game = getGameData(gameID).game();
+    public void updateGameData (GameData gameData, ChessGame game, Integer gameID, String whiteUsername, String blackUsername) throws DataAccessException {
         dataAccess.deleteGame(gameID);
         dataAccess.createGame(new GameData(gameData.gameID(), whiteUsername, blackUsername, gameData.gameName(), game));
     }
@@ -147,10 +145,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
         if (Objects.equals(getPlayerColor(username, gameID), "WHITE")) {
-            updateGameData(getGameData(gameID), gameID,null, getGameData(gameID).blackUsername());
+            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID,null, getGameData(gameID).blackUsername());
         }
         else if (Objects.equals(getPlayerColor(username, gameID), "BLACK")) {
-            updateGameData(getGameData(gameID), gameID, getGameData(gameID).whiteUsername(), null);
+            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID, getGameData(gameID).whiteUsername(), null);
         }
     }
 
@@ -170,27 +168,28 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         if (playerColor != null && playerColor.equals("WHITE")) {
             opposingUsername = gameData.blackUsername();
-            updateGameData(gameData,gameID, null, opposingUsername);
+            updateGameData(gameData, getGameData(gameID).game(), gameID, null, opposingUsername);
         }
         else {
             opposingUsername = gameData.whiteUsername();
-            updateGameData(gameData, gameID, opposingUsername, null);
+            updateGameData(gameData, getGameData(gameID).game(), gameID, opposingUsername, null);
         }
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
         connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
     }
 
-    public void updateGame(ChessMove move, GameData gameData) throws InvalidMoveException {
-        ChessGame game = gameData.game();
+    public void updateGame(ChessMove move, ChessGame game) throws InvalidMoveException {
         game.makeMove(move);
+        System.out.println(game);
     }
 
 
     public void makeMove(Session session, String username, Integer gameID, ChessMove move) throws Exception {
         String color = getPlayerColor(username, gameID);
         GameData gameData = getGameData(gameID);
-        ChessGame.TeamColor currentTurn = gameData.game().getTeamTurn();
+        ChessGame game = getGameData(gameID).game();
+        ChessGame.TeamColor currentTurn = game.getTeamTurn();
         ChessGame.TeamColor currentColor = null;
         // System.out.println(color);
         if (color != null && color.equals("BLACK")) {
@@ -209,13 +208,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-        if (gameData.game().isInCheck(currentColor)) {
+        updateGame(move, game);
+        updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
+        if (game.isInCheck(currentColor)) {
             var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.ERROR, "Game over.");
             connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
             return;
         }
-        updateGame(move, getGameData(gameID));
-        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
+//        System.out.println(getGameData(gameID).game());
+//        System.out.println(game.getTeamTurn());
+        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, game);
         connections.broadcast(null, gameID, new Gson().toJson(sendGame));
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "move", username, null, null);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
