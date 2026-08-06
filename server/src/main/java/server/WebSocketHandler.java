@@ -16,6 +16,8 @@ import model.GameData;
 import model.GameInfo;
 import org.eclipse.jetty.websocket.api.Session;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -176,12 +178,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
         connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
-        connections.remove(gameID, session);
+        // connections.remove(gameID, session); have the user manually remove themselves
+        // change boolean
     }
 
-    public void updateGame(ChessMove move, ChessGame game) throws InvalidMoveException {
-        game.makeMove(move);
-        System.out.println(game);
+    public void updateGame(ChessMove move, ChessGame game, Session session) throws Exception {
+        try {
+            game.makeMove(move);
+        } catch (Exception e) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Invalid move");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+        }
     }
 
 
@@ -191,33 +198,55 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessGame game = getGameData(gameID).game();
         ChessGame.TeamColor currentTurn = game.getTeamTurn();
         ChessGame.TeamColor currentColor = null;
+        ChessGame.TeamColor opposingColor = null;
         // System.out.println(color);
+        if (game.checkGameOver()) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game is already over.");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
         if (color != null && color.equals("BLACK")) {
             currentColor = ChessGame.TeamColor.BLACK;
+            opposingColor = ChessGame.TeamColor.WHITE;
         }
         else if (color != null && color.equals("WHITE")) {
             currentColor = ChessGame.TeamColor.WHITE;
+            opposingColor = ChessGame.TeamColor.BLACK;
         }
         else {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can not make moves.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
+        // add a check here to make sure game isn't over
         if (!currentColor.equals(currentTurn)) {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Not your turn.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-        updateGame(move, game);
-        updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
-        if (game.isInCheck(currentColor)) {
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.ERROR, "Game over.");
-            connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
+        try {
+            updateGame(move, game, session);
+            updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
+        } catch (Exception e) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Invalid move!");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-//        System.out.println(getGameData(gameID).game());
-//        System.out.println(game.getTeamTurn());
-        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, game);
+        if (getGameData(gameID).game().isInCheckmate(opposingColor)) {
+            // change username
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", username));
+            connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
+        }
+        else if (getGameData(gameID).game().isInCheck(opposingColor)) {
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in check", username));
+            connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
+        }
+        else if (getGameData(gameID).game().isInStalemate(opposingColor)) {
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in stalemate.", username));
+            connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
+        }
+
+        var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
         connections.broadcast(null, gameID, new Gson().toJson(sendGame));
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "move", username, null, null);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));

@@ -12,10 +12,13 @@ import java.util.*;
 public class ChessGame {
     ChessBoard game = new ChessBoard();
     TeamColor currentTurn = TeamColor.WHITE;
+    Boolean gameOver = false;
 
     public ChessGame() {
         game.resetBoard(); // here is where you call it!! Calling it above makes it fail, and we only want to reset the board once each time
     }
+
+    public boolean checkGameOver() {return gameOver;}
 
     /**
      * @return Which team's turn it is
@@ -260,6 +263,7 @@ public class ChessGame {
             col = 0;
             row++;
         }
+        gameOver = true;
         return true;
     }
 
