@@ -184,7 +184,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         game.makeMove(move);
     }
 
-
     public void makeMove(Session session, String username, Integer gameID, ChessMove move) throws Exception {
         String color = getPlayerColor(username, gameID);
         GameData gameData = getGameData(gameID);
@@ -192,7 +191,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         ChessGame.TeamColor currentTurn = game.getTeamTurn();
         ChessGame.TeamColor currentColor = null;
         ChessGame.TeamColor opposingColor = null;
-        // System.out.println(color);
+        String opposingUsername = null;
+        // makes sure the game can be played, and checks for check, checkmate, and stalemate
         if (game.checkGameOver()) {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game is already over.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
@@ -201,10 +201,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (color != null && color.equals("BLACK")) {
             currentColor = ChessGame.TeamColor.BLACK;
             opposingColor = ChessGame.TeamColor.WHITE;
+            opposingUsername = gameData.whiteUsername();
         }
         else if (color != null && color.equals("WHITE")) {
             currentColor = ChessGame.TeamColor.WHITE;
             opposingColor = ChessGame.TeamColor.BLACK;
+            opposingUsername = gameData.blackUsername();
         }
         else {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can not make moves.");
@@ -217,7 +219,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-
         try {
             updateGame(move, game, session);
             updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
@@ -226,13 +227,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-
         if (getGameData(gameID).game().isInCheckmate(opposingColor)) {
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", opposingColor));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", opposingUsername));
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         else if (getGameData(gameID).game().isInCheck(opposingColor)) {
-            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in check", opposingColor));
+            var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in check", opposingUsername));
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         else if (getGameData(gameID).game().isInStalemate(opposingColor)) {
