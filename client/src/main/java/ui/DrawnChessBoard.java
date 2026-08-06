@@ -91,10 +91,10 @@ public class DrawnChessBoard {
                     setDarkGray(out);
                 }
                 if (startColor.equals("BLACK")) {
-                    playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
+                    playersColor(out, row, col, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
                 }
                 else {
-                    playersColor(out, row, col, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
+                    playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
                 }
             }
             drawSideHeader(out, 8-row);
@@ -172,5 +172,11 @@ public class DrawnChessBoard {
     private static void setGray(PrintStream out) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_LIGHT_GREY);
+    }
+
+    public static void main(String[] args) {
+        ChessBoard game = new ChessBoard();
+        game.resetBoard();
+        chessBoard("WHITE", game);
     }
 }

@@ -18,7 +18,7 @@ import static ui.EscapeSequences.*;
 
 // DO I NEED TO HAVE A DELETE DATA? They shouldn't have access to that right?
 
-public class ChessClient implements ServerMessage{
+public class ChessClient {
     private State state = State.SIGNEDOUT;
     private final ServerFacade server;
     private String authToken;
@@ -66,7 +66,7 @@ public class ChessClient implements ServerMessage{
                 case "list" -> list();
                 case "join" -> join(params);
                 case "observe" -> observe(params);
-                case "redraw" -> redraw();
+                // case "redraw" -> redraw();
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -150,7 +150,7 @@ public class ChessClient implements ServerMessage{
                 throw new Exception("Error: gameID must be an integer!");
             }
             out.print(ERASE_SCREEN);
-            DrawnChessBoard.chessBoard("WHITE");
+            // DrawnChessBoard.chessBoard("WHITE");
             state = State.OBSERVING;
             return String.format("Observing Game %s", params[0]);
         }
@@ -168,7 +168,7 @@ public class ChessClient implements ServerMessage{
             }
             String color = params[1].toUpperCase();
             server.join(new JoinRequest(authToken, color, gameID));
-            DrawnChessBoard.chessBoard(color);
+            // DrawnChessBoard.chessBoard(color);
             out.print(ERASE_SCREEN);
             state = State.JOINEDGAME;
             currentGameID = gameID;
@@ -179,11 +179,11 @@ public class ChessClient implements ServerMessage{
         throw new Exception("Expected: <gameID>, <WHITE|BLACK>");
     }
 
-    public String redraw() throws Exception {
-        if (currentColor.equals("BLACK")) {
-            DrawnChessBoard.chessBoard(currentColor, game);
-        }
-    }
+//    public String redraw() throws Exception {
+//        if (currentColor.equals("BLACK")) {
+//            DrawnChessBoard.chessBoard(currentColor, game);
+//        }
+//    }
 
     public String help() {
         if (state == State.SIGNEDOUT) {
