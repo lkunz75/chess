@@ -6,6 +6,7 @@ import io.javalin.websocket.*;
 import websocket.commands.UserGameCommand;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import websocket.messages.ErrorMessages;
 import websocket.messages.ServerMessage;
 import model.AuthData;
 import model.GameData;
@@ -18,6 +19,7 @@ import java.util.Objects;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
+    private final String resigned = null;
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -37,20 +39,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand command = new Gson().fromJson(
                     wsMessageContext.message(), UserGameCommand.class);
             gameID = command.getGameID();
+            String authToken = command.getAuthToken();
+            if (!checkAuth(authToken)) {
+                var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "user didn't register");
+                session.getRemote().sendString(new Gson().toJson(updatedNotification));
+                return;
+            }
             String username = getUsername(command.getAuthToken());
             switch (command.getCommandType()) {
-                case CONNECT -> connect(session, username, command.getAuthToken(), command.getGameID());
-                case MAKE_MOVE -> makeMove(session, username, command.getAuthToken(), command.getGameID());
-                case LEAVE -> leaveGame(session, username, command.getAuthToken(), command.getGameID());
-                case RESIGN -> resign(session, username, command.getAuthToken(), command.getGameID());
+                case CONNECT -> connect(session, username, gameID);
+                case MAKE_MOVE -> makeMove(session, username, authToken, gameID);
+                case LEAVE -> leaveGame(session, username, gameID);
+                case RESIGN -> resign(session, username, gameID);
             }
-        } catch(DataAccessException ex) {
-            var updatedNotification = ServerMessage.errorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
-            session.getRemote().sendString(updatedNotification);
-        }
-        catch (Exception ex) {
-            var updatedNotification = ServerMessage.errorMessage(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
-            connections.broadcast(null, gameID, updatedNotification);
+        } catch (Exception ex) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, ex.getMessage());
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
         }
     }
 
@@ -82,12 +86,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 return "OBSERVER";
             }
         }
-        // this should probably be an error message from Notification Message instead
-        throw new DataAccessException("Error: Invalid");
+        return null;
     }
 
-    private void checkAuth(String authToken) throws DataAccessException {
-        dataAccess.getAuthData(authToken);
+    private boolean checkAuth(String authToken) {
+        try {
+            dataAccess.getAuthData(authToken);
+            return true;
+        } catch (DataAccessException e) {
+            return false;
+        }
     }
 
     // Just moved it
@@ -101,23 +109,36 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return null;
     }
 
-    public void connect(Session session, String username, String authToken, Integer gameID) throws Exception {
-        //might have to deserialze twice
-        checkAuth(authToken); // will throw an error if not there
-        // System.out.println(getPlayerColor(username, gameID));
-        // System.out.println(authToken);
-        // System.out.println(username);
-        // System.out.println(gameID);
-        // System.out.println(getGameData(gameID).game());
+    public boolean checkGameID(Integer gameID) throws DataAccessException {
+        List<GameInfo> gameInfos = dataAccess.listGames();
+        for (GameInfo info : gameInfos) {
+            if (Objects.equals(info.gameID(), gameID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void updateGameData (GameData gameData, Integer gameID, String whiteUsername, String blackUsername) throws DataAccessException {
+        ChessGame game = getGameData(gameID).game();
+        dataAccess.deleteGame(gameID);
+        dataAccess.createGame(new GameData(gameData.gameID(), whiteUsername, blackUsername, gameData.gameName(), game));
+    }
+
+    public void connect(Session session, String username, Integer gameID) throws Exception {
+        if (!checkGameID(gameID)) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Error: Invalid");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, getPlayerColor(username, gameID), getGameData(gameID).game());
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "connect", username, getPlayerColor(username, gameID), null);
-        saveSession(gameID, session); // has nullptr
+        saveSession(gameID, session);
         session.getRemote().sendString(new Gson().toJson(sendGame));
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
     }
 
-    public void leaveGame(Session session, String username, String authToken, Integer gameID) throws Exception {
-        checkAuth(authToken);
+    public void leaveGame(Session session, String username, Integer gameID) throws Exception {
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "leave", username, getPlayerColor(username, gameID), null);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
@@ -125,19 +146,30 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         session.getRemote().sendString(new Gson().toJson(sendGame));
     }
 
-    public void resign(Session session, String username, String authToken, Integer gameID) throws Exception {
-        checkAuth(authToken);
+    public void resign(Session session, String username, Integer gameID) throws Exception {
         GameData gameData = getGameData(gameID);
         String playerColor = getPlayerColor(username, gameID);
         String opposingUsername;
-        if (playerColor.equals("WHITE")) {
+        if (playerColor != null && playerColor.equals("OBSERVER")) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can't resign.");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
+        if (gameData.blackUsername() == null || gameData.whiteUsername() == null){
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game was already forfeited. You win!");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
+        if (playerColor != null && playerColor.equals("WHITE")) {
             opposingUsername = gameData.blackUsername();
+            updateGameData(gameData,gameID, null, opposingUsername);
         }
         else {
             opposingUsername = gameData.whiteUsername();
+            updateGameData(gameData, gameID, opposingUsername, null);
         }
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, "resign", username, getPlayerColor(username, gameID), opposingUsername);
-        connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
+        connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
     }
 

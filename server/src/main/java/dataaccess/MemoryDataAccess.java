@@ -147,6 +147,14 @@ public class MemoryDataAccess implements DataAccess {
         listGames = new ArrayList<>();
     }
 
+    public void deleteGame(Integer gameID){
+        for (GameData game: allGameData){
+            if (game.gameID() == gameID) {
+                allGameData.remove(game);
+            }
+        }
+    }
+
     public void deleteAllAuthData() {authInfo = new ArrayList<>();}
 
     public void deleteAllUserData() {userInfo = new ArrayList<>();}

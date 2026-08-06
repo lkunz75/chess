@@ -193,6 +193,18 @@ public class MySqlDataAccess implements DataAccess{
         }
     }
 
+    public void deleteGame(Integer gameID) throws DataAccessException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "DELETE FROM gameData WHERE gameID=?";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                ps.executeUpdate();
+            }
+        } catch (SQLException e) {
+            String.format("500 Error: unable to update database: %s", e.getMessage());
+        }
+    }
+
     public void deleteAllGameData() throws DataAccessException {
         var statement = "DELETE FROM GameData";
         executeUpdate(statement);

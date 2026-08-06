@@ -26,28 +26,27 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public static NotificationMessage callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) throws Exception {
-        if (type.equals(ServerMessageType.NOTIFICATION)) {
-            if (function.equals("connect")) {
+    public static NotificationMessage callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) {
+        // suggested change from function
+        switch (function) {
+            case "connect" -> {
                 return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has joined the game as %s", username, playerColor));
             }
-            else if (function.equals("leave")) {
+            case "leave" -> {
                 return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has left the game.", username));
             }
-            else if (function.equals("resign")) {
+            case "resign" -> {
                 return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s resigns. %s wins the game!", username, opposingPlayer));
-
             }
-
         }
-        throw new Exception("Error: Invalid");
+        return new NotificationMessage(ServerMessageType.NOTIFICATION, "Error: Invalid");
     }
 
-    public static String errorMessage(ServerMessageType type, String message) throws Exception {
+    public ErrorMessages errorMessage(ServerMessageType type, String message) {
         if (type.equals(ServerMessageType.ERROR)) {
-            return String.format(message);
+            return new ErrorMessages(ServerMessageType.ERROR, message);
         }
-        throw new Exception("Error: Invalid");
+        return new ErrorMessages(ServerMessageType.ERROR, "Error: Invalid!");
     }
 
     public static LoadGameMessage callLoadGameMessage(ServerMessageType type, String playerColor, ChessGame gameData) throws Exception {
