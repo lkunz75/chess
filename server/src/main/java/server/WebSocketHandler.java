@@ -189,8 +189,27 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void makeMove(Session session, String username, Integer gameID, ChessMove move) throws Exception {
         String color = getPlayerColor(username, gameID);
         GameData gameData = getGameData(gameID);
-        if (!color.equals(gameData.game().getTeamTurn())) {
+        ChessGame.TeamColor currentTurn = gameData.game().getTeamTurn();
+        ChessGame.TeamColor currentColor = null;
+        // System.out.println(color);
+        if (color != null && color.equals("BLACK")) {
+            currentColor = ChessGame.TeamColor.BLACK;
+        }
+        else if (color != null && color.equals("WHITE")) {
+            currentColor = ChessGame.TeamColor.WHITE;
+        }
+        else {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Observers can not make moves.");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
+        if (!currentColor.equals(currentTurn)) {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Not your turn.");
+            session.getRemote().sendString(new Gson().toJson(updatedNotification));
+            return;
+        }
+        if (gameData.game().isInCheck(currentColor)) {
+            var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Game over.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
