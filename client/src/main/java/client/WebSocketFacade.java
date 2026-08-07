@@ -3,7 +3,6 @@ package client;
 import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessages;
@@ -46,7 +45,7 @@ public class WebSocketFacade extends Endpoint {
                 }
             });
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
@@ -54,43 +53,43 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void connect(String authToken, Integer gameID, ChessMove move, ChessGame game) throws DataAccessException {
+    public void connect(String authToken, Integer gameID, ChessMove move, ChessGame game) throws Exception {
         try {
            // UserGameCommand.CommandType commandType, String authToken, Integer gameID, ChessMove move, ChessGame game
             UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, move, game);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    public void makeMove(String authToken, Integer gameID, ChessMove move, ChessGame game) throws DataAccessException {
+    public void makeMove(String authToken, Integer gameID, ChessMove move, ChessGame game) throws Exception {
         try {
             // UserGameCommand.CommandType commandType, String authToken, Integer gameID, ChessMove move, ChessGame game
             UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move, game);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    public void leave(String authToken, Integer gameID, ChessMove move, ChessGame game) throws DataAccessException {
+    public void leave(String authToken, Integer gameID, ChessMove move, ChessGame game) throws Exception {
         try {
             // UserGameCommand.CommandType commandType, String authToken, Integer gameID, ChessMove move, ChessGame game
             UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameID, move, game);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 
-    public void resign(String authToken, Integer gameID, ChessMove move, ChessGame game) throws DataAccessException {
+    public void resign(String authToken, Integer gameID, ChessMove move, ChessGame game) throws Exception {
         try {
             // UserGameCommand.CommandType commandType, String authToken, Integer gameID, ChessMove move, ChessGame game
             UserGameCommand userGameCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, gameID, move, game);
             this.session.getBasicRemote().sendText(new Gson().toJson(userGameCommand));
         } catch (Exception e) {
-            throw new DataAccessException(e.getMessage());
+            throw new Exception(e.getMessage());
         }
     }
 }
