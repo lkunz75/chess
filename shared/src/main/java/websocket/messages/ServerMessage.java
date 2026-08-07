@@ -26,30 +26,28 @@ public class ServerMessage {
         this.serverMessageType = type;
     }
 
-    public static NotificationMessage callNotificationMessage(ServerMessageType type, String function, String username, String playerColor, String opposingPlayer) {
+    public static NotificationMessage callNotificationMessage(ServerMessageType type,
+                                                              String function, String username, String playerColor, String opposingPlayer) {
         // suggested change from function
         switch (function) {
             case "connect" -> {
-                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has joined the game as %s", username, playerColor));
+                return new NotificationMessage(ServerMessageType.NOTIFICATION,
+                        String.format("%s has joined the game as %s", username, playerColor));
             }
             case "leave" -> {
-                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s has left the game.", username));
+                return new NotificationMessage(ServerMessageType.NOTIFICATION,
+                        String.format("%s has left the game.", username));
             }
             case "resign" -> {
-                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s resigns. %s wins the game!", username, opposingPlayer));
+                return new NotificationMessage(ServerMessageType.NOTIFICATION,
+                        String.format("%s resigns. %s wins the game!", username, opposingPlayer));
             }
             case "move" -> {
-                return new NotificationMessage(ServerMessageType.NOTIFICATION, String.format("%s moved to %s", playerColor, opposingPlayer));
+                return new NotificationMessage(ServerMessageType.NOTIFICATION,
+                        String.format("%s moved to %s", playerColor, opposingPlayer));
             }
         }
         return new NotificationMessage(ServerMessageType.NOTIFICATION, "Error: Invalid");
-    }
-
-    public ErrorMessages errorMessage(ServerMessageType type, String message) {
-        if (type.equals(ServerMessageType.ERROR)) {
-            return new ErrorMessages(ServerMessageType.ERROR, message);
-        }
-        return new ErrorMessages(ServerMessageType.ERROR, "Error: Invalid!");
     }
 
     public static LoadGameMessage callLoadGameMessage(ServerMessageType type, String playerColor, ChessGame gameData) throws Exception {

@@ -79,6 +79,21 @@ public class DrawnChessBoard {
         setGray(out);
     }
 
+    private static void setHelp(PrintStream out, Collection<ChessMove> moves, Integer row, Integer col) {
+        for (ChessMove move: moves) {
+            ChessPosition endPosition = move.getEndPosition();
+            if (startColor.equals("BLACK")) {
+                if (col == 7 - endPosition.getColumn() && row == 7 - endPosition.getRow()) {
+                    setBlue(out);
+                }
+            }
+            else {
+                if (col == endPosition.getColumn()-1 && row == endPosition.getRow()-1){
+                    setBlue(out);
+                }
+            }
+        }
+    }
     private static void drawBoard(PrintStream out, Collection<ChessMove> moves) {
         for (int row = 0; row < HEIGHT; row++) {
             drawSideHeader(out, 8-row);
@@ -89,22 +104,11 @@ public class DrawnChessBoard {
                 } else {
                     setDarkGray(out);
                 }
+                setHelp(out, moves, row, col);
                 if (startColor.equals("BLACK")) {
-                    for (ChessMove move: moves) {
-                        ChessPosition endPosition = move.getEndPosition();
-                        if (col == 7-endPosition.getColumn() && row == 7-endPosition.getRow()){
-                            setBlue(out);
-                        }
-                    }
                     playersColor(out, row, col, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
                 }
                 else {
-                    for (ChessMove move: moves) {
-                        ChessPosition endPosition = move.getEndPosition();
-                        if (col == endPosition.getColumn()-1 && row == endPosition.getRow()-1){
-                            setBlue(out);
-                        }
-                    }
                     playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
                 }
             }
