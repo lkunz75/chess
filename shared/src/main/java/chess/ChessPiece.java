@@ -358,7 +358,6 @@ public class ChessPiece { // so confused by cloneable
         return valid_move;
     }
 
-
     // just moved it for added clarity
     Collection<ChessMove> convertMoves(ChessPosition myPosition, List<List<Integer>> validMoves, ChessPiece piece){
         List<ChessMove> converted_move = new ArrayList<>();

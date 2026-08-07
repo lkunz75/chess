@@ -2,6 +2,7 @@ package server;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import io.javalin.websocket.*;
 import websocket.commands.UserGameCommand;
@@ -135,15 +136,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME,
                 getPlayerColor(username, gameID), getGameData(gameID).game());
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "connect", username, getPlayerColor(username, gameID), null);
+                "connect", username, getPlayerColor(username, gameID), null, null);
         saveSession(gameID, session);
+        // System.out.println("Session saved");
         session.getRemote().sendString(new Gson().toJson(sendGame));
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
     }
 
     public void leaveGame(Session session, String username, Integer gameID) throws Exception {
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "leave", username, getPlayerColor(username, gameID), null);
+                "leave", username, getPlayerColor(username, gameID), null, null);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
         if (Objects.equals(getPlayerColor(username, gameID), "WHITE")) {
@@ -176,8 +178,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             opposingUsername = gameData.whiteUsername();
             updateGameData(gameData, getGameData(gameID).game(), gameID, opposingUsername, null);
         }
+
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "resign", username, getPlayerColor(username, gameID), opposingUsername);
+                "resign", username, getPlayerColor(username, gameID), opposingUsername, null);
         connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         // this boolean makes it so once the game is over or they resign it's done!
         gameData.game().updateGameOver();
@@ -235,6 +238,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         if (getGameData(gameID).game().isInCheckmate(opposingColor)) {
             var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                     String.format("%s is in checkmate.", opposingUsername));
+            gameData.game().updateGameOver();
+            updateGameData(gameData, gameData.game(), gameID, gameData.whiteUsername(), gameData.blackUsername());
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         else if (getGameData(gameID).game().isInCheck(opposingColor)) {
@@ -245,13 +250,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         else if (getGameData(gameID).game().isInStalemate(opposingColor)) {
             var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                     "The game is in stalemate.");
+            gameData.game().updateGameOver();
+            updateGameData(gameData, gameData.game(), gameID, gameData.whiteUsername(), gameData.blackUsername());
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));
         }
         // System.out.println(new Gson().toJson(game));
         var sendGame = ServerMessage.callLoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, color, getGameData(gameID).game());
         connections.broadcast(null, gameID, new Gson().toJson(sendGame));
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+
+        String start = "" + (char)(startPosition.getColumn()-1 + 'a') + (startPosition.getRow());
+        String end = "" + (char)(endPosition.getColumn()-1 + 'a') + (endPosition.getRow());
         var updatedNotification = ServerMessage.callNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "move", username, null, null);
+                "move", username, start, end, username);
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
     }
 }

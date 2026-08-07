@@ -88,7 +88,7 @@ public class ChessGame {
         int col = startPosition.getColumn() - 1;
         int row = startPosition.getRow() - 1;
         if (game.squares[row][col] == null) {
-            return null;
+            return new ArrayList<>();
         }
         // know king placement and moves
         ChessPiece piece = game.squares[row][col];
@@ -170,7 +170,8 @@ public class ChessGame {
                 piece = board.squares[start_row][start_col];
                 if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                     ChessPiece.PieceType promote = move.getPromotionPiece();
-                    if (promote != null) {
+                    // needed an extra check in promote!!!
+                    if (promote != null && (move.getEndPosition().getRow()-1 != 7 || move.getEndPosition().getRow()-1 != 0)) {
                         piece = new ChessPiece(color, promote);
                     }
                 }

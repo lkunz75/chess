@@ -3,6 +3,7 @@ package client;
 import chess.*;
 import com.google.gson.Gson;
 import model.GameInfo;
+import org.jetbrains.annotations.NotNull;
 import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
@@ -91,6 +92,11 @@ public class ChessClient implements NotificationHandler {
         if (Objects.equals(notification.getServerMessageType(), ServerMessage.ServerMessageType.LOAD_GAME)) {
             LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
             game = loadGameMessage.getChessGame();
+            try {
+                redraw();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         if (Objects.equals(notification.getServerMessageType(), ServerMessage.ServerMessageType.ERROR)) {
             System.out.println(SET_BG_COLOR_RED + new Gson().toJson(((ErrorMessages) notification).getMessage()));
@@ -176,6 +182,7 @@ public class ChessClient implements NotificationHandler {
             out.print(ERASE_SCREEN);
             DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
             state = State.OBSERVING;
+            currentID = gameID;
             return String.format("Observing Game %s", params[0]);
         }
         throw new Exception("Expected: <gameID>");
@@ -195,7 +202,7 @@ public class ChessClient implements NotificationHandler {
             state = State.JOINEDGAME;
             ws.connect(authToken, gameID, null, game);
             currentColor = color;
-            redraw();
+            // redraw();
             out.print(ERASE_SCREEN);
             currentID = gameID;
             return String.format("Joined game %s, as %s", gameID, color);
@@ -204,6 +211,7 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String redraw() throws Exception {
+        System.out.println();
         if (currentColor.equals("BLACK")) {
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
         }
@@ -237,7 +245,8 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String move(String...params) throws Exception {
-        if (params.length >= 3) {
+        String promotion;
+        if (params.length >= 2) {
             int rowStart = convertPosition(params[0]);
             int rowEnd = convertPosition(params[1]);
             // quickly converts into an integer
@@ -250,18 +259,43 @@ public class ChessClient implements NotificationHandler {
             }
             chessStartPosition = new ChessPosition(colStart, rowStart);
             chessEndPosition = new ChessPosition(colEnd, rowEnd);
-            ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
-            ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game); // sends updated move
-            redraw();
+            if (params.length > 2) {
+                promotion = params[2];
+            }
+            else {
+                promotion = "NULL";
+            }
+            ChessMove move = getChessMove(promotion, chessStartPosition, chessEndPosition);
+            ws.makeMove(authToken, currentID, move, game); // sends updated move
             return " ";
         }
-        return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is for pawns when they reach the end).";
+        return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is only needed for pawns when they reach the end).";
+    }
+
+    private ChessMove getChessMove(String promotion, ChessPosition chessStartPosition, ChessPosition chessEndPosition) {
+        // this is to make sure we aren't updating before allowed
+        ChessPiece.PieceType updatedPromotion = convertPromotion(promotion.toUpperCase());
+        ChessMove move = new ChessMove(chessStartPosition, chessEndPosition, updatedPromotion);
+        if (game.getBoard().squares[move.getStartPosition().getRow()-1][move.getStartPosition().getRow()-1] != null &&
+                game.getBoard().squares[move.getStartPosition().getRow()-1][move.getStartPosition().getRow()-1].getPieceType().equals(ChessPiece.PieceType.PAWN)
+                && (move.getEndPosition().getRow()-1 != 7 || move.getEndPosition().getRow()-1 != 0)) {
+            move = new ChessMove(chessStartPosition, chessEndPosition, null);
+        }
+        return move;
     }
 
     public String resign() throws Exception {
-        // notify();
-        ws.resign(authToken, currentID, null, game);
-        return String.format("%s has resigned.", username);
+        System.out.println("Are you sure you want to resign? (Yes/No)");
+        Scanner scanner = new Scanner(System.in);
+        printPrompt();
+        String line = scanner.nextLine();
+        if (line.toLowerCase().equals("yes")) {
+            ws.resign(authToken, currentID, null, game);
+            return String.format("%s has resigned.", username);
+        }
+        else {
+            return " ";
+        }
     }
 
     private Integer convertPosition(String move) {

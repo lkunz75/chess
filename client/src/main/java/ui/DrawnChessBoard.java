@@ -80,6 +80,9 @@ public class DrawnChessBoard {
     }
 
     private static void setHelp(PrintStream out, Collection<ChessMove> moves, Integer row, Integer col) {
+        if (moves == null) {
+            return;
+        }
         for (ChessMove move: moves) {
             ChessPosition endPosition = move.getEndPosition();
             if (startColor.equals("BLACK")) {

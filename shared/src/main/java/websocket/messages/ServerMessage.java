@@ -27,7 +27,7 @@ public class ServerMessage {
     }
 
     public static NotificationMessage callNotificationMessage(ServerMessageType type,
-                                                              String function, String username, String playerColor, String opposingPlayer) {
+                                                              String function, String username, String playerColor, String opposingPlayer, String moveUsername) {
         // suggested change from function
         switch (function) {
             case "connect" -> {
@@ -44,7 +44,8 @@ public class ServerMessage {
             }
             case "move" -> {
                 return new NotificationMessage(ServerMessageType.NOTIFICATION,
-                        String.format("%s moved to %s", playerColor, opposingPlayer));
+                        String.format("%s has moved %s to %s", moveUsername, playerColor, opposingPlayer));
+                // player Color and opposingPlayer actually hold the moves
             }
         }
         return new NotificationMessage(ServerMessageType.NOTIFICATION, "Error: Invalid");

@@ -29,6 +29,8 @@ public class ConnectionManager {
 
     public void remove(Integer gameID, Session session) {
         List<Session> sessions = connections.get(gameID);
+//        System.out.println(sessions);
+//        System.out.println(gameID);
         sessions.remove(session);
         connections.put(gameID, sessions); // putting the new one in
     }
