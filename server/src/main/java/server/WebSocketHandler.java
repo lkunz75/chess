@@ -21,7 +21,6 @@ import java.util.Objects;
 public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsCloseHandler {
     private final ConnectionManager connections = new ConnectionManager();
     private final DataAccess dataAccess;
-    private final String resigned = null;
 
     public WebSocketHandler(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -180,7 +179,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         updateGameData(gameData, gameData.game(), gameID, gameData.whiteUsername(), gameData.blackUsername());
     }
 
-    public void updateGame(ChessMove move, ChessGame game, Session session) throws Exception {
+    public void updateGame(ChessMove move, ChessGame game) throws Exception {
         game.makeMove(move);
     }
 
@@ -213,20 +212,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
-        // add a check here to make sure game isn't over
         if (!currentColor.equals(currentTurn)) {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Not your turn.");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
+
         try {
-            updateGame(move, game, session);
+            updateGame(move, game);
             updateGameData(gameData, game, gameID, gameData.whiteUsername(), gameData.blackUsername());
         } catch (Exception e) {
             var updatedNotification = new ErrorMessages(ServerMessage.ServerMessageType.ERROR, "Invalid move!");
             session.getRemote().sendString(new Gson().toJson(updatedNotification));
             return;
         }
+
         if (getGameData(gameID).game().isInCheckmate(opposingColor)) {
             var updatedNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, String.format("%s is in checkmate.", opposingUsername));
             connections.broadcast(null, gameID, new Gson().toJson(updatedNotification));

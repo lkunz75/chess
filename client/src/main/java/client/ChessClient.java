@@ -6,13 +6,12 @@ import model.GameInfo;
 import service.gamerequests.*;
 import service.userrequests.*;
 import ui.DrawnChessBoard;
-import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessages;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.*;
-
-import static java.lang.System.load;
 import static java.lang.System.out;
 import static ui.EscapeSequences.*;
 
@@ -23,10 +22,10 @@ public class ChessClient implements NotificationHandler {
     private final ServerFacade server;
     private String authToken;
     private String username;
-    private String currentColor;
+    private String currentColor = "WHITE";
     private final WebSocketFacade ws;
-    private Integer currentID;
-    private ChessGame game;
+    private Integer currentID = 0;
+    private ChessGame game = new ChessGame();
 
     public ChessClient(String serverUrl) throws Exception {
         server = new ServerFacade(serverUrl);
@@ -56,6 +55,7 @@ public class ChessClient implements NotificationHandler {
 
     public String eval(String input) {
         try {
+            System.out.println(RESET_BG_COLOR);
             String [] tokens = input.toLowerCase().split(" "); // helps avoid random crashes
             String command = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length); // ordered without the command
@@ -82,18 +82,23 @@ public class ChessClient implements NotificationHandler {
     }
 
     private void printPrompt() {
-        out.print("\n" + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
+        out.print("\n" + RESET_BG_COLOR + RESET_TEXT_COLOR + ">>> " + SET_TEXT_COLOR_GREEN);
     }
 
     @Override
     public void notify(ServerMessage notification) {
-        System.out.println(SET_BG_COLOR_RED + new Gson().toJson(notification));
-        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+        // System.out.println(SET_TEXT_COLOR_RED + new Gson().toJson(notification));
+        if (Objects.equals(notification.getServerMessageType(), ServerMessage.ServerMessageType.LOAD_GAME)) {
             LoadGameMessage loadGameMessage = (LoadGameMessage) notification;
             game = loadGameMessage.getChessGame();
         }
+        if (Objects.equals(notification.getServerMessageType(), ServerMessage.ServerMessageType.ERROR)) {
+            System.out.println(SET_BG_COLOR_RED + new Gson().toJson(((ErrorMessages) notification).getMessage()));
+        }
+        if (Objects.equals(notification.getServerMessageType(), ServerMessage.ServerMessageType.NOTIFICATION)) {
+            System.out.println(SET_BG_COLOR_RED + new Gson().toJson(((NotificationMessage) notification).getMessage()));
+        }
         printPrompt();
-        System.out.println(RESET_BG_COLOR);
     }
 
     public String register(String...params) throws Exception {
@@ -191,7 +196,7 @@ public class ChessClient implements NotificationHandler {
             state = State.JOINEDGAME;
             ws.connect(authToken, gameID, null, game);
             currentColor = color;
-            notify();
+            // notify();
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
             out.print(ERASE_SCREEN);
             currentID = gameID;
@@ -201,7 +206,7 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String redraw() throws Exception {
-        notify();
+        // notify();
         if (currentColor.equals("BLACK")) {
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
         }
@@ -212,7 +217,7 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String highlight(String...params) {
-        notify();
+        // notify();
         if (params.length > 0) {
             int rowStart = convertPosition(params[0]);
             int colStart = params[0].charAt(1) - '0';
@@ -225,8 +230,8 @@ public class ChessClient implements NotificationHandler {
 
     public String leave(String...params) throws Exception {
         ws.leave(authToken, currentID, null, game);
-        currentID = null;
-        currentColor = null;
+        currentID = 0;
+        currentColor = "WHITE";
         return "You left the game.";
     }
 
@@ -245,7 +250,7 @@ public class ChessClient implements NotificationHandler {
             ChessPosition chessEndPosition = new ChessPosition(rowEnd, colEnd);
             ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
             ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game); // sends updated move
-            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), null);
+            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
             return String.format("%s moved %s to %s", username, params[0], params[1]);
         }
         return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is for pawns when they reach the end).";

@@ -6,6 +6,9 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessages;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.net.URI;
@@ -26,15 +29,18 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    ServerMessage serverMessage = new Gson().fromJson(message, ServerMessage.class);
-                    if (serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
-                        notificationHandler.notify(serverMessage); // will notify chess client / send info
+                    ServerMessage mes = new Gson().fromJson(message, ServerMessage.class);
+                    if (mes.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+                        LoadGameMessage loadGameMessage = new Gson().fromJson(message, LoadGameMessage.class);
+                        notificationHandler.notify(loadGameMessage); // will notify chess client / send info
                     }
-                    else if (serverMessage.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
-                        notificationHandler.notify(serverMessage);
+                    else if (mes.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION)) {
+                        NotificationMessage notificationMessage = new Gson().fromJson(message, NotificationMessage.class);
+                        notificationHandler.notify(notificationMessage);
                     }
                     else {
-                        notificationHandler.notify(serverMessage);
+                        ErrorMessages errorMessages = new Gson().fromJson(message, ErrorMessages.class);
+                        notificationHandler.notify(errorMessages);
                     }
 
                 }
