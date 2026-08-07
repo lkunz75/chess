@@ -83,7 +83,7 @@ public class DrawnChessBoard {
         for (ChessMove move: moves) {
             ChessPosition endPosition = move.getEndPosition();
             if (startColor.equals("BLACK")) {
-                if (col == 8 - endPosition.getColumn() && row == endPosition.getRow() - 1){
+                if (col == endPosition.getColumn() - 1 && row == 8 - endPosition.getRow()){
                     setBlue(out);
                 }
             }
@@ -127,7 +127,7 @@ public class DrawnChessBoard {
                     playersColor(out, updatedRow, updatedCol, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
                 }
             }
-            drawSideHeader(out, 8-updatedRow);
+            drawSideHeader(out, 8-row);
             out.print(RESET_TEXT_COLOR);
             out.print(RESET_BG_COLOR);
             out.println(); // gets it to the next line

@@ -195,7 +195,7 @@ public class ChessClient implements NotificationHandler {
             state = State.JOINEDGAME;
             ws.connect(authToken, gameID, null, game);
             currentColor = color;
-            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
+            redraw();
             out.print(ERASE_SCREEN);
             currentID = gameID;
             return String.format("Joined game %s, as %s", gameID, color);
@@ -210,7 +210,7 @@ public class ChessClient implements NotificationHandler {
         else {
             DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
         }
-        return "Redrawn board";
+        return "";
     }
 
     public String highlight(String...params) {
@@ -248,14 +248,8 @@ public class ChessClient implements NotificationHandler {
             if (colStart > 8 || colEnd > 8 || rowStart > 8 || rowEnd > 8) {
                 return "Error! Must be a valid move.";
             }
-            if (currentColor.equals("BLACK")) {
-                chessStartPosition = new ChessPosition(colStart, 9 - rowStart);
-                chessEndPosition = new ChessPosition(colEnd, 9- rowEnd);
-            }
-            else {
-                chessStartPosition = new ChessPosition(colStart, rowStart);
-                chessEndPosition = new ChessPosition(colEnd, rowEnd);
-            }
+            chessStartPosition = new ChessPosition(colStart, rowStart);
+            chessEndPosition = new ChessPosition(colEnd, rowEnd);
             ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
             ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game); // sends updated move
             redraw();
