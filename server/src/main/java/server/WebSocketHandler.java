@@ -147,10 +147,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(session, gameID, new Gson().toJson(updatedNotification));
         connections.remove(gameID, session);
         if (Objects.equals(getPlayerColor(username, gameID), "WHITE")) {
-            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID,null, getGameData(gameID).blackUsername());
+            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID,username, getGameData(gameID).blackUsername());
         }
         else if (Objects.equals(getPlayerColor(username, gameID), "BLACK")) {
-            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID, getGameData(gameID).whiteUsername(), null);
+            updateGameData(getGameData(gameID), getGameData(gameID).game(), gameID, getGameData(gameID).whiteUsername(), username);
         }
     }
 

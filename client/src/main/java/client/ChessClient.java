@@ -172,7 +172,6 @@ public class ChessClient implements NotificationHandler {
             } catch (NumberFormatException e) {
                 throw new Exception("Error: gameID must be an integer!");
             }
-            // notify();
             ws.connect(authToken, gameID, null, game);
             out.print(ERASE_SCREEN);
             DrawnChessBoard.chessBoard("WHITE", game.getBoard(), new ArrayList<>());
@@ -196,7 +195,6 @@ public class ChessClient implements NotificationHandler {
             state = State.JOINEDGAME;
             ws.connect(authToken, gameID, null, game);
             currentColor = color;
-            // notify();
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
             out.print(ERASE_SCREEN);
             currentID = gameID;
@@ -206,7 +204,6 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String redraw() throws Exception {
-        // notify();
         if (currentColor.equals("BLACK")) {
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
         }
@@ -217,11 +214,14 @@ public class ChessClient implements NotificationHandler {
     }
 
     public String highlight(String...params) {
-        // notify();
         if (params.length > 0) {
             int rowStart = convertPosition(params[0]);
             int colStart = params[0].charAt(1) - '0';
-            Collection<ChessMove> moves = game.validMoves(new ChessPosition(rowStart, colStart)); // will need to be a ChessGame to call that
+            ChessBoard board = game.getBoard();
+//            System.out.println(rowStart);
+//            System.out.print(colStart);
+//            System.out.println(board.squares[colStart-1][rowStart-1].getPieceType());
+            Collection<ChessMove> moves = game.validMoves(new ChessPosition(colStart, rowStart));
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), moves);
             return "Valid moves have been highlighted";
         }
@@ -232,6 +232,7 @@ public class ChessClient implements NotificationHandler {
         ws.leave(authToken, currentID, null, game);
         currentID = 0;
         currentColor = "WHITE";
+        state = State.SIGNEDIN;
         return "You left the game.";
     }
 
@@ -242,16 +243,23 @@ public class ChessClient implements NotificationHandler {
             // quickly converts into an integer
             int colStart = params[0].charAt(1) - '0';
             int colEnd = params[1].charAt(1) - '0';
+            ChessPosition chessStartPosition;
+            ChessPosition chessEndPosition;
             if (colStart > 8 || colEnd > 8 || rowStart > 8 || rowEnd > 8) {
                 return "Error! Must be a valid move.";
             }
-            // notify();
-            ChessPosition chessStartPosition = new ChessPosition(rowStart, colStart);
-            ChessPosition chessEndPosition = new ChessPosition(rowEnd, colEnd);
+            if (currentColor.equals("BLACK")) {
+                chessStartPosition = new ChessPosition(colStart, 9 - rowStart);
+                chessEndPosition = new ChessPosition(colEnd, 9- rowEnd);
+            }
+            else {
+                chessStartPosition = new ChessPosition(colStart, rowStart);
+                chessEndPosition = new ChessPosition(colEnd, rowEnd);
+            }
             ChessPiece.PieceType promotion = convertPromotion(params[2].toUpperCase());
             ws.makeMove(authToken, currentID, new ChessMove(chessStartPosition, chessEndPosition, promotion), game); // sends updated move
-            DrawnChessBoard.chessBoard(currentColor, game.getBoard(), new ArrayList<>());
-            return String.format("%s moved %s to %s", username, params[0], params[1]);
+            redraw();
+            return " ";
         }
         return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is for pawns when they reach the end).";
     }

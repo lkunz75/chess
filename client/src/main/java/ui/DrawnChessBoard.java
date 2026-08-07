@@ -83,36 +83,51 @@ public class DrawnChessBoard {
         for (ChessMove move: moves) {
             ChessPosition endPosition = move.getEndPosition();
             if (startColor.equals("BLACK")) {
-                if (col == 7 - endPosition.getColumn() && row == 7 - endPosition.getRow()) {
+                if (col == 8 - endPosition.getColumn() && row == endPosition.getRow() - 1){
                     setBlue(out);
                 }
             }
             else {
-                if (col == endPosition.getColumn()-1 && row == endPosition.getRow()-1){
+                if (col == endPosition.getColumn() - 1 && row == 8 - endPosition.getRow()) {
                     setBlue(out);
                 }
             }
         }
     }
     private static void drawBoard(PrintStream out, Collection<ChessMove> moves) {
+        int updatedRow = 0;
+        int updatedCol = 0;
         for (int row = 0; row < HEIGHT; row++) {
+            if (startColor.equals("BLACK")) {
+                updatedRow = 7 - row;
+            }
+            else {
+                updatedRow = row;
+            }
             drawSideHeader(out, 8-row);
             for (int col = 0; col < WIDTH; col++) {
-                if ((row + col) % 2 == 0) {
+                if (startColor.equals("BLACK")) {
+                    updatedCol = 7 - col;
+                }
+                else {
+                    updatedCol = col;
+                }
+
+                if ((updatedRow + col) % 2 == 0) {
                     setWhite(out);
 
                 } else {
                     setDarkGray(out);
                 }
-                setHelp(out, moves, row, col);
+                setHelp(out, moves, updatedRow, updatedCol);
                 if (startColor.equals("BLACK")) {
-                    playersColor(out, row, col, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
+                    playersColor(out, updatedRow, updatedCol, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
                 }
                 else {
-                    playersColor(out, row, col, SET_TEXT_COLOR_MAGENTA, SET_TEXT_COLOR_BLACK);
+                    playersColor(out, updatedRow, updatedCol, SET_TEXT_COLOR_BLACK, SET_TEXT_COLOR_MAGENTA);
                 }
             }
-            drawSideHeader(out, 8-row);
+            drawSideHeader(out, 8-updatedRow);
             out.print(RESET_TEXT_COLOR);
             out.print(RESET_BG_COLOR);
             out.println(); // gets it to the next line
@@ -155,10 +170,7 @@ public class DrawnChessBoard {
     }
 
     private static void playersColor(PrintStream out, int row, int col, String opposingColor, String homeColor) {
-        if (startColor.equals("BLACK")) {
-            row = 7 - row; // zero indexed!
-            col = 7 - col;
-        }
+        row = 7 - row;
         String piece = pieceType(game.squares[row][col]);
         if (piece.equals(EMPTY)) {
             out.print(EMPTY);
