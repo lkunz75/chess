@@ -266,7 +266,8 @@ public class ChessClient implements NotificationHandler {
             ws.makeMove(authToken, currentID, move, game); // sends updated move
             return " ";
         }
-        return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is only needed for pawns when they reach the end).";
+        return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. " +
+                "(Promotion is only needed for pawns when they reach the end).";
     }
 
     private ChessMove getChessMove(String promotion, ChessPosition chessStartPosition,
