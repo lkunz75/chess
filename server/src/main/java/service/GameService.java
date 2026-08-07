@@ -65,7 +65,7 @@ public class GameService {
                 return new JoinResult();
             }
             List<GameInfo> games = service.dataAccess.listGames();
-            for (GameInfo game: games) {
+            for (GameInfo game : games) {
                 if (authData.username().equals(game.blackUsername()) || authData.username().equals(game.whiteUsername())) {
                     service.dataAccess.joinGame(authData.username(), joinRequest.playerColor(), joinRequest.gameID());
                     return new JoinResult();
