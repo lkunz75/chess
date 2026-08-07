@@ -226,9 +226,6 @@ public class ChessClient implements NotificationHandler {
             int rowStart = convertPosition(params[0]);
             int colStart = params[0].charAt(1) - '0';
             ChessBoard board = game.getBoard();
-//            System.out.println(rowStart);
-//            System.out.print(colStart);
-//            System.out.println(board.squares[colStart-1][rowStart-1].getPieceType());
             Collection<ChessMove> moves = game.validMoves(new ChessPosition(colStart, rowStart));
             DrawnChessBoard.chessBoard(currentColor, game.getBoard(), moves);
             return "Valid moves have been highlighted";
@@ -272,12 +269,14 @@ public class ChessClient implements NotificationHandler {
         return "Error: Must provide <CURRENT POSITION> <MOVE POSITION> <PROMOTION PIECE>. (Promotion is only needed for pawns when they reach the end).";
     }
 
-    private ChessMove getChessMove(String promotion, ChessPosition chessStartPosition, ChessPosition chessEndPosition) {
+    private ChessMove getChessMove(String promotion, ChessPosition chessStartPosition,
+                                   ChessPosition chessEndPosition) {
         // this is to make sure we aren't updating before allowed
         ChessPiece.PieceType updatedPromotion = convertPromotion(promotion.toUpperCase());
         ChessMove move = new ChessMove(chessStartPosition, chessEndPosition, updatedPromotion);
         if (game.getBoard().squares[move.getStartPosition().getRow()-1][move.getStartPosition().getRow()-1] != null &&
-                game.getBoard().squares[move.getStartPosition().getRow()-1][move.getStartPosition().getRow()-1].getPieceType().equals(ChessPiece.PieceType.PAWN)
+                game.getBoard().squares[move.getStartPosition().getRow()-1]
+                        [move.getStartPosition().getRow()-1].getPieceType().equals(ChessPiece.PieceType.PAWN)
                 && (move.getEndPosition().getRow()-1 != 7 || move.getEndPosition().getRow()-1 != 0)) {
             move = new ChessMove(chessStartPosition, chessEndPosition, null);
         }

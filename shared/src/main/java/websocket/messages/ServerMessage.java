@@ -27,7 +27,8 @@ public class ServerMessage {
     }
 
     public static NotificationMessage callNotificationMessage(ServerMessageType type,
-                                                              String function, String username, String playerColor, String opposingPlayer, String moveUsername) {
+                                                              String function, String username, String playerColor,
+                                                              String opposingPlayer, String moveUsername) {
         // suggested change from function
         switch (function) {
             case "connect" -> {
