@@ -271,7 +271,7 @@ public class ChessClient implements NotificationHandler {
 
     private ChessMove getChessMove(String promotion, ChessPosition chessStartPosition,
                                    ChessPosition chessEndPosition) {
-        // this is to make sure we aren't updating before allowed
+        // this code checks promotion
         ChessPiece.PieceType updatedPromotion = convertPromotion(promotion.toUpperCase());
         ChessMove move = new ChessMove(chessStartPosition, chessEndPosition, updatedPromotion);
         if (game.getBoard().squares[move.getStartPosition().getRow()-1][move.getStartPosition().getRow()-1] != null &&
