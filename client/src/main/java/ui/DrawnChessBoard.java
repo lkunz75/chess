@@ -193,10 +193,4 @@ public class DrawnChessBoard {
         out.print(SET_BG_COLOR_BLUE);
         out.print(SET_TEXT_COLOR_BLUE);
     }
-
-//    public static void main(String[] args) {
-//        ChessBoard game = new ChessBoard();
-//        game.resetBoard();
-//        chessBoard("WHITE", game);
-//    }
 }
